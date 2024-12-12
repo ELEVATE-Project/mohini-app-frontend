@@ -40,6 +40,6 @@
       shell: "curl --location --request GET '{{ vaultAddress }}mohiniPortalPM2Config' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data.data' > '{{ project_path }}/pm2.config.json'"
       register: pm2
     - name: Build mohini app
-      shell: cd {{project_path}} && npm run build-prod
+      shell: cd {{project_path}} && env-cmd -e prod react-scripts build
     - name: Start pm2
       shell: cd {{project_path}} && pm2 start pm2.config.json

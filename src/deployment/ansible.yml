@@ -1,7 +1,7 @@
 ---
 - hosts: elevate
   vars:
-    project_path: /opt/frontend/mohini-frontend
+    project_path: /opt/frontend/mohini-app
     root_path: /opt/frontend
   tasks:
     - name: Slurp host file

@@ -19,8 +19,10 @@
         state: directory
         mode: '0755'
 
-    - name: Change directory to project path
-      shell: "chdr {{ project_path }}"
+    - name: Change directory
+      shell: chdir {{project_path}}
+    - name: Change directory
+      shell: cd {{project_path}}
 
     - name: Fetch the latest code
       git:

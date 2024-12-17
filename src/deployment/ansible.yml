@@ -42,14 +42,11 @@
     - name: Set permission for json2env.sh
       shell: "chmod 744 {{ project_path }}/src/scripts/json2env.sh"
 
-    - name: Generate .env-cmdrc
-      shell: |
-        if [ -f "{{ root_path }}/data2.json" ]; then
-          cat {{ root_path }}/data2.json | jq '.data' > {{ project_path }}/.env-cmdrc
-        else
-          echo "data2.json not found!"
-          exit 1
-        fi
+   - name: Generate .env-cmdrc
+     copy:
+       src: "{{ root_path }}/data2.json"
+       dest: "{{ project_path }}/.env-cmdrc"
+
       args:
         creates: "{{ project_path }}/.env-cmdrc"
 

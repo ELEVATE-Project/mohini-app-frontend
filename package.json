@@ -1,5 +1,6 @@
 {
   "name": "shikshalokam-fe",
+  "homepage": "/mohini",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

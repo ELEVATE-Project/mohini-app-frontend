@@ -3,6 +3,7 @@
   vars:
     project_path: /opt/frontend/mohini-app
     root_path: /opt/frontend
+
   tasks:
     - name: Slurp host file
       slurp:
@@ -10,7 +11,10 @@
       register: slurpfile
 
     - name: Run vault credentials
-      shell: "curl --location --request GET '{{ vaultAddress }}mohini-frontend' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data' > '{{root_path}}/data2.json'"
+      shell: >
+        curl --location --request GET '{{ vaultAddress }}mohini-frontend' 
+        --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' 
+        | jq '.data' > '{{ root_path }}/data2.json'
       register: vaultCurl
 
     - name: Ensure project directory exists
@@ -18,9 +22,6 @@
         path: "{{ project_path }}"
         state: directory
         mode: '0755'
-
-    - name: Change directory to project path
-      shell: "cd {{ project_path }}"
 
     - name: Fetch the latest code
       git:
@@ -39,16 +40,34 @@
       shell: "cd {{ project_path }} && npm i --force"
 
     - name: Set permission for json2env.sh
-      shell: chmod 744 {{ project_path }}/src/scripts/json2env.sh
+      shell: "chmod 744 {{ project_path }}/src/scripts/json2env.sh"
 
-    - name: Generate .env
-      shell: cat {{ root_path }}/data2.json | jq '.data' > {{ project_path }}/.env-cmdrc
-      register: envConfig
+    - name: Generate .env-cmdrc
+      shell: |
+        if [ -f "{{ root_path }}/data2.json" ]; then
+          cat {{ root_path }}/data2.json | jq '.data' > {{ project_path }}/.env-cmdrc
+        else
+          echo "data2.json not found!"
+          exit 1
+        fi
+      args:
+        creates: "{{ project_path }}/.env-cmdrc"
 
-    - debug: msg=" cred {{ envConfig }} "
+    - name: Verify .env-cmdrc file creation
+      stat:
+        path: "{{ project_path }}/.env-cmdrc"
+      register: env_file_stat
+
+    - name: Fail if .env-cmdrc file was not created
+      fail:
+        msg: ".env-cmdrc file was not created!"
+      when: not env_file_stat.stat.exists
 
     - name: Fetch pm2 config file
-      shell: "curl --location --request GET '{{ vaultAddress }}mohiniPortalPM2Config' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data.data' > '{{ project_path }}/pm2.config.json'"
+      shell: >
+        curl --location --request GET '{{ vaultAddress }}mohiniPortalPM2Config'
+        --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' 
+        | jq '.data.data' > '{{ project_path }}/pm2.config.json'
       register: pm2
 
     - name: Build mohini app

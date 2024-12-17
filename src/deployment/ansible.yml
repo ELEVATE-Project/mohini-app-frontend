@@ -20,7 +20,7 @@
         mode: '0755'
 
     - name: Change directory to project path
-      shell: "cd {{ project_path }}"
+      shell: "chdr {{ project_path }}"
 
     - name: Fetch the latest code
       git:

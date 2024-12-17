@@ -43,6 +43,10 @@ import Swal from 'sweetalert2';
 import { PrimaryButton } from "../../components/Buttons";
 import { IoClose } from "react-icons/io5";
 import { selectedLabel } from "./enum";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ROUTES from "../../url";
+import PrivacyPolicyPage from "../../components/TnC/privacyPolicy";
+import { getPrivacyPolicyText } from "./privacy_policy_text";
 
 
 const cookies = new Cookies();
@@ -82,12 +86,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   // const recognitionRef = useRef(
   //   new (window.SpeechRecognition || window.webkitSpeechRecognition)()
   // );
+  const [profileToUse, setProfileToUse] = useState(JSON.parse(localStorage.getItem('profileid')) || null);
   const audioRef = useRef();
   const lastBotMessageIndex = useRef(-1);
-  let { access_token } = useUserStore() || { access_token: "" };
+  let access_token = JSON.parse(localStorage.getItem('accToken'));
   const isInitialLoadRef = useRef(true);
   const [storyMediaIdArray, ] = useState(null);
 
+  const [searchParams] = useSearchParams();
+  
   // const isMobile = false;
 
   const [localChatHistory, setLocalChatHistory, removeLocalChatHistory] =
@@ -141,8 +148,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [showFileInput, setShowFileInput] = useState(null);
   const [shouldSendMessage, ] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [acceptedTnc, setAcceptedTnC] = useState(localStorage.getItem('has_accepted_tnc')|| 'ONGOING');
   const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
 
+  const privacyPolicyText = getPrivacyPolicyText();
   const endPageToScrollRef = useRef(null);
 
   const [error, setError] = useState({
@@ -154,14 +163,17 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [fileErrorText, setFileErrorText] = useState('');
 
   const fileExceedText = 'You cannot upload more than 5 files';
-  const fileSizeText = 'File size cannot exceed 5MB';
+  const fileSizeText = 'File size cannot exceed 50MB';
   const completedStatusText = 'Completed';
   const inProgressStatusText = 'In Progress';
 
   let isMobile = useCustomMediaQuery('(max-width: 500px)');
   let chatToAddLength = isMobile? 7: 13;
   const [visibleItemCount, setVisibleItemCount] = useState(chatToAddLength);
+  const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
 
+  const userId = searchParams.get("userid");
+  const projectId = searchParams.get("projectid");
 
   let params = new URL(document.location).searchParams;
   const code = params.get("code");
@@ -170,19 +182,98 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     HiddenRecorder,
   } = useVoiceRecord();
 
-  const isShikshalokamPublicType = type === "shikshalokam" && variant ==='publicBot';
-  if (isShikshalokamPublicType && !access_token) {
-    access_token = JSON.parse(localStorage.getItem('access_token'));
-  }
+  const isShikshalokamPublicType = true;
+ 
   const shouldShowChatHistoryFeature = true;
   
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
+  const navigate = useNavigate();
+
   const openModal = () => {
     setIsModalOpen(true);
   };
+
+  useEffect(()=>{
+    console.log('userID in params: ', userId)
+    console.log('projectId in params: ', projectId)
+    if ((!userId || !projectId) && !profileToUse && !access_token) {
+      navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN)
+    }
+
+  }, [userId, projectId, profileToUse])
+
+  useEffect(() => {
+    // Function to create user profile
+    async function createUserProfile() {
+      try {
+        setIsLoading(true);
+        const headers = {
+          "Content-Type": "application/json",
+        };
+        let body = {
+          access_token: access_token,
+        };
+
+        const response = await axiosInstance.post(`/api/create-profile/`, body, { headers });
+        console.log("response: ", response)
+        if (response) {
+          const data  = response?.data.profile_details;
+          console.log("data: ", data)
+          localStorage.setItem('profileid', data?.id);
+          setProfileToUse(data?.id)
+          let sessionid = localStorage.getItem('sessionid');
+          if (!sessionid) {
+            let session = await getSessionDetails();
+            localStorage.setItem('sessionid', JSON.stringify(session.sessionid));
+          }
+
+          localStorage.setItem('route', JSON.stringify("/"));
+          localStorage.setItem('isNewChatOpen', JSON.stringify(true));
+          localStorage.setItem('first_name', JSON.stringify(data?.first_name));
+          localStorage.setItem('company', JSON.stringify(data?.company?.slug));
+          localStorage.setItem('state', JSON.stringify(data?.profile_address[0]?.state));
+        }
+      } catch (error) {
+        console.error(error?.response?.data || error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    console.log("profileToUse", profileToUse)
+    console.log("access_token", access_token)
+    // Check if profile ID is in localStorage, if not, create the profile
+    if (!profileToUse && access_token) {
+      console.log("In here")
+      createUserProfile();
+      setShouldFetchIntro(true);
+      setIsStreamingComplete(true);
+    }
+  }, [access_token, profileToUse]);
+
+
+  useEffect(()=>{
+    console.log("projectId: ", projectId)
+    console.log("userId: ", userId)
+    async function fetchChatSession() {
+      const response = await axiosInstance({
+        url: `/api/chatsession?project_id=${projectId}&user_id=${userId}`,
+      })
+      console.log("response: ", response)
+      if (response?.status === 200 && response?.data[0]?.session) {
+        localStorage.setItem('sessionid', JSON.stringify(response?.data[0]?.session))
+        localStorage.setItem('isOldChatOpen', JSON.stringify(true));
+        localStorage.setItem('isNewChatOpen', JSON.stringify(false));
+      }
+    }
+
+    if(projectId && userId) {
+      fetchChatSession()
+    }
+  
+  }, [projectId, userId])
 
   useEffect(()=>{
    console.log("initial visibleItemCount: ", visibleItemCount)
@@ -226,17 +317,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
   },[fileErrorText])
 
-  useEffect(()=>{
-    let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
-    if(!profileid) window.location.href='/logout';
-    
-  
-    if(isShikshalokamPublicType){
-      setShouldFetchIntro(true);
-      setIsStreamingComplete(true);
-    }
-  }, [isShikshalokamPublicType])
-
   useEffect(() => {
     async function callEndStory() {
       if (isStreamingComplete && strandStep >= 8) {
@@ -244,7 +324,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           setIsLoading(true);
           setIsEndStoryLoading(true);
   
-          const profileid = JSON.parse(localStorage.getItem('profileid'));
           const sessionid = JSON.parse(localStorage.getItem('sessionid'));
           const end_story_api_url = `/api/end-story/`;
           console.log('isEndStoryLoading: ', isEndStoryLoading);
@@ -253,11 +332,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             url: end_story_api_url,
             data: {
               session: sessionid,
-              profile_id: profileid,
+              profile_id: profileToUse,
               stage: 'COMPLETED',
-            },
-            headers: {
-              Authorization: access_token, 
+              access_token: access_token,
             },
             method: "POST",
           });
@@ -276,15 +353,23 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       }
     }
   
-    if (isStreamingComplete && strandStep >= 8 && access_token) {
+    if (isStreamingComplete && strandStep >= 8) {
       callEndStory();
     }
   }, [isStreamingComplete, strandStep, access_token]);
+    useEffect(()=>{
+    let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
+    if(!profileid && !access_token) window.location.href='/logout';
+    
   
+    if(isShikshalokamPublicType){
+      setShouldFetchIntro(true);
+      setIsStreamingComplete(true);
+    }
+  }, [isShikshalokamPublicType])
 
   useEffect(() => {
     if(shouldShowChatHistoryFeature) {const isOldChatOpen = JSON.parse(localStorage.getItem('isOldChatOpen'));
-    const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
     if(isOldChatOpen === true){
       setShouldFetchIntro(false);
       setShowHomepage(false);
@@ -299,7 +384,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       removeLocalChatHistory();
       MakeSocketConnection();
     }
-  }, []);
+  }, [isNewChatOpen]);
 
   useEffect(()=>{
     console.log("ShowHomepage: ", showHomepage)
@@ -424,6 +509,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                         data: {
                           id: storyData?.id,
                           formatted_content: outputData?.blocks,
+                          access_token: JSON.parse(localStorage.getItem('accToken')),
+                          session: JSON.parse(localStorage.getItem('sessionid'))
                         },
                         token: access_token,
                       });
@@ -479,6 +566,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
   
   // socket connection
+  //wss://demo.shi /shikshalokam_new
   function MakeSocketConnection(){
     let socket;
     console.log("Selected: ", selectedType)
@@ -565,14 +653,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     socket.onopen = () => {
       setChatSocket(socket);
       if (isShikshalokamPublicType){
-        let profileid = JSON.parse(localStorage.getItem('profileid'))
         let sessionid = JSON.parse(localStorage.getItem('sessionid'))
         let route = JSON.parse(localStorage.getItem('route'))
-        if(profileid && sessionid){
+        if(profileToUse && sessionid){
           socket.send(JSON.stringify({
             type: 'authenticate',
             sessionid: sessionid,
-            profileid: profileid,
+            profileid: profileToUse,
+            projectid: searchParams.get("projectid"),
+            userid: searchParams.get("userid"),
             route: route,
           }));
         }
@@ -639,10 +728,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     async function getStoryBySession(sessionID, accessToken){
       const res = await axiosInstance({
         url: `api/get-story/?session=${sessionID}`,
-        headers:{
-          Authorization: `Bearer ${accessToken}`,
-        }
       })
+      console.log('res: ', res)
       return res?.data;
     }
 
@@ -653,13 +740,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(()=>{
       const sessionID = JSON.parse(localStorage.getItem('sessionid'))
-      if (!access_token || !sessionID) return;
+      if (!sessionID) return;
 
     (async () => {
       const story_data = await getStoryBySession(sessionID, access_token);
-      if (story_data && story_data?.results[0]) {
-        setStoryData(story_data?.results[0]);
-        const formatted_content = story_data?.results[0].formatted_content;
+      console.log("story_data: ", story_data)
+      if (story_data && story_data?.length > 0 && story_data[0]) {
+        setStoryData(story_data[0]);
+        const formatted_content = story_data[0].formatted_content;
         console.log(formatted_content)
         const textBlocks = extractTextBlocks(formatted_content);
         setEditorCopyChanges(textBlocks);
@@ -669,11 +757,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [access_token])
 
   function handleFileUpload(e) {
+    console.log("in file upload")
     const story_id = storyData?.id;
+    console.log("storyData: ", storyData)
     if (!story_id || story_id === '') return;
   
     const selectedFiles = Array.from(e.target.files); 
-    const maxFileSize = 5 * 1024 * 1024; 
+    const maxFileSize = 50 * 1024 * 1024; 
     const currentFiles = [...files];  
   
     const uploadPromises = selectedFiles.map((uploadedFile) => {
@@ -682,12 +772,26 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         // Skip oversized files
         return Promise.resolve();
       }
-  
+      const fileName = uploadedFile?.name;
+      const fileExtension =  fileName ?  fileName.split('.').pop().toLowerCase() : '';
+      const mediaTypes = {
+        "jpeg": "image/jpeg",
+        "jpg": "image/jpeg",
+        "png": "image/png",
+      };
+      
+      const mediaType = mediaTypes[fileExtension] || null;
+      
+
       const formData = new FormData();
       formData.append("file", uploadedFile);
       formData.append("story", story_id);
-      formData.append("name", uploadedFile?.name);
+      formData.append("name", fileName);
+      formData.append("mediaType", mediaType);
       formData.append('include_in_story', true);
+      formData.append('access_token', access_token);
+      formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
+      formData.append("media_type", mediaType);
   
       // Return a promise for each file upload
       return uploadImage(formData, story_id);
@@ -730,25 +834,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
 
   useEffect(() => {
-    if (!isModalOpen && access_token && storyData && storyData?.id !== '') {
+    if (!isModalOpen && storyData && storyData?.id !== '') {
       const story_id = storyData?.id;
       const tempMediaArr = []
 
       getStoryAllMedia({
         setter: (data) => {
-          for (let item of Object.values(data?.results || [])) {
+          for (let item of Object.values(data || [])) {
             if (item.include_in_story) {
               item.base64_str = `data:image/jpeg;charset=utf-8;base64,${item.base64_str}`
               tempMediaArr.push(item);
             }
           }
+          console.log("tempMediaArr: ", tempMediaArr)
           setFiles(tempMediaArr);
         },
         loader: setIsLoading,
         data: {
           story: story_id,
         },
-        token: access_token,
       });
     }
 
@@ -759,6 +863,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     try {
       const formData = new FormData();
       formData.append('include_in_story', include_in_story);
+      formData.append('access_token', access_token);
+      formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
   
       createAuthRequest({
         setter: () => {
@@ -779,16 +885,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function getCompanyDetail(){
     
-    let profID = cookies?.get("profileid");
-    if(isShikshalokamPublicType){
-      profID = JSON.parse(localStorage.getItem('profileid'))
-    }
     const res = await axiosInstance({
-      url: `/api/profileuser/${profID}/`,
-      headers:{
-        Authorization: `Bearer ${access_token}`,
-      }
+      url: `/api/profileuser/${profileToUse}/`,
     })
+    console.log("company detail res: ", res)
     return res?.data?.company?.slug;
   }
 
@@ -817,19 +917,17 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(() => {
     const fetchBotInfo = async () => {
+      console.log("Fetching Intro")
       setIsIntroLoading(true);
       let companyName = await getCompanyDetail();
       try {
         const response = await axiosInstance({
           url: company_bot_list_url,
-          headers: {
-            Authorization: access_token,
-          },
           params: {
             company__slug: companyName,
           },
         });
-        const bots = response?.data?.results;
+        const bots = response?.data;
   
         if (bots) {
           const storedRoute = '/';
@@ -866,6 +964,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             handleFirstMessage('');
             return;
           }
+          console.log("latestBot: ", latestBot)
           let message = latestBot.introductory_message;
           let firstName = JSON.parse(localStorage.getItem("first_name")) || '';
           if (message && firstName) {
@@ -889,7 +988,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             ]);
           }
         } else {
-          const message = response?.data?.results[0]?.introductory_message;
+          const message = response?.data?.introductory_message;
           if (message === null) {
             handleFirstMessage('');
             return;
@@ -911,8 +1010,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         console.error({ error });
       }
     };
-  
-    if (!!access_token && chatHistory?.length === 0 && shouldFetchIntro) {
+    console.log("shouldFetchIntro: ", shouldFetchIntro)
+    console.log("profileToUse: ", profileToUse)
+    if (chatHistory?.length === 0 && shouldFetchIntro && profileToUse) {
 
       fetchBotInfo().then(() => {
         setShouldFetchIntro(false);
@@ -921,7 +1021,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
     
     return () => {};
-  }, [access_token, shouldFetchIntro]);
+  }, [access_token, shouldFetchIntro, profileToUse]);
 
   useEffect(()=>{
     console.log('sentences: ', sentences);
@@ -986,7 +1086,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isMute])
 
   useEffect(()=>{
-    if(!isModalOpen){
+    if(!isModalOpen && profileToUse){
       setIsLoading(true);
       const titleTime = setTimeout(()=>{
         if(shouldShowChatHistoryFeature) showChatTitle();
@@ -997,7 +1097,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         clearTimeout(titleTime);
       }
     }
-  },[])
+  },[profileToUse])
 
 
   useEffect(() => {
@@ -1036,17 +1136,21 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     try {
         setIsLoading(true);
         setIsPdfDownloading(true);
+        console.log('sessionid: ', sessionid)
         
         // Fetch story by session ID
         const story = await getStoryBySession(sessionid, access_token);
-        const story_media = story?.results[0]?.story_media;
+        console.log('story: ', story)
+        const story_media = story[0]?.story_media;
         const pdfMedia = story_media?.filter(media => media.media_type === 'application/pdf') || [];
+        console.log('pdfMedia: ', pdfMedia)
         
         const pdfFileName = pdfMedia[0]?.name;
         const fileUrl = pdfMedia[0]?.public_url;
 
         if (fileUrl && pdfFileName) {
             const response = await fetch(fileUrl);
+            console.log('response: ', response)
 
             if (response.ok) {
                 const reader = response.body.getReader();
@@ -1091,9 +1195,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   async function getCompanyChatApi(currentSession) {
     const resp = await axiosInstance({
       url: `/api/companychat/?session=${currentSession}`,
-      headers: {
-          Authorization: `Bearer ${access_token}`,
-      }
     });
     return resp
   }
@@ -1111,7 +1212,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         const resp = await getCompanyChatApi(currentSession);
 
         const newChatSessionDetail = [];
-        let sortedResult = quickSort(resp?.data?.results, compareById);
+        let sortedResult = quickSort(resp?.data, compareById);
 
         // Ensure intro message is added only once
         if (introMessageRef.current) {
@@ -1197,7 +1298,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   function quickSort(arr, compare) {
-    if (arr.length <= 1) {
+    if (arr?.length <= 1) {
         return arr;
     }
 
@@ -1205,7 +1306,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     const left = [];
     const right = [];
 
-    for (let i = 1; i < arr.length; i++) {
+    for (let i = 1; i < arr?.length; i++) {
         if (compare(arr[i], pivot) < 0) {
             left.push(arr[i]);
         } else {
@@ -1218,24 +1319,26 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function showChatTitle(){
     try{
-      const profID = JSON.parse(localStorage.getItem('profileid'));
       const currentSessionID = JSON.parse(localStorage.getItem('sessionid'));
       let sessionComplete;
       const TitleAndSession = [];
       const response = await axiosInstance({
-        url: `/api/chatsession?profile=${profID}`,
+        url: `/api/chatsession?profile=${profileToUse}`,
       })
-      let sortedResult = quickSort(response?.data?.results, compareByIdDesc);
-      sortedResult.forEach((sessionObj, index)=>{
-        const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
-        TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
-        if (sessionObj.session === currentSessionID) {
-          sessionComplete = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase();
-        }
-      })
-      setShowFileInput(sessionComplete === true);
-      setSessionTitleDetail(TitleAndSession);
-      setChatTitle([...TitleAndSession.slice(0, chatToAddLength)]);
+      console.log("response: ", response)
+      if (response) {
+        let sortedResult = quickSort(response?.data, compareByIdDesc);
+        sortedResult.forEach((sessionObj, index)=>{
+          const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
+          TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
+          if (sessionObj.session === currentSessionID) {
+            sessionComplete = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase();
+          }
+        })
+        setShowFileInput(sessionComplete === true);
+        setSessionTitleDetail(TitleAndSession);
+        setChatTitle([...TitleAndSession.slice(0, chatToAddLength)]);
+      }
     } catch (error){
       console.log('Error while fetching chat session data: ', error);
     } finally{
@@ -1427,6 +1530,24 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       throw error;
     }
   }
+
+
+  async function updateChatSession(session, update_field){
+    try {
+        const response = await axiosInstance.patch(
+            `api/chatsession/${session}/`, 
+            {
+                session,
+                ...update_field
+            }
+        );
+      
+        return response?.data;
+    } catch (error) {
+        console.error('Error Updating Chatsession:', error);
+        throw error;
+    } 
+}
 
 
   const handleAI4BharatTTSRequest = async (text, id, sourceLanguage) => {
@@ -1842,9 +1963,24 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     ResetChat(e);
   }
 
+  function handleAcceptTnC() {
+    console.log("here in Tnc accept")
+    localStorage.setItem('has_accepted_tnc', true)
+    setAcceptedTnC(true);
+  }
+
+  function handleDeclineTnC() {
+    console.log("here in Tnc decline")
+    localStorage.setItem('has_accepted_tnc', false)
+    setAcceptedTnC(false);
+    navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
+  }
+
   return (
     <>
-      <div className={`div27 ${isOpen&& ' div70'}`}>
+      {(acceptedTnc==="ONGOING" && !isLoading)&& <PrivacyPolicyPage tncText={privacyPolicyText} onAccept={handleAcceptTnC} onDecline={handleDeclineTnC} />}
+
+      <div className={`div27 ${isOpen&& ' div70'} ${(projectId && userId)&& ' div21'}`}>
         <div className={`div28 ${isOpen ? "div29" : ""}`}>
           {(isShikshalokamPublicType)&& <Sidebar
             isOpen={isOpen}
@@ -2002,12 +2138,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message="Would you like to add evidences to the project?"
+                  message={isnt_english? "क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?" : "Would you like to add evidences to the project?"}
+                  // message="क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?"
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    handleOnSpeaking("Would you like to add evidences to the project?", "upload-img-id",
-                      {msg: "Would you like to add evidences to the project?", updated_at: "upload-img-id", source:"bot"}
+                    const message_to_use = isnt_english? "क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?" : "Would you like to add evidences to the project?"
+                    handleOnSpeaking(message_to_use, "upload-img-id",
+                      {msg: message_to_use, updated_at: "upload-img-id", source:"bot"}
                     )}
                   }
                   isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2027,13 +2165,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                       accept="image/*" 
                       multiple
                       onChange={handleFileUpload} 
-                      onClick={(e) => {
-                        if (files?.length >= 5) {
-                          setFileErrorText(fileExceedText);
-                        } else {
-                          setFileErrorText('');
-                        }
-                      }}
+                      // onClick={(e) => {
+                      //   if (files?.length >= 5) {
+                      //     setFileErrorText(fileExceedText);
+                      //   } else {
+                      //     setFileErrorText('');
+                      //   }
+                      // }}
                       disabled={isLoading || (fileErrorText !== '' && fileErrorText !== fileSizeText && fileErrorText === fileExceedText)}
                       className="div17"
                     />
@@ -2074,12 +2212,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message="Here is your improvement story"
+                  message={isnt_english? "ये है आपकी इम्प्रूवमेंट स्टोरी" : "Here is your improvement story"}
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    handleOnSpeaking("Here is your improvement story", "download-story-id",
-                      {msg: "Here is your improvement story", updated_at: "download-story-id", source:"bot"}
+                    const message_to_use = isnt_english? "ये है आपकी इम्प्रूवमेंट स्टोरी" : "Here is your improvement story"
+                    handleOnSpeaking(message_to_use, "download-story-id",
+                      {msg: message_to_use, updated_at: "download-story-id", source:"bot"}
                     )}
                   }
                   isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2092,7 +2231,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <div className="div20">
                   <button
                     className="clickable-button"
-                    onClick={handleDownloadClick}
+                    onClick={()=>{
+                      const sessionToUse = JSON.parse(localStorage.getItem('sessionid'));
+                      if (sessionToUse) {
+                        pdfDownloadSidebar(sessionToUse);
+                      }
+                    }}
                     disabled={isLoading || isPdfDownloading}
                   >
                     <div className="download-story-div">
@@ -2101,7 +2245,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     </div>
                   </button>
 
-                  {triggerDownload && isPdfDownloading && isLoading && downloadPdf()}
+                  {triggerDownload && isPdfDownloading && !isLoading && downloadPdf()}
                 </div>
                 <div className="div20">
                   <button
@@ -2120,7 +2264,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     progressBarClass="w-[273px] progress-div-download"
                   />} */}
               </div>
-              {isModalOpen && storyData && handleEditClick()}
+              {(isModalOpen && storyData )&& handleEditClick()}
             </>
           )}
           <div id="last-chat-boundary" className="div38" />
@@ -2145,6 +2289,20 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 onInput={(e) => {
                   e.target.style.height = 'auto';
                   e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (e.shiftKey) {
+                      // Submit the form on Shift + Enter
+                      e.preventDefault(); // Prevent default "Enter" key behavior
+                      e.target.form.requestSubmit();
+                      setTimeout(() => {
+                        e.target.value = "";
+                      }, 0);
+                    } else {
+                      
+                    }
+                  }
                 }}
               />
             </div>

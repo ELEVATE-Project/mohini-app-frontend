@@ -43,10 +43,7 @@
       shell: "chmod 744 {{ project_path }}/src/scripts/json2env.sh"
 
     - name: Generate .env-cmdrc
-      copy:
-        src: "{{ root_path }}/data2.json"
-        dest: "{{ project_path }}/.env-cmdrc"
-
+      shell: cp "{{ root_path }}/data2.json" "{{ project_path }}/.env-cmdrc"
       args:
         creates: "{{ project_path }}/.env-cmdrc"
 

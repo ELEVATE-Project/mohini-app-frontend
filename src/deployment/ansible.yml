@@ -24,10 +24,9 @@
       debug:
         msg: "{{ vault_response.stdout }}"
 
-    - name: Extract Vault data to create .env-cmdrc
+    - name: Extract and write the entire data.data to .env-cmdrc
       copy:
-        content: |
-          {{ vault_response.stdout | from_json | json_query('data') | to_json }}
+        content: "{{ vault_response.stdout | from_json | json_query('data.data') | to_json }}"
         dest: "{{ project_path }}/.env-cmdrc"
 
     - name: Verify .env-cmdrc file creation
@@ -48,7 +47,7 @@
 
     - name: Fetch the latest code
       git:
-        repo: https://github.com/5Amogh/mohini-app-frontend
+        repo: https://github.com/ELEVATE-Project/mohini-app-frontend
         dest: "{{ project_path }}"
         version: "{{ gitBranch }}"
         force: yes

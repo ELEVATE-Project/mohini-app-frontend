@@ -24,6 +24,7 @@ const login_api_url = `/api/login/`;
 function Login({ type, variant }) {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
+  const [emailId, setEmailId] = useState("");
   const [userLanguage, setUserLanguage] = useState("");
   const [userState, setUserState] = useState("");
   const [userDistrict, setUserDistrict] = useState("");
@@ -63,6 +64,7 @@ function Login({ type, variant }) {
     localStorage.removeItem('timerStart');
     localStorage.removeItem('showHomepage');
     localStorage.removeItem('model');
+    localStorage.removeItem('has_accepted_tnc');
     
     cookies.remove("profileid", {
       path: "/",
@@ -125,6 +127,10 @@ function Login({ type, variant }) {
     setUserBlock(e.target.value);
   };
 
+  const handleEmailChange = (e) => {
+    setEmailId(e.target.value);
+  };
+
   const handleNameChange = (e) => {
     setFirstName(e.target.value);
   };
@@ -172,8 +178,7 @@ function Login({ type, variant }) {
 
     const body = {
       first_name: firstName,
-      email: phoneNumberField + "@shikshalokam.org",
-      phone: phoneNumberField,
+      email: emailId,
       preferred_route: userLanguage,
       company: "shikshalokamstaging",
       password: "grit@123",
@@ -204,7 +209,7 @@ function Login({ type, variant }) {
       url: login_api_url,
       method: "POST",
       data: {
-        email: body.email,
+        email: emailId,
         password: "grit@123",
       },
     });
@@ -240,19 +245,14 @@ function Login({ type, variant }) {
       <div className="px-5 hidden sm:block">
           <div className="flex">
             <img
-              src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshaLokam.png"
+              src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png"
               className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0"
               alt="shikshalokam_logo"
-            />
-              <img
-              src="https://mohini-static.shikshalokam.org/fe-images/SVG/Shikshalokam/shikshalokam-logo.png"
-              className="h-[60px] w-[auto] mt-6 object-fill aspect-auto align-top object-[center_center] relative ml-2"
-              alt="grit_Logo"
             />
           </div>
           
         <img
-          src="https://mohini-static.shikshalokam.org/fe-images/PNG/GritBot/innovationpana-1@2x.png"
+          src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png"
           width="500"
           height="900"
           className="center-img custom-login-image"
@@ -303,12 +303,11 @@ function Login({ type, variant }) {
               </>
 
                 <>
-                  <FormData layOut={1} isRequired={true}  labelName="Phone Number" id="phnNumID" inputType="text" inputName="phoneNumber"
+                  <FormData layOut={1} isRequired={true}  labelName="E-mail ID" id="emailID" inputType="email" inputName="email"
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     inputClass="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
-                    inputOnChange={handlePhoneChange}
-                    fieldError={fieldError}
-                    inputValue = {phoneNumberField}
+                    inputOnChange={handleEmailChange}
+                    inputValue = {emailId}
                   />
                   <FormData layOut={2} labelName="language" id="languageID" selectID="languageID" selectName="language"
                     selectOptions={[{label:'English', value:'/'}

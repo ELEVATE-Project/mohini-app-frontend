@@ -20,6 +20,10 @@
         msg: "Vault response is not valid JSON or does not contain expected data."
       when: vault_response.stdout is not search('\"data\":')
 
+    - name: Debug Vault response (for troubleshooting)
+      debug:
+        msg: "{{ vault_response.stdout }}"
+
     - name: Extract Vault data to create .env-cmdrc
       copy:
         content: |

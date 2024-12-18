@@ -140,7 +140,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
       const { company_name, collab_logo } = current_company_config;
       setContentPDF((oldContent)=>({
         ...oldContent,
-        companyLogo: '/images/grit_shikshalokam_collagLogo.png'
+        companyLogo: '/images/shikshalokam_logo_pdf.png'
       }))
     }
 
@@ -287,7 +287,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                           data: {
                               story: storyData?.id,
                           },
-                          token: accessToken,
+                          token: JSON.parse(localStorage.getItem('accToken')),
                       });
                       resolve(); // Resolve the promise here
                   },
@@ -297,7 +297,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                   },
                   loader: setIsLoading,
                   data: formData,
-                  token: accessToken,
+                  token: JSON.parse(localStorage.getItem('accToken')),
               });
           } else {
               updateStoryMedia({
@@ -311,13 +311,15 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                   },
                   loader: setIsLoading,
                   data: {
-                      story: storyData?.id,
-                      name: fileName,
-                      file: fileData,
-                      id: mediaId,
-                      media_type: 'application/pdf',
+                    story: storyData?.id,
+                    name: fileName,
+                    file: fileData,
+                    id: mediaId,
+                    media_type: 'application/pdf',
+                    access_token: JSON.parse(localStorage.getItem('accToken')),
+                    session: JSON.parse(localStorage.getItem('sessionid'))
                   },
-                  token: accessToken,
+                  token: JSON.parse(localStorage.getItem('accToken')),
               });
           }
       });
@@ -438,6 +440,8 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
       formData.append("story", storyData?.id);
       formData.append("name", `${storyData?.title}.pdf`);
       formData.append("media_type", 'application/pdf');
+      formData.append('access_token', JSON.parse(localStorage.getItem('accToken')));
+      formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
       // const uploadFilePromise = await uploadFile(formData, file, `${storyData?.title}.pdf`, story_media[0]?.id, storyData?.id);
 
       console.log(pdfBlob)

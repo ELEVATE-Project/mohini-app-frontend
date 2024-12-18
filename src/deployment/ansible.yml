@@ -1,4 +1,3 @@
----
 - hosts: elevate
   vars:
     project_path: /opt/frontend/mohini-app
@@ -10,12 +9,32 @@
         src: "/opt/backend/deployment/.token"
       register: slurpfile
 
-    - name: Run vault credentials
+    - name: Fetch credentials from Vault
       shell: >
         curl --location --request GET '{{ vaultAddress }}mohini-frontend' 
-        --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' 
-        | jq '.data' > '{{ root_path }}/data2.json'
-      register: vaultCurl
+        --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}'
+      register: vault_response
+
+    - name: Ensure Vault response is valid JSON
+      fail:
+        msg: "Vault response is not valid JSON or does not contain expected data."
+      when: vault_response.stdout is not search('\"data\":')
+
+    - name: Extract Vault data to create .env-cmdrc
+      copy:
+        content: |
+          {{ vault_response.stdout | from_json | json_query('data') | to_json }}
+        dest: "{{ project_path }}/.env-cmdrc"
+
+    - name: Verify .env-cmdrc file creation
+      stat:
+        path: "{{ project_path }}/.env-cmdrc"
+      register: env_file_stat
+
+    - name: Fail if .env-cmdrc file was not created
+      fail:
+        msg: ".env-cmdrc file was not created!"
+      when: not env_file_stat.stat.exists
 
     - name: Ensure project directory exists
       file:
@@ -25,7 +44,7 @@
 
     - name: Fetch the latest code
       git:
-        repo: https://github.com/ELEVATE-Project/mohini-app-frontend
+        repo: https://github.com/5Amogh/mohini-app-frontend
         dest: "{{ project_path }}"
         version: "{{ gitBranch }}"
         force: yes
@@ -45,27 +64,11 @@
     - name: Set permission for json2env.sh
       shell: "chmod 744 {{ project_path }}/src/scripts/json2env.sh"
 
-    - name: Generate .env-cmdrc
-      shell: cp "{{ root_path }}/data2.json" "{{ project_path }}/.env-cmdrc"
-      args:
-        creates: "{{ project_path }}/.env-cmdrc"
-
-    - name: Verify .env-cmdrc file creation
-      stat:
-        path: "{{ project_path }}/.env-cmdrc"
-      register: env_file_stat
-
-    - name: Fail if .env-cmdrc file was not created
-      fail:
-        msg: ".env-cmdrc file was not created!"
-      when: not env_file_stat.stat.exists
-
     - name: Fetch pm2 config file
       shell: >
         curl --location --request GET '{{ vaultAddress }}mohiniPortalPM2Config'
         --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' 
         | jq '.data.data' > '{{ project_path }}/pm2.config.json'
-      register: pm2
 
     - name: Build mohini app
       shell: "cd {{ project_path }} && npm run build-prod"

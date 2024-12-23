@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm';
@@ -8,7 +8,17 @@ import "./privacyPolicyStyle.css";
 
 
 const PrivacyPolicyPage = ({ tncText, onAccept, onDecline }) => {
-    console.log("tncText: ", tncText)
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    window.scrollTo(0, 0);
+  
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+  
+
   return (
     <>
         <div className="tnc-cover"></div>

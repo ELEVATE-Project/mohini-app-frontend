@@ -7,7 +7,7 @@ import {
   MdSend,
 } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
-import getConfiguration, { lang_codes } from "../../configure";
+import getConfiguration, { lang_codes, lang_routes } from "../../configure";
 import { useLocalStorage } from "react-use";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
@@ -89,7 +89,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [profileToUse, setProfileToUse] = useState(JSON.parse(localStorage.getItem('profileid')) || null);
   const audioRef = useRef();
   const lastBotMessageIndex = useRef(-1);
-  let access_token = JSON.parse(localStorage.getItem('accToken'));
+  let access_token = localStorage.getItem('accToken');
+  let globalSessionID = JSON.parse(localStorage.getItem('sessionid'))
+
   const isInitialLoadRef = useRef(true);
   const [storyMediaIdArray, ] = useState(null);
 
@@ -172,8 +174,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [visibleItemCount, setVisibleItemCount] = useState(chatToAddLength);
   const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
 
-  const userId = searchParams.get("userid");
-  const projectId = searchParams.get("projectid");
+  const projectId = searchParams.get("projectId");
 
   let params = new URL(document.location).searchParams;
   const code = params.get("code");
@@ -193,17 +194,27 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const navigate = useNavigate();
 
   const openModal = () => {
+    console.log('setting model to open')
     setIsModalOpen(true);
   };
 
   useEffect(()=>{
-    console.log('userID in params: ', userId)
+    if(!projectId) return
+    const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language'));
+    if(!preferredLanguage) return;
+    const language = preferredLanguage.value || 'en';
+    isnt_english = !(language === 'en');
+    console.log(language)
+    console.log(lang_routes[language])
+  }, [projectId])
+
+  useEffect(()=>{
     console.log('projectId in params: ', projectId)
-    if ((!userId || !projectId) && !profileToUse && !access_token) {
+    if ((!projectId) && !profileToUse && !access_token) {
       navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN)
     }
 
-  }, [userId, projectId, profileToUse])
+  }, [projectId, profileToUse])
 
   useEffect(() => {
     // Function to create user profile
@@ -219,7 +230,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
         const response = await axiosInstance.post(`/api/create-profile/`, body, { headers });
         console.log("response: ", response)
-        if (response) {
+        if (response && response?.status === 200) {
           const data  = response?.data.profile_details;
           console.log("data: ", data)
           localStorage.setItem('profileid', data?.id);
@@ -228,16 +239,27 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           if (!sessionid) {
             let session = await getSessionDetails();
             localStorage.setItem('sessionid', JSON.stringify(session.sessionid));
-          }
-
-          localStorage.setItem('route', JSON.stringify("/"));
+            globalSessionID = session?.sessionid;
+      }
+          const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language') || '{}');
+          const language = preferredLanguage.value || 'en';
+          
+          localStorage.setItem('route', JSON.stringify(lang_routes[language] || "/"));
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
           localStorage.setItem('state', JSON.stringify(data?.profile_address[0]?.state));
+        } else {
+          //navigate(ROUTES.EXIT_ROUTE)
+          window.location.href=ROUTES.EXIT_ROUTE
+          clearFromStorage()
         }
       } catch (error) {
         console.error(error?.response?.data || error);
+        //navigate(ROUTES.EXIT_ROUTE)
+        window.location.href=ROUTES.EXIT_ROUTE
+        clearFromStorage()
+
       } finally {
         setIsLoading(false);
       }
@@ -256,24 +278,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(()=>{
     console.log("projectId: ", projectId)
-    console.log("userId: ", userId)
     async function fetchChatSession() {
       const response = await axiosInstance({
-        url: `/api/chatsession?project_id=${projectId}&user_id=${userId}`,
+        url: `/api/chatsession?project_id=${projectId}`,
       })
       console.log("response: ", response)
-      if (response?.status === 200 && response?.data[0]?.session) {
-        localStorage.setItem('sessionid', JSON.stringify(response?.data[0]?.session))
+      if (response?.status === 200 && response?.data?.results[0]?.session) {
+        localStorage.setItem('sessionid', JSON.stringify(response?.data?.results[0]?.session))
+        globalSessionID = response?.data?.results[0]?.session
+
         localStorage.setItem('isOldChatOpen', JSON.stringify(true));
         localStorage.setItem('isNewChatOpen', JSON.stringify(false));
       }
     }
 
-    if(projectId && userId) {
+    if(projectId) {
       fetchChatSession()
     }
   
-  }, [projectId, userId])
+  }, [projectId])
 
   useEffect(()=>{
    console.log("initial visibleItemCount: ", visibleItemCount)
@@ -293,15 +316,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       introMessageRef.current = temp_intro_message;
     }
   },[isFetchingOldIntro])
-
-  useEffect(()=>{
-    if (isShikshalokamPublicType) {
-      const route = JSON.parse(localStorage.getItem('route'));
-      isnt_english = !(route === '/');
-    } else {
-      isnt_english = !(lang_codes.en === current_company_config.preferredLanguage);
-    }
-  }, [isShikshalokamPublicType])
 
   useEffect(()=>{
     console.log("Error: ", error);
@@ -335,9 +349,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               profile_id: profileToUse,
               stage: 'COMPLETED',
               access_token: access_token,
+              flow: localStorage.getItem('flow')
             },
             method: "POST",
           });
+          console.log('endStoryResponse: ', endStoryResponse?.data)
   
           if (endStoryResponse?.data?.id) {
             setFiles([]);
@@ -346,6 +362,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
         } catch (error) {
           console.error('Error completing the story:', error);
+          //navigate(ROUTES.EXIT_ROUTE)
+          if (projectId){
+            window.location.href=ROUTES.EXIT_ROUTE;
+            clearFromStorage()
+          }
+
         } finally {
           setIsEndStoryLoading(false);
           setIsLoading(false);
@@ -463,7 +485,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     return () => {
       if (!!Object.keys(editor || {})?.length) editor.destroy();
     };
-  }, [editorCopyChanges, isModalOpen]);
+  }, [editorCopyChanges, isModalOpen, storyData]);
 
   const handleEditClick = () => {
     return (
@@ -497,38 +519,83 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               </div>
             </div>
             <div className="editor-button-div">
-              <PrimaryButton
-                onClick={() => {
-                  editor
-                    .save()
-                    .then((outputData) => {
-                      console.log({ outputData });
-                      partialUpdateStoryById({
-                        setter: setStoryData,
-                        loader: setIsSaving,
-                        data: {
-                          id: storyData?.id,
-                          formatted_content: outputData?.blocks,
-                          access_token: JSON.parse(localStorage.getItem('accToken')),
-                          session: JSON.parse(localStorage.getItem('sessionid'))
-                        },
-                        token: access_token,
-                      });
-                    })
-                    .catch((error) => {
-                      console.error("Saving failed: ", error);
-                    });
-                }}
-                disabled={isLoading || isSaving}
-              >
-                Save Changes
-              </PrimaryButton>
+            <PrimaryButton
+              onClick={async () => {
+                try {
+                  const outputData = await editor.save();
+                  console.log({ outputData });
+                  
+                  await partialUpdateStoryById({
+                    setter: setStoryData,
+                    loader: setIsSaving,
+                    data: {
+                      id: storyData?.id,
+                      formatted_content: outputData?.blocks,
+                      access_token: localStorage.getItem('accToken'),
+                      session: JSON.parse(localStorage.getItem('sessionid')),
+                      flow: localStorage.getItem('flow')
+                    },
+                    token: access_token,
+                  });
+                  
+                  await updateReflectionStatus();
+
+                } catch (error) {
+                  console.error("Saving failed: ", error);
+                  //navigate(ROUTES.EXIT_ROUTE)
+                  if (projectId){
+                    window.location.href=ROUTES.EXIT_ROUTE;
+                    clearFromStorage()
+                  }
+                }
+              }}
+              disabled={isLoading || isSaving}
+            >
+              {
+                isnt_english?
+                'परिवर्तन पुष्टि करें':
+                'Confirm Changes'
+              }
+            </PrimaryButton>
             </div>
           </div>
         </div>
       </>
     );
   };
+
+  async function updateReflectionStatus(){
+    try{
+      const flow = localStorage.getItem('flow');
+
+      if(flow === 'login') return;
+
+      const response = await axiosInstance.post('api/update-project-status/', {
+        access_token: localStorage.getItem('accToken'),
+        project_id: projectId,
+        flow: localStorage.getItem('flow')
+      });
+
+      if (response?.status === 200) {
+        //navigate(ROUTES.EXIT_ROUTE)
+        if (projectId){
+          window.location.href=ROUTES.EXIT_ROUTE;
+          clearFromStorage()
+
+        }
+      }
+      
+      return response;
+    } catch (error) {
+      //navigate(ROUTES.EXIT_ROUTE)
+      if (projectId){
+        window.location.href=ROUTES.EXIT_ROUTE;
+        clearFromStorage()
+
+      }
+    }
+
+  }
 
   const handleDownloadClick = () => {
     setIsLoading(true);
@@ -562,6 +629,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     localStorage.setItem('isChatVisible', JSON.stringify(false));
     localStorage.setItem('chatbot_clickedOn?', '');
     localStorage.setItem('showHomepage', true);
+    localStorage.removeItem('has_accepted_tnc')
     window.location.reload();
   }
   
@@ -655,13 +723,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       if (isShikshalokamPublicType){
         let sessionid = JSON.parse(localStorage.getItem('sessionid'))
         let route = JSON.parse(localStorage.getItem('route'))
-        if(profileToUse && sessionid){
+        if(profileToUse && sessionid && access_token){
           socket.send(JSON.stringify({
             type: 'authenticate',
             sessionid: sessionid,
             profileid: profileToUse,
-            projectid: searchParams.get("projectid"),
-            userid: searchParams.get("userid"),
+            projectid: searchParams.get("projectId"),
+            access_token: access_token,
             route: route,
           }));
         }
@@ -686,7 +754,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   function showConfirmationPopup() {
     <div className="div-popup">
     {Swal.fire({
-      title: 
+      title: isnt_english?
+      `
+      <div class='text-class'>
+        आप कुछ समय से निष्क्रिय हैं।  
+        क्या आप जारी रखना चाहते हैं?
+      </div>
+      `:
       `<div class='text-class'>
         You've been inactive for a while.
         Do you want to continue?
@@ -694,13 +768,19 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       `,
       // icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
+      confirmButtonText: isnt_english? 'हाँ':'Yes',
+      cancelButtonText: isnt_english? "नहीं":'No',
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload();
       } else {
-        ResetChat();
+        if (projectId){
+          window.location.href=ROUTES.EXIT_ROUTE;
+          clearFromStorage()
+
+        } else {
+          ResetChat();
+        }
       }
     })}
     </div>
@@ -714,6 +794,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [])
 
   useEffect(()=>{
+    // showConfirmationPopup()
  
     localStorage.setItem('showFileInput', showFileInput)
 
@@ -730,7 +811,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         url: `api/get-story/?session=${sessionID}`,
       })
       console.log('res: ', res)
-      return res?.data;
+      return res?.data?.results;
     }
 
   function extractTextBlocks(formattedContent) {
@@ -739,11 +820,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   useEffect(()=>{
-      const sessionID = JSON.parse(localStorage.getItem('sessionid'))
-      if (!sessionID) return;
+      console.log('globalSessionID: ', globalSessionID)
+      console.log('access_token: ', access_token)
+      if (!globalSessionID) return;
 
     (async () => {
-      const story_data = await getStoryBySession(sessionID, access_token);
+      const story_data = await getStoryBySession(globalSessionID, access_token);
       console.log("story_data: ", story_data)
       if (story_data && story_data?.length > 0 && story_data[0]) {
         setStoryData(story_data[0]);
@@ -754,7 +836,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       }
     })();
 
-  }, [access_token])
+  }, [access_token, globalSessionID])
 
   function handleFileUpload(e) {
     console.log("in file upload")
@@ -790,6 +872,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       formData.append("mediaType", mediaType);
       formData.append('include_in_story', true);
       formData.append('access_token', access_token);
+      formData.append('flow', localStorage.getItem('flow'));
       formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
       formData.append("media_type", mediaType);
   
@@ -818,6 +901,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             });
           },
           errorHandler: (err) => {
+            //navigate(ROUTES.EXIT_ROUTE)
+            if (projectId){
+              window.location.href=ROUTES.EXIT_ROUTE;
+              clearFromStorage()
+
+            }
             setError(err);
             reject(err); 
           },
@@ -827,6 +916,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         });
       } catch (error) {
         console.error({ error });
+        //navigate(ROUTES.EXIT_ROUTE)
+        if (projectId){
+          window.location.href=ROUTES.EXIT_ROUTE;
+          clearFromStorage()
+
+        }
         reject(error);
       }
     });
@@ -834,13 +929,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
 
   useEffect(() => {
-    if (!isModalOpen && storyData && storyData?.id !== '') {
+    if (storyData && storyData?.id !== '') {
       const story_id = storyData?.id;
       const tempMediaArr = []
 
       getStoryAllMedia({
         setter: (data) => {
-          for (let item of Object.values(data || [])) {
+          console.log("DATA: ", data)
+          for (let item of Object.values(data?.results || [])) {
+            console.log("ITEEEM: ", item)
             if (item.include_in_story) {
               item.base64_str = `data:image/jpeg;charset=utf-8;base64,${item.base64_str}`
               tempMediaArr.push(item);
@@ -863,6 +960,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     try {
       const formData = new FormData();
       formData.append('include_in_story', include_in_story);
+      formData.append('flow', localStorage.getItem('flow'));
       formData.append('access_token', access_token);
       formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
   
@@ -927,7 +1025,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             company__slug: companyName,
           },
         });
-        const bots = response?.data;
+        const bots = response?.data?.results;
+        console.log(bots)
   
         if (bots) {
           const storedRoute = '/';
@@ -936,7 +1035,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           if (!selectedBot) {
             selectedBot = bots[0] || { route: '/' };
           }
-
+          console.log(selectedBot)
           const botName = selectedBot?.name || 'Bot';
           localStorage.setItem('botName', botName);
           setBotNameToDisplay(botName);
@@ -1036,7 +1135,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [chatHistory]);
 
   useEffect(() => {
-    if(!isLoading && showFileInput){
+    if(!isLoading && showFileInput && acceptedTnc!=="ONGOING"){
       endPageToScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [isLoading, showFileInput]);
@@ -1097,7 +1196,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         clearTimeout(titleTime);
       }
     }
-  },[profileToUse])
+  },[profileToUse, isModalOpen])
 
 
   useEffect(() => {
@@ -1105,6 +1204,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isChatVisible]);
 
   const handleScrollToView = () => {
+    if(acceptedTnc==="ONGOING") return;
     try {
       document?.querySelector("#last-chat-boundary")?.scrollIntoView({
         behavior: "smooth",
@@ -1212,7 +1312,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         const resp = await getCompanyChatApi(currentSession);
 
         const newChatSessionDetail = [];
-        let sortedResult = quickSort(resp?.data, compareById);
+        console.log(resp)
+        let sortedResult = quickSort(resp?.data?.results, compareById);
 
         // Ensure intro message is added only once
         if (introMessageRef.current) {
@@ -1327,7 +1428,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       })
       console.log("response: ", response)
       if (response) {
-        let sortedResult = quickSort(response?.data, compareByIdDesc);
+        let sortedResult = quickSort(response?.data?.results, compareByIdDesc);
         sortedResult.forEach((sessionObj, index)=>{
           const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
           TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
@@ -1530,24 +1631,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       throw error;
     }
   }
-
-
-  async function updateChatSession(session, update_field){
-    try {
-        const response = await axiosInstance.patch(
-            `api/chatsession/${session}/`, 
-            {
-                session,
-                ...update_field
-            }
-        );
-      
-        return response?.data;
-    } catch (error) {
-        console.error('Error Updating Chatsession:', error);
-        throw error;
-    } 
-}
 
 
   const handleAI4BharatTTSRequest = async (text, id, sourceLanguage) => {
@@ -1979,8 +2062,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   return (
     <>
       {(acceptedTnc==="ONGOING" && !isLoading)&& <PrivacyPolicyPage tncText={privacyPolicyText} onAccept={handleAcceptTnC} onDecline={handleDeclineTnC} />}
-
-      <div className={`div27 ${isOpen&& ' div70'} ${(projectId && userId)&& ' div21'}`}>
+      <></>
+      <div className={`div27 ${isOpen&& ' div70'} ${(projectId)&& ' div21'}`}>
         <div className={`div28 ${isOpen ? "div29" : ""}`}>
           {(isShikshalokamPublicType)&& <Sidebar
             isOpen={isOpen}
@@ -2043,10 +2126,34 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
         </div>
       </div> }
-      <div className={`${isOpen&& ' div71'}`}>
+      <div className={`${projectId? 'div72' : isOpen? 'div71': ''}`}>
+       {(projectId)&& 
+        <>
+            <button
+              onClick={(e) => {
+                if (projectId){
+                  window.location.href=ROUTES.EXIT_ROUTE;
+                  clearFromStorage()
+
+                }
+              }}
+              className="button-13"
+            >
+              <div
+              >
+                {
+                  isnt_english?
+                  'मैं इसे बाद में करूंगा':
+                  'I will do it later'
+                }
+                
+              </div>
+            </button>
+          </>
+        }
         <HiddenRecorder />
         <div
-          className="div33 div9"
+          className={`${projectId? 'div33-a': 'div33'} div9`}
         >
           {(!showHomepage)&&
             <ul className="div34">
@@ -2093,16 +2200,18 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
           {(showHomepage)&&
             <>
-              <div className="div10" >
-                <h3 className="h3-1">
-                  Micro Improvement Report<br />with Mohini!
-                </h3>
-              </div>
-              <ul className="div11" >
-                <li>Start chatting with Mohini below</li>
-                <li>Add photos to your report</li>
-                <li>Download your report</li>
-              </ul>
+              {(localStorage.getItem('flow'))&&<>
+                <div className="div10" >
+                  <h3 className="h3-1">
+                    Micro Improvement Report<br />with Mohini!
+                  </h3>
+                </div>
+                <ul className="div11" >
+                  <li>Start chatting with Mohini below</li>
+                  <li>Add photos to your report</li>
+                  <li>Download your report</li>
+                </ul>
+              </>}
 
               {chatHistory?.length > 0 && (
                 <div className="div26">
@@ -2158,7 +2267,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <div className="div14">
                   <label className="clickable-label" htmlFor="file-upload">
                     <GrGallery className="icon-1" />
-                    <span className="div16">Upload Photos</span>
+                    <span className="div16">{
+                      isnt_english?
+                      'फोटो अपलोड करें':
+                      'Upload Photos'
+                    }
+                    </span>
                     <input 
                       id="file-upload"
                       type="file" 
@@ -2241,7 +2355,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   >
                     <div className="download-story-div">
                       <FiDownload className="icon-1" />
-                      <span className="div16" ref={endPageToScrollRef}>Download Story</span>
+                      <span className="div16" ref={endPageToScrollRef}>
+                      {
+                        isnt_english?
+                        'कहानी डाउनलोड करें':
+                        'Download Story'
+                      }
+                      </span>
                     </div>
                   </button>
 
@@ -2255,7 +2375,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   >
                     <div className="download-story-div">
                       <MdEdit className="icon-1" />
-                      <span className="div16" ref={endPageToScrollRef}>Edit Story</span>
+                      <span className="div16" ref={endPageToScrollRef}>
+                      {
+                        isnt_english?
+                        'कहानी संपादित करें':
+                        'Edit Story'
+                      }
+                      </span>
                     </div>
                   </button>
                 </div>
@@ -2485,3 +2611,16 @@ export const LoadingChat = () => (
   </div>
 );
 /* eslint-disable react-hooks/exhaustive-deps */
+
+
+export function clearFromStorage() {
+  const keysToRemove = [
+    'botName', 'chat-history', 'company', 'first_name', 'has_accepted_tnc', 'intro_message', 
+    'isChatVisible', 'isNewChatOpen', 'isOldChatOpen', 'profileid', 'route', 'sessionid', 'showFileInput', 
+    'showHomepage', 'state'
+  ];
+
+  keysToRemove.forEach((key) => {
+    localStorage.removeItem(key);
+  });
+}

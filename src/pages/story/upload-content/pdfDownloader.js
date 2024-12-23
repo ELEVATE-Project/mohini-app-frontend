@@ -287,7 +287,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                           data: {
                               story: storyData?.id,
                           },
-                          token: JSON.parse(localStorage.getItem('accToken')),
+                          token: localStorage.getItem('accToken'),
                       });
                       resolve(); // Resolve the promise here
                   },
@@ -297,7 +297,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                   },
                   loader: setIsLoading,
                   data: formData,
-                  token: JSON.parse(localStorage.getItem('accToken')),
+                  token: localStorage.getItem('accToken'),
               });
           } else {
               updateStoryMedia({
@@ -316,10 +316,10 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
                     file: fileData,
                     id: mediaId,
                     media_type: 'application/pdf',
-                    access_token: JSON.parse(localStorage.getItem('accToken')),
+                    access_token: localStorage.getItem('accToken'),
                     session: JSON.parse(localStorage.getItem('sessionid'))
                   },
-                  token: JSON.parse(localStorage.getItem('accToken')),
+                  token: localStorage.getItem('accToken'),
               });
           }
       });
@@ -440,7 +440,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
       formData.append("story", storyData?.id);
       formData.append("name", `${storyData?.title}.pdf`);
       formData.append("media_type", 'application/pdf');
-      formData.append('access_token', JSON.parse(localStorage.getItem('accToken')));
+      formData.append('access_token', localStorage.getItem('accToken'));
       formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
       // const uploadFilePromise = await uploadFile(formData, file, `${storyData?.title}.pdf`, story_media[0]?.id, storyData?.id);
 

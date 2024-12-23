@@ -154,7 +154,8 @@ export const updateStoryMedia = async ({
     file: [],
     id: "",
     access_token: "",
-    session: ""
+    session: "",
+    flow:""
   },
 }) => {
   try {
@@ -164,6 +165,7 @@ export const updateStoryMedia = async ({
     formData.append('file', data.file);
     formData.append('media_type', data.media_type);
     formData.append('access_token', data.access_token);
+    formData.append('flow', data.flow);
     formData.append('session', data.session);
     await createAuthRequest({
       loader,

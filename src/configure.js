@@ -21,6 +21,12 @@ export const lang_codes = {
   enus: "en-US"
 };
 
+
+export const lang_routes = {
+  en: "/",
+  hi: "/hindi",
+};
+
 export const company_list = {
   shikshalokam: "shikshalokam",
 };

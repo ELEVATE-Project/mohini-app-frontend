@@ -1,4 +1,10 @@
 /*   */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --primary-font-family: "Manrope", sans-serif;
+    --secondary-font-family: "Urbanist", sans-serif;
+}
 
 @media screen and (min-width: 992px) {
     #shikshaScrollableDiv::-webkit-scrollbar {
@@ -556,6 +562,12 @@
     padding-bottom: 5rem;
 }
 
+.div33-a {
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+}
+
+
 .div34 {
     margin: 0;
 }
@@ -974,7 +986,8 @@
 .text-class{
     font-size: 1rem;
     color:#081413;
-    font-family: 'Open Sans', sans-serif;
+    /* font-family: 'Open Sans', sans-serif; */
+    font-family: var(--primary-font-family);
 
 }
 
@@ -1034,4 +1047,17 @@
     margin-bottom: 5px;
     display: block;
     color: #3b3939;
+}
+
+
+.button-13{
+    width: 100%;
+    text-align: right;
+    padding: 20px 24px;
+    color: #167fd7;
+    font-size: 1.05rem;
+}
+
+.div72{
+    background-color: hsl(0deg 0% 95.42%);
 }

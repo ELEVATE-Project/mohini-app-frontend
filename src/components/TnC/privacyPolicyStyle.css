@@ -1,7 +1,14 @@
 /* Base styles */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --primary-font-family: "Manrope", sans-serif;
+    --secondary-font-family: "Urbanist", sans-serif;
+}
+
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
 }
 
 .tnc-container {
@@ -80,6 +87,11 @@ body {
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         height: 523px;
     }
+
+    .tnc-bg {
+        font-family: var(--secondary-font-family);
+    }
+
     
 }
   
@@ -91,6 +103,7 @@ body {
         transform: translate(-50%, -50%);
         position: absolute;
         z-index: 1000;
+        font-family: var(--secondary-font-family);
     }
 
     .tnc-cover {
@@ -127,6 +140,6 @@ body {
         position: sticky;
         bottom: 0;
     }
-  }
+}
   
   

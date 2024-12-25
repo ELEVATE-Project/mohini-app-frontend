@@ -49,7 +49,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
 
     useEffect(() => {
       if(!storyData || !storyMediaIdArray) return;
-      console.log("Child Story Data: ", storyData);
+      
 
       if(storyData && storyData?.formatted_content){
         wordCounter(storyData);
@@ -65,7 +65,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
       try {
           setStoryMediaIdArray(storyMediaArr);
       } catch (error) {
-        console.log('Error: ', error);
+        
       }
     }, [storyMediaArr])
 
@@ -444,7 +444,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
       formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
       // const uploadFilePromise = await uploadFile(formData, file, `${storyData?.title}.pdf`, story_media[0]?.id, storyData?.id);
 
-      console.log(pdfBlob)
+      
       uploadFile(formData, file, `${storyData?.title}.pdf`, story_media[0]?.id, storyData?.id)
         .then(() => {
             setIsLoading(false);
@@ -500,7 +500,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
           </>
         )
       } else if(images.length === 0){
-        console.log('Here')
+        
         return(
           <>
               {((currentState==='Nagaland')&& <StoryFifthPage {...storyData} />)}
@@ -514,7 +514,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
 
     function showThirdPage(isHeadingVisible) {
       if(contentPDF.content1.length===0 || !storyData) return;
-      console.log('here in show third')
+      
       return (
         contentPDF.content1.map((item, index) => {
           if(item === '') return;
@@ -533,7 +533,7 @@ const PdfDownloader = ({ storyData, isShikshalokam, downloadTriggered, handleDow
     }
 
     useEffect(()=>{
-      console.log('ContentPDF: ', contentPDF)
+      
     }, [contentPDF])
 
     function showPdfAccToCompany(){

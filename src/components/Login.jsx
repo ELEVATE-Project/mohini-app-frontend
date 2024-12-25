@@ -263,17 +263,12 @@ function Login({ type, variant }) {
       </div>
       <div className="">
         <div className="justify-center w-full flex sm:hidden">
-          <div className="w-[75%]">
+          <div className="w-[100%]">
             
                 <div className="flex p-2 mx-auto px-auto items-center justify-center">
-                  <img
-                  src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png"
-                  className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0"
-                  alt="shikshalokam_logo"
-                />
                  <img
-                  src="https://mohini-static.shikshalokam.org/fe-images/SVG/Shikshalokam/shikshalokam-logo.png"
-                  className="h-[60px] w-[auto] mt-6 object-fill aspect-auto align-top object-[center_center] relative ml-2"
+                  src="https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/shikshalokam_logo_pdf.png"
+                  className="h-[60px] w-[auto] mt-6 mb-2 object-fill aspect-auto align-top object-[center_center] relative ml-2"
                   alt="grit_Logo"
                 />
               </div>

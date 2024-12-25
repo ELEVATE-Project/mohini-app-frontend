@@ -12,7 +12,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst=false, showLogout=true, showScr
   const navigate = useNavigate();
 
   function handleLogout(){
-    navigate(ROUTES.LOGOUT);
+    navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
   }
 
   return (

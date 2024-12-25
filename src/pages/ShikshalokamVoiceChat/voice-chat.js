@@ -63,10 +63,9 @@ function useCustomMediaQuery(query) {
   useEffect(() => {
     // Ensure the window object is available
     if (typeof window !== "undefined") {
-      console.log("SETTING IT")
       const media = window.matchMedia(query);
       const isMatching = media.matches;
-      console.log("media: ", isMatching)
+      
       setMatches(isMatching); // Set the initial value
 
       const listener = () => setMatches(isMatching);
@@ -76,7 +75,7 @@ function useCustomMediaQuery(query) {
       return () => media.removeEventListener('change', listener);
     }
   }, [query]);
-  console.log("matches: ", matches)
+  
 
   return matches;
 }
@@ -194,7 +193,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const navigate = useNavigate();
 
   const openModal = () => {
-    console.log('setting model to open')
+    
     setIsModalOpen(true);
   };
 
@@ -204,12 +203,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if(!preferredLanguage) return;
     const language = preferredLanguage.value || 'en';
     isnt_english = !(language === 'en');
-    console.log(language)
-    console.log(lang_routes[language])
+    
+    
   }, [projectId])
 
   useEffect(()=>{
-    console.log('projectId in params: ', projectId)
+    
     if ((!projectId) && !profileToUse && !access_token) {
       navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN)
     }
@@ -229,10 +228,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         };
 
         const response = await axiosInstance.post(`/api/create-profile/`, body, { headers });
-        console.log("response: ", response)
+        
         if (response && response?.status === 200) {
           const data  = response?.data.profile_details;
-          console.log("data: ", data)
+          
           localStorage.setItem('profileid', data?.id);
           setProfileToUse(data?.id)
           let sessionid = localStorage.getItem('sessionid');
@@ -264,11 +263,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         setIsLoading(false);
       }
     }
-    console.log("profileToUse", profileToUse)
-    console.log("access_token", access_token)
+    
+    
     // Check if profile ID is in localStorage, if not, create the profile
     if (!profileToUse && access_token) {
-      console.log("In here")
+      
       createUserProfile();
       setShouldFetchIntro(true);
       setIsStreamingComplete(true);
@@ -277,12 +276,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
 
   useEffect(()=>{
-    console.log("projectId: ", projectId)
+    
     async function fetchChatSession() {
       const response = await axiosInstance({
         url: `/api/chatsession?project_id=${projectId}`,
       })
-      console.log("response: ", response)
+      
       if (response?.status === 200 && response?.data?.results[0]?.session) {
         localStorage.setItem('sessionid', JSON.stringify(response?.data?.results[0]?.session))
         globalSessionID = response?.data?.results[0]?.session
@@ -299,14 +298,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [projectId])
 
   useEffect(()=>{
-   console.log("initial visibleItemCount: ", visibleItemCount)
-   console.log("initial chatToAddLength: ", chatToAddLength)
+   
+   
   
     setVisibleItemCount(chatToAddLength)
   }, [chatToAddLength])
 
   useEffect(()=>{
-   console.log("visibleItemCount: ", visibleItemCount)
+   
   }, [visibleItemCount])
 
 
@@ -318,7 +317,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   },[isFetchingOldIntro])
 
   useEffect(()=>{
-    console.log("Error: ", error);
+    
   }, [error])
 
   useEffect(()=>{
@@ -340,7 +339,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   
           const sessionid = JSON.parse(localStorage.getItem('sessionid'));
           const end_story_api_url = `/api/end-story/`;
-          console.log('isEndStoryLoading: ', isEndStoryLoading);
+          
   
           const endStoryResponse = await axiosInstance({
             url: end_story_api_url,
@@ -353,7 +352,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             },
             method: "POST",
           });
-          console.log('endStoryResponse: ', endStoryResponse?.data)
+          
   
           if (endStoryResponse?.data?.id) {
             setFiles([]);
@@ -381,7 +380,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isStreamingComplete, strandStep, access_token]);
     useEffect(()=>{
     let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
-    if(!profileid && !access_token) window.location.href='/logout';
+    if(!profileid && !access_token) window.location.href=ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN;
     
   
     if(isShikshalokamPublicType){
@@ -409,7 +408,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isNewChatOpen]);
 
   useEffect(()=>{
-    console.log("ShowHomepage: ", showHomepage)
+    
   }, [showHomepage])
 
 
@@ -425,7 +424,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         }));
     } catch (error) {
         parsed_content = [];
-        console.log('error: ',error)
+        
       }
       const _editor = new EditorJS({
         /**
@@ -445,14 +444,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           },
         },
         onReady: (ready) => {
-          console.log({ ready });
+          
           setEditor(_editor);
         },
         data: {
           blocks: parsed_content,
         },
         onChange: async (api, event) => {
-          console.log({ event: event?.blocks });
+          
           setIsSaving(false);
         
           const savedData = await api.saver.save();
@@ -523,7 +522,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               onClick={async () => {
                 try {
                   const outputData = await editor.save();
-                  console.log({ outputData });
+                  
                   
                   await partialUpdateStoryById({
                     setter: setStoryData,
@@ -538,7 +537,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     token: access_token,
                   });
                   
-                  await updateReflectionStatus();
+                  if(projectId){
+                    await updateReflectionStatus();
+                  } else{
+                    window.location.reload()
+                  }
 
                 } catch (error) {
                   console.error("Saving failed: ", error);
@@ -604,7 +607,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   };
 
   const handleDownloadStop = () => {
-    console.log('Download stopped');
+    
     setTriggerDownload(false);
     setIsLoading(false);
     setIsPdfDownloading(false);
@@ -637,7 +640,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   //wss://demo.shi /shikshalokam_new
   function MakeSocketConnection(){
     let socket;
-    console.log("Selected: ", selectedType)
+    
     socket = new WebSocket(
       !!code  ? `${wss_protocol}${window.location.host}/ws/chat/company/`
         : `${wss_protocol}${window.location.host}/ws/${isShikshalokamPublicType? 
@@ -676,7 +679,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         });
     
         // Update chat history in the same manner
-        console.log('2222')
+        
         setChatHistory((prevChatHistory) => {
           const updatedChatHistory = [...prevChatHistory];
     
@@ -684,15 +687,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             updatedChatHistory.length > 0 &&
             updatedChatHistory[updatedChatHistory.length - 1]?.source === "bot"
           ) {
-            console.log("HERE 1")
+            
             // Append to the last bot message in chat history
             if (message?.msg) {
               updatedChatHistory[updatedChatHistory.length - 1].msg += message?.msg;
             }
           } else {
             // Create a new bot message in chat history
-            console.log("HERE 2")
-            console.log('updatedChatHistory.length: ', updatedChatHistory.length);
+            
+            
             updatedChatHistory.push({
               msg: message?.msg || "",
               source: "bot",
@@ -723,11 +726,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       if (isShikshalokamPublicType){
         let sessionid = JSON.parse(localStorage.getItem('sessionid'))
         let route = JSON.parse(localStorage.getItem('route'))
-        if(profileToUse && sessionid && access_token){
+        let tempProfId = localStorage.getItem('profileid')
+        
+        
+        if(tempProfId && sessionid){
           socket.send(JSON.stringify({
             type: 'authenticate',
             sessionid: sessionid,
-            profileid: profileToUse,
+            profileid: tempProfId,
             projectid: searchParams.get("projectId"),
             access_token: access_token,
             route: route,
@@ -737,7 +743,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     };
 
     socket.onclose = (event) => {
-      console.log("Socket connection closed", event);
+      
       if(strandStep < 3 && !isResetCalled){
         showConfirmationPopup()
       }
@@ -745,7 +751,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
     return () => {
       if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-        console.log("Socket connection closed")
+        
         chatSocket.close();
       }
     };
@@ -810,7 +816,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       const res = await axiosInstance({
         url: `api/get-story/?session=${sessionID}`,
       })
-      console.log('res: ', res)
+      
       return res?.data?.results;
     }
 
@@ -820,17 +826,17 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   useEffect(()=>{
-      console.log('globalSessionID: ', globalSessionID)
-      console.log('access_token: ', access_token)
+      
+      
       if (!globalSessionID) return;
 
     (async () => {
       const story_data = await getStoryBySession(globalSessionID, access_token);
-      console.log("story_data: ", story_data)
+      
       if (story_data && story_data?.length > 0 && story_data[0]) {
         setStoryData(story_data[0]);
         const formatted_content = story_data[0].formatted_content;
-        console.log(formatted_content)
+        
         const textBlocks = extractTextBlocks(formatted_content);
         setEditorCopyChanges(textBlocks);
       }
@@ -839,9 +845,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [access_token, globalSessionID])
 
   function handleFileUpload(e) {
-    console.log("in file upload")
+    
     const story_id = storyData?.id;
-    console.log("storyData: ", storyData)
+    
     if (!story_id || story_id === '') return;
   
     const selectedFiles = Array.from(e.target.files); 
@@ -860,6 +866,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         "jpeg": "image/jpeg",
         "jpg": "image/jpeg",
         "png": "image/png",
+        "svg": "image/svg+xml",
       };
       
       const mediaType = mediaTypes[fileExtension] || null;
@@ -935,15 +942,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
       getStoryAllMedia({
         setter: (data) => {
-          console.log("DATA: ", data)
+          
           for (let item of Object.values(data?.results || [])) {
-            console.log("ITEEEM: ", item)
+            
             if (item.include_in_story) {
               item.base64_str = `data:image/jpeg;charset=utf-8;base64,${item.base64_str}`
               tempMediaArr.push(item);
             }
           }
-          console.log("tempMediaArr: ", tempMediaArr)
+          
           setFiles(tempMediaArr);
         },
         loader: setIsLoading,
@@ -986,7 +993,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     const res = await axiosInstance({
       url: `/api/profileuser/${profileToUse}/`,
     })
-    console.log("company detail res: ", res)
+    
     return res?.data?.company?.slug;
   }
 
@@ -1015,7 +1022,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(() => {
     const fetchBotInfo = async () => {
-      console.log("Fetching Intro")
+      
       setIsIntroLoading(true);
       let companyName = await getCompanyDetail();
       try {
@@ -1026,7 +1033,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           },
         });
         const bots = response?.data?.results;
-        console.log(bots)
+        
   
         if (bots) {
           const storedRoute = '/';
@@ -1035,7 +1042,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           if (!selectedBot) {
             selectedBot = bots[0] || { route: '/' };
           }
-          console.log(selectedBot)
+          
           const botName = selectedBot?.name || 'Bot';
           localStorage.setItem('botName', botName);
           setBotNameToDisplay(botName);
@@ -1063,7 +1070,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             handleFirstMessage('');
             return;
           }
-          console.log("latestBot: ", latestBot)
+          
           let message = latestBot.introductory_message;
           let firstName = JSON.parse(localStorage.getItem("first_name")) || '';
           if (message && firstName) {
@@ -1109,8 +1116,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         console.error({ error });
       }
     };
-    console.log("shouldFetchIntro: ", shouldFetchIntro)
-    console.log("profileToUse: ", profileToUse)
+    
+    
     if (chatHistory?.length === 0 && shouldFetchIntro && profileToUse) {
 
       fetchBotInfo().then(() => {
@@ -1123,12 +1130,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [access_token, shouldFetchIntro, profileToUse]);
 
   useEffect(()=>{
-    console.log('sentences: ', sentences);
+    
   }, [sentences])
 
   //copying to local storage
   useEffect(() => {
-    console.log('chatHistory: ', chatHistory);
+    
     setLocalChatHistory(chatHistory);
     lastBotMessageIndex.current = chatHistory?.length - 1;
     if (!showFileInput) handleScrollToView();
@@ -1145,7 +1152,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       !!recordings?.length &&
       chatHistory[chatHistory?.length - 1]?.source !== "bot"
     ) {
-        console.log('333')
+        
         setChatHistory((prev) => {
         prev[chatHistory?.length - 1] = {
           ...prev[chatHistory?.length - 1],
@@ -1236,21 +1243,21 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     try {
         setIsLoading(true);
         setIsPdfDownloading(true);
-        console.log('sessionid: ', sessionid)
+        
         
         // Fetch story by session ID
         const story = await getStoryBySession(sessionid, access_token);
-        console.log('story: ', story)
+        
         const story_media = story[0]?.story_media;
         const pdfMedia = story_media?.filter(media => media.media_type === 'application/pdf') || [];
-        console.log('pdfMedia: ', pdfMedia)
+        
         
         const pdfFileName = pdfMedia[0]?.name;
         const fileUrl = pdfMedia[0]?.public_url;
 
         if (fileUrl && pdfFileName) {
             const response = await fetch(fileUrl);
-            console.log('response: ', response)
+            
 
             if (response.ok) {
                 const reader = response.body.getReader();
@@ -1312,7 +1319,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         const resp = await getCompanyChatApi(currentSession);
 
         const newChatSessionDetail = [];
-        console.log(resp)
+        
         let sortedResult = quickSort(resp?.data?.results, compareById);
 
         // Ensure intro message is added only once
@@ -1370,7 +1377,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         }));
         
         // Avoid adding duplicates
-        console.log('444')
+        
         setChatHistory((prev) => {
             const existingMessages = new Set(prev.map(msg => msg.msg));
             const filteredItems = newChatHistoryItems.filter(item => !existingMessages.has(item.msg));
@@ -1426,7 +1433,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       const response = await axiosInstance({
         url: `/api/chatsession?profile=${profileToUse}`,
       })
-      console.log("response: ", response)
+      
       if (response) {
         let sortedResult = quickSort(response?.data?.results, compareByIdDesc);
         sortedResult.forEach((sessionObj, index)=>{
@@ -1441,7 +1448,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         setChatTitle([...TitleAndSession.slice(0, chatToAddLength)]);
       }
     } catch (error){
-      console.log('Error while fetching chat session data: ', error);
+      
     } finally{
       setIsLoading(false);
     }
@@ -1505,7 +1512,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             {(item?.sessionStatus === completedStatusText)&& <button
               className="span5"
               onClick={() => {
-                console.log('Download initiated for', item?.title);
+                
 
                 pdfDownloadSidebar(item?.session)
               }}
@@ -1526,7 +1533,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const handleSendMessage = useCallback(
     (event) => {
       try {
-        console.log('Sending message: ', textMessage);
+        
         setIsChatVisible(true);
         setShowHomepage(false);
         setNotMute(true);
@@ -1563,7 +1570,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   const handleOnInputText = (e) => {
     e.preventDefault();
-    // console.log('msg in inp: ', e.target.value)
     setTextMessage(e.target.value);
     
     // If the input is cleared, reset the recognition flags
@@ -1579,19 +1585,19 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       
       const lastMessage = chatHistory[chatHistory?.length - 1];
       if (lastMessage?.msg === sentence && lastMessage?.source === "bot") {
-        console.log('Duplicate message detected, skipping...');
+        
         return;
       }
 
       if (chatHistory[chatHistory?.length - 1]?.source === "bot") {
-        console.log('5555')
+        
         setChatHistory((prevMessages) => {
           const lastMessage = prevMessages[prevMessages?.length - 1];
           lastMessage.msg += " " + sentence;
           return [...prevMessages];
         });
       } else {
-        console.log('666')
+        
         setChatHistory((prevMessages) => {
           return [
             ...prevMessages,
@@ -1709,7 +1715,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   };
 
   async function ai4BharatASR(base64, gender = 'female'){
-    console.log("CALLING Ai 4 bharat")
+    
     let sourceLanguage = 'en';
     try {
       if (isnt_english) {
@@ -1764,7 +1770,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       !!appendix?.length &&
       chatHistory[chatHistory?.length - 1].source === "bot"
     ) {
-        console.log('777')
+        
         setChatHistory((prevMessages) => {
         const lastMessage = prevMessages[prevMessages?.length - 1];
         lastMessage.appendixURL = appendix;
@@ -1840,25 +1846,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   
           recorder.start();
           setHasStartedRecording(true);
-          console.log("Recording started...");
+          
   
           recorder.ondataavailable = (event) => {
             // Collect audio data chunks in the local array
             localAudioChunks.push(event.data);
-            console.log("Audio chunk received:", event.data);
+            
           };
   
           recorder.onstop = async () => {
-            console.log("Recording stopped.");
+            
             if (localAudioChunks.length > 0) {
               // Combine all audio chunks into a single Blob
               const audioBlob = new Blob(localAudioChunks, { type: 'audio/webm;codecs=opus' });
-              console.log("Audio blob created:", audioBlob);
+              
   
               // Check if the audio blob contains any significant sound
               const wavBlob = await convertToWav(audioBlob);
               if (!wavBlob) {
-                console.log("No significant audio detected. Skipping API call.");
+                
                 return; // Skip if no meaningful audio
               }
               setIsFetchingData(true);
@@ -2006,7 +2012,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if (mediaRecorder) {
       mediaRecorder.stop(); // Stop the recording
       setHasStartedRecording(false);
-      console.log("Stopping recording...");
+      
     }
   };
 
@@ -2021,7 +2027,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if(!current_company){
       current_company = cookies.get('company');
     }
-    console.log("Parent Story Data: ", storyData);
+    
 
     return (
       <>
@@ -2047,13 +2053,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   function handleAcceptTnC() {
-    console.log("here in Tnc accept")
+    
     localStorage.setItem('has_accepted_tnc', true)
     setAcceptedTnC(true);
   }
 
   function handleDeclineTnC() {
-    console.log("here in Tnc decline")
+    
     localStorage.setItem('has_accepted_tnc', false)
     setAcceptedTnC(false);
     navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
@@ -2276,7 +2282,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     <input 
                       id="file-upload"
                       type="file" 
-                      accept="image/*" 
+                      accept="image/*,image/svg+xml" 
                       multiple
                       onChange={handleFileUpload} 
                       // onClick={(e) => {
@@ -2303,7 +2309,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                       )}
                       {files.map((file, index) => (
                         <li key={index} className="li-2">
-                          {file.name}
+                          {file.name.slice(0, 20)}
+                          {file.name.length > 20 && '...'} 
                           <button 
                             className="button-1" 
                             onClick={() => partialUpdateMedia(file?.id)}
@@ -2342,7 +2349,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   chatId={"download-story-id"}
                   isStaticMessage={true}
                 />
-                <div className="div20">
+                {(!projectId)&& <div className="div20">
                   <button
                     className="clickable-button"
                     onClick={()=>{
@@ -2366,7 +2373,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   </button>
 
                   {triggerDownload && isPdfDownloading && !isLoading && downloadPdf()}
-                </div>
+                </div>}
                 <div className="div20">
                   <button
                     className="clickable-button"
@@ -2464,9 +2471,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 >
                   
                   {hasStartedRecording ? <FaMicrophone /> : <FaMicrophone />}
-                </button>
-                {transcript && console.log("TRANSCRIPT: ", transcript)}
-                
+                </button>                
               </div>
             )}
           </form>

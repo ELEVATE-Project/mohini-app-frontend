@@ -10,9 +10,7 @@ function StoryFifthPage({
   micro_improvement,
   objective,
 }) {
-  useEffect(()=>{
-    // console.log(action_steps);
-  }, [action_steps])
+
   return (
     <div className="story-shikshaLokam-div no-page-break">
       <div className="story-fifthpage-wrapper">

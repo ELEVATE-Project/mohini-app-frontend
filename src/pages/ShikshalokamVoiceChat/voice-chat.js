@@ -669,6 +669,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     };
 
     socket.onclose = (event) => {
+      console.log("Closed",strandStep, isResetCalled)
       console.log("Socket connection closed", event);
       if(strandStep < 3 && !isResetCalled){
         showConfirmationPopup()

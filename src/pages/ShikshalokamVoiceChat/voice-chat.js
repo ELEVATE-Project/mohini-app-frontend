@@ -643,7 +643,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     
     socket = new WebSocket(
       !!code  ? `${wss_protocol}${window.location.host}/ws/chat/company/`
-        : `${wss_protocol}${window.location.host}/ws/${isShikshalokamPublicType? 
+        : `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/${isShikshalokamPublicType? 
           selectedType === 'normal'? 'shikshalokam_new' : 'shikshalokam_one_shot' : current_company_config.websocket_url}/`
     );
     console.log("socket: ", socket)

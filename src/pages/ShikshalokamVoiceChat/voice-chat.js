@@ -250,14 +250,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           localStorage.setItem('state', JSON.stringify(data?.profile_address[0]?.state));
         } else {
           //navigate(ROUTES.EXIT_ROUTE)
-          window.location.href=ROUTES.EXIT_ROUTE
           clearFromStorage()
+          window.location.href=ROUTES.EXIT_ROUTE
         }
       } catch (error) {
         console.error(error?.response?.data || error);
         //navigate(ROUTES.EXIT_ROUTE)
-        window.location.href=ROUTES.EXIT_ROUTE
-        clearFromStorage()
+          clearFromStorage()
+          window.location.href=ROUTES.EXIT_ROUTE
 
       } finally {
         setIsLoading(false);
@@ -363,8 +363,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           console.error('Error completing the story:', error);
           //navigate(ROUTES.EXIT_ROUTE)
           if (projectId){
-            window.location.href=ROUTES.EXIT_ROUTE;
             clearFromStorage()
+            window.location.href=ROUTES.EXIT_ROUTE;
           }
 
         } finally {
@@ -547,8 +547,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   console.error("Saving failed: ", error);
                   //navigate(ROUTES.EXIT_ROUTE)
                   if (projectId){
-                    window.location.href=ROUTES.EXIT_ROUTE;
                     clearFromStorage()
+                    window.location.href=ROUTES.EXIT_ROUTE;
                   }
                 }
               }}
@@ -582,8 +582,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       if (response?.status === 200) {
         //navigate(ROUTES.EXIT_ROUTE)
         if (projectId){
-          window.location.href=ROUTES.EXIT_ROUTE;
           clearFromStorage()
+          window.location.href=ROUTES.EXIT_ROUTE;
 
         }
       }
@@ -592,8 +592,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     } catch (error) {
       //navigate(ROUTES.EXIT_ROUTE)
       if (projectId){
-        window.location.href=ROUTES.EXIT_ROUTE;
         clearFromStorage()
+        window.location.href=ROUTES.EXIT_ROUTE;
 
       }
     }
@@ -646,7 +646,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         : `${wss_protocol}${window.location.host}/ws/${isShikshalokamPublicType? 
           selectedType === 'normal'? 'shikshalokam_new' : 'shikshalokam_one_shot' : current_company_config.websocket_url}/`
     );
-
+    console.log("socket: ", socket)
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
       const message = data["text"];
@@ -722,31 +722,36 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     };
 
     socket.onopen = () => {
+      console.log('websocket open')
       setChatSocket(socket);
-      if (isShikshalokamPublicType){
-        let sessionid = JSON.parse(localStorage.getItem('sessionid'))
-        let route = JSON.parse(localStorage.getItem('route'))
-        let tempProfId = localStorage.getItem('profileid')
-        
-        
-        if(tempProfId && sessionid){
-          socket.send(JSON.stringify({
-            type: 'authenticate',
-            sessionid: sessionid,
-            profileid: tempProfId,
-            projectid: searchParams.get("projectId"),
-            access_token: access_token,
-            route: route,
-          }));
-        }
+      let sessionid = JSON.parse(localStorage.getItem('sessionid'))
+      let route = JSON.parse(localStorage.getItem('route'))
+      let tempProfId = localStorage.getItem('profileid')
+      console.log('detail in onopen: ', sessionid, route, tempProfId)
+      
+      
+      if(tempProfId && sessionid){
+        socket.send(JSON.stringify({
+          type: 'authenticate',
+          sessionid: sessionid,
+          profileid: tempProfId,
+          projectid: searchParams.get("projectId"),
+          access_token: access_token,
+          route: route,
+        }));
       }
     };
 
     socket.onclose = (event) => {
-      
-      if(strandStep < 3 && !isResetCalled){
+      console.log("closed ", strandStep, isResetCalled)
+      console.log("event ", event)
+      if(!isResetCalled){
         showConfirmationPopup()
       }
+    };
+
+    socket.onerror = (event) => {
+      console.log("error ", event)
     };
 
     return () => {
@@ -781,8 +786,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         window.location.reload();
       } else {
         if (projectId){
-          window.location.href=ROUTES.EXIT_ROUTE;
           clearFromStorage()
+          window.location.href=ROUTES.EXIT_ROUTE;
 
         } else {
           ResetChat();
@@ -910,8 +915,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           errorHandler: (err) => {
             //navigate(ROUTES.EXIT_ROUTE)
             if (projectId){
-              window.location.href=ROUTES.EXIT_ROUTE;
               clearFromStorage()
+              window.location.href=ROUTES.EXIT_ROUTE;
 
             }
             setError(err);
@@ -925,8 +930,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         console.error({ error });
         //navigate(ROUTES.EXIT_ROUTE)
         if (projectId){
-          window.location.href=ROUTES.EXIT_ROUTE;
           clearFromStorage()
+          window.location.href=ROUTES.EXIT_ROUTE;
 
         }
         reject(error);
@@ -1036,7 +1041,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         
   
         if (bots) {
-          const storedRoute = '/';
+          const storedRoute = (selectedType === 'oneshot')? '/oneshot_bot' : '/';
           
           let selectedBot = bots.find(bot => bot.route === storedRoute);
           if (!selectedBot) {
@@ -1058,7 +1063,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           let latestBot;
           for (const bot of bots) {
             if(isShikshalokamPublicType){
-              if (bot.route === '/'){
+              const storedRoute = (selectedType === 'oneshot')? '/oneshot_bot' : '/';
+              if (bot.route === storedRoute){
                 latestBot = bot
               }
             }
@@ -2138,8 +2144,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             <button
               onClick={(e) => {
                 if (projectId){
-                  window.location.href=ROUTES.EXIT_ROUTE;
                   clearFromStorage()
+                  window.location.href=ROUTES.EXIT_ROUTE;
 
                 }
               }}

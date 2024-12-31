@@ -251,13 +251,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         } else {
           //navigate(ROUTES.EXIT_ROUTE)
           clearFromStorage()
-          window.location.href=ROUTES.EXIT_ROUTE
+          navigate(-1)
+          // window.location.href=ROUTES.EXIT_ROUTE
         }
       } catch (error) {
         console.error(error?.response?.data || error);
         //navigate(ROUTES.EXIT_ROUTE)
           clearFromStorage()
-          window.location.href=ROUTES.EXIT_ROUTE
+          navigate(-1)
+          // window.location.href=ROUTES.EXIT_ROUTE
 
       } finally {
         setIsLoading(false);
@@ -364,7 +366,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           //navigate(ROUTES.EXIT_ROUTE)
           if (projectId){
             clearFromStorage()
-            window.location.href=ROUTES.EXIT_ROUTE;
+            navigate(-1)
+            // window.location.href=ROUTES.EXIT_ROUTE;
           }
 
         } finally {
@@ -548,7 +551,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   //navigate(ROUTES.EXIT_ROUTE)
                   if (projectId){
                     clearFromStorage()
-                    window.location.href=ROUTES.EXIT_ROUTE;
+                    navigate(-1)
+                    // window.location.href=ROUTES.EXIT_ROUTE;
                   }
                 }
               }}
@@ -583,7 +587,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         //navigate(ROUTES.EXIT_ROUTE)
         if (projectId){
           clearFromStorage()
-          window.location.href=ROUTES.EXIT_ROUTE;
+          navigate(-1)
+          // window.location.href=ROUTES.EXIT_ROUTE;
 
         }
       }
@@ -593,7 +598,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       //navigate(ROUTES.EXIT_ROUTE)
       if (projectId){
         clearFromStorage()
-        window.location.href=ROUTES.EXIT_ROUTE;
+        navigate(-1)
+        // window.location.href=ROUTES.EXIT_ROUTE;
 
       }
     }
@@ -787,7 +793,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       } else {
         if (projectId){
           clearFromStorage()
-          window.location.href=ROUTES.EXIT_ROUTE;
+          navigate(-1)
+          // window.location.href=ROUTES.EXIT_ROUTE;
 
         } else {
           ResetChat();
@@ -916,7 +923,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             //navigate(ROUTES.EXIT_ROUTE)
             if (projectId){
               clearFromStorage()
-              window.location.href=ROUTES.EXIT_ROUTE;
+              navigate(-1)
+              // window.location.href=ROUTES.EXIT_ROUTE;
 
             }
             setError(err);
@@ -931,7 +939,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         //navigate(ROUTES.EXIT_ROUTE)
         if (projectId){
           clearFromStorage()
-          window.location.href=ROUTES.EXIT_ROUTE;
+          navigate(-1)
+          // window.location.href=ROUTES.EXIT_ROUTE;
 
         }
         reject(error);
@@ -2068,7 +2077,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     
     localStorage.setItem('has_accepted_tnc', false)
     setAcceptedTnC(false);
-    navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
+    // navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
+    navigate(-1)
   }
 
   return (
@@ -2145,7 +2155,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               onClick={(e) => {
                 if (projectId){
                   clearFromStorage()
-                  window.location.href=ROUTES.EXIT_ROUTE;
+                  navigate(-1)
+                  // window.location.href=ROUTES.EXIT_ROUTE;
 
                 }
               }}

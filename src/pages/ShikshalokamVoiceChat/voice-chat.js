@@ -151,6 +151,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [acceptedTnc, setAcceptedTnC] = useState(localStorage.getItem('has_accepted_tnc')|| 'ONGOING');
   const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
+  const [stateMachineLength, setStateMachineLength] = useState(localStorage.getItem('statemachine_length') || 0);
 
   const privacyPolicyText = getPrivacyPolicyText();
   const endPageToScrollRef = useRef(null);
@@ -334,7 +335,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(() => {
     async function callEndStory() {
-      if (isStreamingComplete && strandStep >= 8) {
+      if (isStreamingComplete && strandStep >= stateMachineLength) {
         try {
           setIsLoading(true);
           setIsEndStoryLoading(true);
@@ -377,10 +378,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       }
     }
   
-    if (isStreamingComplete && strandStep >= 8) {
+    if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength) {
       callEndStory();
     }
-  }, [isStreamingComplete, strandStep, access_token]);
+  }, [isStreamingComplete, strandStep, access_token, stateMachineLength]);
     useEffect(()=>{
     let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
     if(!profileid && !access_token) window.location.href=ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN;
@@ -733,8 +734,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       let sessionid = JSON.parse(localStorage.getItem('sessionid'))
       let route = JSON.parse(localStorage.getItem('route'))
       let tempProfId = localStorage.getItem('profileid')
-      console.log('detail in onopen: ', sessionid, route, tempProfId)
-      
       
       if(tempProfId && sessionid){
         socket.send(JSON.stringify({
@@ -838,9 +837,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   useEffect(()=>{
-      
-      
-      if (!globalSessionID) return;
+    if (!globalSessionID) return;
 
     (async () => {
       const story_data = await getStoryBySession(globalSessionID, access_token);
@@ -1056,7 +1053,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           if (!selectedBot) {
             selectedBot = bots[0] || { route: '/' };
           }
-          
+          localStorage.setItem('statemachine_length', selectedBot?.statemachine_length);
+          setStateMachineLength(selectedBot?.statemachine_length)
           const botName = selectedBot?.name || 'Bot';
           localStorage.setItem('botName', botName);
           setBotNameToDisplay(botName);

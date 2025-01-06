@@ -244,7 +244,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language') || '{}');
           const language = preferredLanguage.value || 'en';
           
-          localStorage.setItem('route', JSON.stringify(lang_routes[language] || "/"));
+          localStorage.setItem('route', JSON.stringify(lang_routes[language] || "en"));
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
@@ -343,6 +343,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const sessionid = JSON.parse(localStorage.getItem('sessionid'));
           const end_story_api_url = `/api/end-story/`;
           
+          let sourceLanguage = JSON.parse(localStorage.getItem('preferred_language'))?.value || JSON.parse(localStorage.getItem('route'));
   
           const endStoryResponse = await axiosInstance({
             url: end_story_api_url,
@@ -351,7 +352,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               profile_id: profileToUse,
               stage: 'COMPLETED',
               access_token: access_token,
-              flow: localStorage.getItem('flow')
+              flow: localStorage.getItem('flow'),
+              language: sourceLanguage
             },
             method: "POST",
           });
@@ -1012,10 +1014,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     let translate_api_url = 'api/ai4bharat/translate';
     let targetLanguage = 'en';
     try {
-      let temp_route = JSON.parse(localStorage.getItem('route')) || '/';
-      if (temp_route === '/hindi'){
+      let temp_route = JSON.parse(localStorage.getItem('route')) || 'en';
+      if (temp_route === 'hi'){
         targetLanguage = 'en'
       }
+      
       const response = await axiosInstance.post(translate_api_url, {
         message_body: message,
         source_language: 'hi',
@@ -1092,7 +1095,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             message = words.join(' ');
           }
           
-          if (isTestimonial !== '/hindi'){
+          if (isTestimonial !== 'hi'){
             message = await getTranslatedIntroMessage(message)
           }
           if (message && !!message?.trim() && (chatHistory[chatHistory?.length - 1]?.msg !== message)) {
@@ -1729,11 +1732,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function ai4BharatASR(base64, gender = 'female'){
     
-    let sourceLanguage = 'en';
+    let sourceLanguage = JSON.parse(localStorage.getItem('route'));
     try {
-      if (isnt_english) {
-        sourceLanguage = 'hi';
-      }
       const response = await axiosInstance.post('/api/ai4bharat/asr', {
         base_64: base64,
         source_language: sourceLanguage,
@@ -1754,25 +1754,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   useEffect(() => {
     let unnarratedMessages = sentences.filter((x) => !x?.isNarrated);
     let hasUnnarratedMessages = !!unnarratedMessages?.length;
+    let sourceLanguage = JSON.parse(localStorage.getItem('route')) || 'en';
 
     if (isNextAllowed && hasUnnarratedMessages) {
-      if (isnt_english) {
-        if (isShikshalokamPublicType){
-          handleAI4BharatTTSRequest(
-            unnarratedMessages[0].message,
-            unnarratedMessages[0].id,
-            'hi'
-          )
-        }
-      } else {
-        if (isShikshalokamPublicType){
-          handleAI4BharatTTSRequest(
-            unnarratedMessages[0].message,
-            unnarratedMessages[0].id,
-            'en'
-          )
-        }
-      }
+      handleAI4BharatTTSRequest(
+        unnarratedMessages[0].message,
+        unnarratedMessages[0].id,
+        sourceLanguage
+      )
     }
 
     return () => {};

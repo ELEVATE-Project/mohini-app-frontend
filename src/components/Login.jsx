@@ -307,8 +307,8 @@ function Login({ type, variant }) {
                     inputValue = {emailId}
                   />
                   <FormData layOut={2} labelName="language" id="languageID" selectID="languageID" selectName="language"
-                    selectOptions={[{label:'English', value:'/'}
-                    ,{label:'Hindi', value:'/hindi'}
+                    selectOptions={[{label:'English', value:'en'}
+                    ,{label:'Hindi', value:'hi'}
                   ]}  
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     selectValue = {userLanguage}

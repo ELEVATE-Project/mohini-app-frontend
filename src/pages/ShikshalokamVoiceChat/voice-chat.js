@@ -7,7 +7,7 @@ import {
   MdSend,
 } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
-import getConfiguration, { lang_codes, lang_routes } from "../../configure";
+import getConfiguration from "../../configure";
 import { useLocalStorage } from "react-use";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
@@ -244,7 +244,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language') || '{}');
           const language = preferredLanguage.value || 'en';
           
-          localStorage.setItem('route', JSON.stringify(lang_routes[language] || "en"));
+          localStorage.setItem('route', JSON.stringify(language || "en"));
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
@@ -650,11 +650,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   function MakeSocketConnection(){
     let socket;
     
-    socket = new WebSocket(
-      !!code  ? `${wss_protocol}${window.location.host}/ws/chat/company/`
-        : `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/${isShikshalokamPublicType? 
-          selectedType === 'normal'? 'shikshalokam_new' : 'shikshalokam_one_shot' : current_company_config.websocket_url}/`
-    );
+    let url;
+
+    if (!!code) {
+      url = `${wss_protocol}${window.location.host}/ws/chat/company/`;
+    } else {
+      if (selectedType === 'normal') {
+        console.log('flow: ', localStorage.getItem('flow'))
+        if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
+          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_new/`;
+        } else {
+          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/reflection/`;
+        }
+      } else {
+        url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_one_shot/`;
+      }
+    }
+    
+    socket = new WebSocket(url);
+
     console.log("socket: ", socket)
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
@@ -1050,7 +1064,17 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         
   
         if (bots) {
-          const storedRoute = (selectedType === 'oneshot')? '/oneshot_bot' : '/';
+          let storedRoute = '/';
+
+          if (selectedType === 'oneshot'){
+            storedRoute = '/oneshot_bot';
+          } else {
+            if(localStorage.getItem('flow') && localStorage.getItem('flow') === 'login'){
+              storedRoute = '/';
+            } else {
+              storedRoute = '/reflection';
+            }
+          }
           
           let selectedBot = bots.find(bot => bot.route === storedRoute);
           if (!selectedBot) {
@@ -1073,7 +1097,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           let latestBot;
           for (const bot of bots) {
             if(isShikshalokamPublicType){
-              const storedRoute = (selectedType === 'oneshot')? '/oneshot_bot' : '/';
+              let storedRoute = '/';
+              if (selectedType === 'oneshot'){
+                storedRoute = '/oneshot_bot';
+              } else {
+                if(localStorage.getItem('flow') && localStorage.getItem('flow') === 'login'){
+                  storedRoute = '/';
+                } else {
+                  storedRoute = '/reflection';
+                }
+              }
               if (bot.route === storedRoute){
                 latestBot = bot
               }

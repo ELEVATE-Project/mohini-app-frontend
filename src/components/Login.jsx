@@ -350,8 +350,8 @@ function Login({ type, variant }) {
                 )}
                 <button
                   id="demo"
-                  className=" p-3 mt-6 mb-2 px-5 py-3 bg-mira-red-original hover:bg-mira-red-original text-white rounded-md"
-                  style={{backgroundColor: "#c3234a"}}
+                  className=" p-3 mt-6 mb-2 px-5 py-3 text-white rounded-md"
+                  style={{backgroundColor: "#572E91"}}
                   type="submit"
                 >
                   Let's Get Started

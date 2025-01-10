@@ -9,7 +9,7 @@ function Header({ name, hasInfo, isMobileFirst=false, content, logo,showCompanyL
       <div className="div59">
         <div className="div60">
           {(showCompanyLogo)&& <img
-            src={logo || 'https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png'}
+            src={logo || './images/shikshagrahaLogo.png'}
             height="2rem"
             width="auto"
             alt="shikshalokam logo"

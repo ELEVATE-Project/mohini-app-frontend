@@ -120,8 +120,6 @@ export const partialUpdateStoryById = async ({
   data = {
     id : "",
     formatted_content: "",
-    access_token: "",
-    session: ""
   },
 }) => {
   try {
@@ -131,9 +129,7 @@ export const partialUpdateStoryById = async ({
       errorHandler,
       token,
       data: {
-        formatted_content: JSON.stringify(data?.formatted_content),
-        access_token: data?.access_token,
-        session: data?.session
+        formatted_content: JSON.stringify(data?.formatted_content)
       },
       method: "PATCH",
       url: getStoryByIdUrl(data?.id),
@@ -152,10 +148,7 @@ export const updateStoryMedia = async ({
     story: "",
     name: "",
     file: [],
-    id: "",
-    access_token: "",
-    session: "",
-    flow:""
+    id: ""
   },
 }) => {
   try {
@@ -164,9 +157,6 @@ export const updateStoryMedia = async ({
     formData.append('name', data.name);
     formData.append('file', data.file);
     formData.append('media_type', data.media_type);
-    formData.append('access_token', data.access_token);
-    formData.append('flow', data.flow);
-    formData.append('session', data.session);
     await createAuthRequest({
       loader,
       setter,

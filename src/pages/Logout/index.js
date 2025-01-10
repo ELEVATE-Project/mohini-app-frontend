@@ -188,6 +188,7 @@ const Logout = () => {
       }
     }
     if (!!Object.keys(localUserData || {}).length) {
+      console.log({value:Object.keys(localUserData || {}).length})
       logout();
     }
     return () => {};

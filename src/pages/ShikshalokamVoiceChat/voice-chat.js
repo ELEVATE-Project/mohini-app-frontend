@@ -7,7 +7,7 @@ import {
   MdSend,
 } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
-import getConfiguration from "../../configure";
+import getConfiguration, { lang_codes } from "../../configure";
 import { useLocalStorage } from "react-use";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
@@ -43,10 +43,6 @@ import Swal from 'sweetalert2';
 import { PrimaryButton } from "../../components/Buttons";
 import { IoClose } from "react-icons/io5";
 import { selectedLabel } from "./enum";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import ROUTES from "../../url";
-import PrivacyPolicyPage from "../../components/TnC/privacyPolicy";
-import { getPrivacyPolicyText } from "./privacy_policy_text";
 
 
 const cookies = new Cookies();
@@ -63,9 +59,10 @@ function useCustomMediaQuery(query) {
   useEffect(() => {
     // Ensure the window object is available
     if (typeof window !== "undefined") {
+      console.log("SETTING IT")
       const media = window.matchMedia(query);
       const isMatching = media.matches;
-      
+      console.log("media: ", isMatching)
       setMatches(isMatching); // Set the initial value
 
       const listener = () => setMatches(isMatching);
@@ -75,7 +72,7 @@ function useCustomMediaQuery(query) {
       return () => media.removeEventListener('change', listener);
     }
   }, [query]);
-  
+  console.log("matches: ", matches)
 
   return matches;
 }
@@ -85,17 +82,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   // const recognitionRef = useRef(
   //   new (window.SpeechRecognition || window.webkitSpeechRecognition)()
   // );
-  const [profileToUse, setProfileToUse] = useState(JSON.parse(localStorage.getItem('profileid')) || null);
   const audioRef = useRef();
   const lastBotMessageIndex = useRef(-1);
-  let access_token = localStorage.getItem('accToken');
-  let globalSessionID = JSON.parse(localStorage.getItem('sessionid'))
-
+  let { access_token } = useUserStore() || { access_token: "" };
   const isInitialLoadRef = useRef(true);
   const [storyMediaIdArray, ] = useState(null);
 
-  const [searchParams] = useSearchParams();
-  
   // const isMobile = false;
 
   const [localChatHistory, setLocalChatHistory, removeLocalChatHistory] =
@@ -149,11 +141,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [showFileInput, setShowFileInput] = useState(null);
   const [shouldSendMessage, ] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [acceptedTnc, setAcceptedTnC] = useState(localStorage.getItem('has_accepted_tnc')|| 'ONGOING');
   const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
-  const [stateMachineLength, setStateMachineLength] = useState(localStorage.getItem('statemachine_length') || 0);
 
-  const privacyPolicyText = getPrivacyPolicyText();
   const endPageToScrollRef = useRef(null);
 
   const [error, setError] = useState({
@@ -165,16 +154,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [fileErrorText, setFileErrorText] = useState('');
 
   const fileExceedText = 'You cannot upload more than 5 files';
-  const fileSizeText = 'File size cannot exceed 50MB';
+  const fileSizeText = 'File size cannot exceed 5MB';
   const completedStatusText = 'Completed';
   const inProgressStatusText = 'In Progress';
 
   let isMobile = useCustomMediaQuery('(max-width: 500px)');
   let chatToAddLength = isMobile? 7: 13;
   const [visibleItemCount, setVisibleItemCount] = useState(chatToAddLength);
-  const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
 
-  const projectId = searchParams.get("projectId");
 
   let params = new URL(document.location).searchParams;
   const code = params.get("code");
@@ -183,132 +170,29 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     HiddenRecorder,
   } = useVoiceRecord();
 
-  const isShikshalokamPublicType = true;
- 
+  const isShikshalokamPublicType = type === "shikshalokam" && variant ==='publicBot';
+  if (isShikshalokamPublicType && !access_token) {
+    access_token = JSON.parse(localStorage.getItem('access_token'));
+  }
   const shouldShowChatHistoryFeature = true;
   
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const navigate = useNavigate();
-
   const openModal = () => {
-    
     setIsModalOpen(true);
   };
 
   useEffect(()=>{
-    if(!projectId) return
-    const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language'));
-    if(!preferredLanguage) return;
-    const language = preferredLanguage.value || 'en';
-    isnt_english = !(language === 'en');
-    
-    
-  }, [projectId])
-
-  useEffect(()=>{
-    
-    if ((!projectId) && !profileToUse && !access_token) {
-      navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN)
-    }
-
-  }, [projectId, profileToUse])
-
-  useEffect(() => {
-    // Function to create user profile
-    async function createUserProfile() {
-      try {
-        setIsLoading(true);
-        const headers = {
-          "Content-Type": "application/json",
-        };
-        let body = {
-          access_token: access_token,
-        };
-
-        const response = await axiosInstance.post(`/api/create-profile/`, body, { headers });
-        
-        if (response && response?.status === 200) {
-          const data  = response?.data.profile_details;
-          
-          localStorage.setItem('profileid', data?.id);
-          setProfileToUse(data?.id)
-          let sessionid = localStorage.getItem('sessionid');
-          if (!sessionid) {
-            let session = await getSessionDetails();
-            localStorage.setItem('sessionid', JSON.stringify(session.sessionid));
-            globalSessionID = session?.sessionid;
-      }
-          const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language') || '{}');
-          const language = preferredLanguage.value || 'en';
-          
-          localStorage.setItem('route', JSON.stringify(language || "en"));
-          localStorage.setItem('isNewChatOpen', JSON.stringify(true));
-          localStorage.setItem('first_name', JSON.stringify(data?.first_name));
-          localStorage.setItem('company', JSON.stringify(data?.company?.slug));
-          localStorage.setItem('state', JSON.stringify(data?.profile_address[0]?.state));
-        } else {
-          //navigate(ROUTES.EXIT_ROUTE)
-          clearFromStorage()
-          navigate(-1)
-          // window.location.href=ROUTES.EXIT_ROUTE
-        }
-      } catch (error) {
-        console.error(error?.response?.data || error);
-        //navigate(ROUTES.EXIT_ROUTE)
-          clearFromStorage()
-          navigate(-1)
-          // window.location.href=ROUTES.EXIT_ROUTE
-
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    
-    
-    // Check if profile ID is in localStorage, if not, create the profile
-    if (!profileToUse && access_token) {
-      
-      createUserProfile();
-      setShouldFetchIntro(true);
-      setIsStreamingComplete(true);
-    }
-  }, [access_token, profileToUse]);
-
-
-  useEffect(()=>{
-    
-    async function fetchChatSession() {
-      const response = await axiosInstance({
-        url: `/api/chatsession?project_id=${projectId}`,
-      })
-      
-      if (response?.status === 200 && response?.data?.results[0]?.session) {
-        localStorage.setItem('sessionid', JSON.stringify(response?.data?.results[0]?.session))
-        globalSessionID = response?.data?.results[0]?.session
-
-        localStorage.setItem('isOldChatOpen', JSON.stringify(true));
-        localStorage.setItem('isNewChatOpen', JSON.stringify(false));
-      }
-    }
-
-    if(projectId) {
-      fetchChatSession()
-    }
-  
-  }, [projectId])
-
-  useEffect(()=>{
-   
-   
+   console.log("initial visibleItemCount: ", visibleItemCount)
+   console.log("initial chatToAddLength: ", chatToAddLength)
   
     setVisibleItemCount(chatToAddLength)
   }, [chatToAddLength])
 
   useEffect(()=>{
-   
+   console.log("visibleItemCount: ", visibleItemCount)
   }, [visibleItemCount])
 
 
@@ -320,7 +204,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   },[isFetchingOldIntro])
 
   useEffect(()=>{
-    
+    if (isShikshalokamPublicType) {
+      const route = JSON.parse(localStorage.getItem('route'));
+      isnt_english = !(route === '/');
+    } else {
+      isnt_english = !(lang_codes.en === current_company_config.preferredLanguage);
+    }
+  }, [isShikshalokamPublicType])
+
+  useEffect(()=>{
+    console.log("Error: ", error);
   }, [error])
 
   useEffect(()=>{
@@ -333,60 +226,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
   },[fileErrorText])
 
-  useEffect(() => {
-    async function callEndStory() {
-      if (isStreamingComplete && strandStep >= stateMachineLength) {
-        try {
-          setIsLoading(true);
-          setIsEndStoryLoading(true);
-  
-          const sessionid = JSON.parse(localStorage.getItem('sessionid'));
-          const end_story_api_url = `/api/end-story/`;
-          
-          let sourceLanguage = JSON.parse(localStorage.getItem('preferred_language'))?.value || JSON.parse(localStorage.getItem('route'));
-  
-          const endStoryResponse = await axiosInstance({
-            url: end_story_api_url,
-            data: {
-              session: sessionid,
-              profile_id: profileToUse,
-              stage: 'COMPLETED',
-              access_token: access_token,
-              flow: localStorage.getItem('flow'),
-              language: sourceLanguage
-            },
-            method: "POST",
-          });
-          
-  
-          if (endStoryResponse?.data?.id) {
-            setFiles([]);
-            setShowFileInput(true);
-            window.location.reload();
-          }
-        } catch (error) {
-          console.error('Error completing the story:', error);
-          //navigate(ROUTES.EXIT_ROUTE)
-          if (projectId){
-            clearFromStorage()
-            navigate(-1)
-            // window.location.href=ROUTES.EXIT_ROUTE;
-          }
-
-        } finally {
-          setIsEndStoryLoading(false);
-          setIsLoading(false);
-        }
-      }
-    }
-  
-    if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength) {
-      callEndStory();
-    }
-  }, [isStreamingComplete, strandStep, access_token, stateMachineLength]);
-    useEffect(()=>{
+  useEffect(()=>{
     let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
-    if(!profileid && !access_token) window.location.href=ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN;
+    if(!profileid) window.location.href='/logout';
     
   
     if(isShikshalokamPublicType){
@@ -396,7 +238,53 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isShikshalokamPublicType])
 
   useEffect(() => {
+    async function callEndStory() {
+      if (isStreamingComplete && strandStep >= 8) {
+        try {
+          setIsLoading(true);
+          setIsEndStoryLoading(true);
+  
+          const profileid = JSON.parse(localStorage.getItem('profileid'));
+          const sessionid = JSON.parse(localStorage.getItem('sessionid'));
+          const end_story_api_url = `/api/end-story/`;
+          console.log('isEndStoryLoading: ', isEndStoryLoading);
+  
+          const endStoryResponse = await axiosInstance({
+            url: end_story_api_url,
+            data: {
+              session: sessionid,
+              profile_id: profileid,
+              stage: 'COMPLETED',
+            },
+            headers: {
+              Authorization: access_token, 
+            },
+            method: "POST",
+          });
+  
+          if (endStoryResponse?.data?.id) {
+            setFiles([]);
+            setShowFileInput(true);
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('Error completing the story:', error);
+        } finally {
+          setIsEndStoryLoading(false);
+          setIsLoading(false);
+        }
+      }
+    }
+  
+    if (isStreamingComplete && strandStep >= 8 && access_token) {
+      callEndStory();
+    }
+  }, [isStreamingComplete, strandStep, access_token]);
+  
+
+  useEffect(() => {
     if(shouldShowChatHistoryFeature) {const isOldChatOpen = JSON.parse(localStorage.getItem('isOldChatOpen'));
+    const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
     if(isOldChatOpen === true){
       setShouldFetchIntro(false);
       setShowHomepage(false);
@@ -411,10 +299,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       removeLocalChatHistory();
       MakeSocketConnection();
     }
-  }, [isNewChatOpen]);
+  }, []);
 
   useEffect(()=>{
-    
+    console.log("ShowHomepage: ", showHomepage)
   }, [showHomepage])
 
 
@@ -430,7 +318,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         }));
     } catch (error) {
         parsed_content = [];
-        
+        console.log('error: ',error)
       }
       const _editor = new EditorJS({
         /**
@@ -450,14 +338,14 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           },
         },
         onReady: (ready) => {
-          
+          console.log({ ready });
           setEditor(_editor);
         },
         data: {
           blocks: parsed_content,
         },
         onChange: async (api, event) => {
-          
+          console.log({ event: event?.blocks });
           setIsSaving(false);
         
           const savedData = await api.saver.save();
@@ -490,7 +378,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     return () => {
       if (!!Object.keys(editor || {})?.length) editor.destroy();
     };
-  }, [editorCopyChanges, isModalOpen, storyData]);
+  }, [editorCopyChanges, isModalOpen]);
 
   const handleEditClick = () => {
     return (
@@ -524,90 +412,36 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               </div>
             </div>
             <div className="editor-button-div">
-            <PrimaryButton
-              onClick={async () => {
-                try {
-                  const outputData = await editor.save();
-                  
-                  
-                  await partialUpdateStoryById({
-                    setter: setStoryData,
-                    loader: setIsSaving,
-                    data: {
-                      id: storyData?.id,
-                      formatted_content: outputData?.blocks,
-                      access_token: localStorage.getItem('accToken'),
-                      session: JSON.parse(localStorage.getItem('sessionid')),
-                      flow: localStorage.getItem('flow')
-                    },
-                    token: access_token,
-                  });
-                  
-                  if(projectId){
-                    await updateReflectionStatus();
-                  } else{
-                    window.location.reload()
-                  }
-
-                } catch (error) {
-                  console.error("Saving failed: ", error);
-                  //navigate(ROUTES.EXIT_ROUTE)
-                  if (projectId){
-                    clearFromStorage()
-                    navigate(-1)
-                    // window.location.href=ROUTES.EXIT_ROUTE;
-                  }
-                }
-              }}
-              disabled={isLoading || isSaving}
-            >
-              {
-                isnt_english?
-                'परिवर्तन पुष्टि करें':
-                'Confirm Changes'
-              }
-            </PrimaryButton>
+              <PrimaryButton
+                onClick={() => {
+                  editor
+                    .save()
+                    .then((outputData) => {
+                      console.log({ outputData });
+                      partialUpdateStoryById({
+                        setter: setStoryData,
+                        loader: setIsSaving,
+                        data: {
+                          id: storyData?.id,
+                          formatted_content: outputData?.blocks,
+                        },
+                        token: access_token,
+                      });
+                    })
+                    .catch((error) => {
+                      console.error("Saving failed: ", error);
+                    });
+                }}
+                disabled={isLoading || isSaving}
+              >
+                Save Changes
+              </PrimaryButton>
             </div>
           </div>
         </div>
       </>
     );
   };
-
-  async function updateReflectionStatus(){
-    try{
-      const flow = localStorage.getItem('flow');
-
-      if(flow === 'login') return;
-
-      const response = await axiosInstance.post('api/update-project-status/', {
-        access_token: localStorage.getItem('accToken'),
-        project_id: projectId,
-        flow: localStorage.getItem('flow')
-      });
-
-      if (response?.status === 200) {
-        //navigate(ROUTES.EXIT_ROUTE)
-        if (projectId){
-          clearFromStorage()
-          navigate(-1)
-          // window.location.href=ROUTES.EXIT_ROUTE;
-
-        }
-      }
-      
-      return response;
-    } catch (error) {
-      //navigate(ROUTES.EXIT_ROUTE)
-      if (projectId){
-        clearFromStorage()
-        navigate(-1)
-        // window.location.href=ROUTES.EXIT_ROUTE;
-
-      }
-    }
-
-  }
 
   const handleDownloadClick = () => {
     setIsLoading(true);
@@ -616,7 +450,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   };
 
   const handleDownloadStop = () => {
-    
+    console.log('Download stopped');
     setTriggerDownload(false);
     setIsLoading(false);
     setIsPdfDownloading(false);
@@ -641,35 +475,19 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     localStorage.setItem('isChatVisible', JSON.stringify(false));
     localStorage.setItem('chatbot_clickedOn?', '');
     localStorage.setItem('showHomepage', true);
-    localStorage.removeItem('has_accepted_tnc')
     window.location.reload();
   }
   
   // socket connection
-  //wss://demo.shi /shikshalokam_new
   function MakeSocketConnection(){
     let socket;
-    
-    let url;
+    console.log("Selected: ", selectedType)
+    socket = new WebSocket(
+      !!code  ? `${wss_protocol}${window.location.host}/ws/chat/company/`
+        : `${wss_protocol}${window.location.host}/ws/${isShikshalokamPublicType? 
+          selectedType === 'normal'? 'shikshalokam_new' : 'shikshalokam_one_shot' : current_company_config.websocket_url}/`
+    );
 
-    if (!!code) {
-      url = `${wss_protocol}${window.location.host}/ws/chat/company/`;
-    } else {
-      if (selectedType === 'normal') {
-        console.log('flow: ', localStorage.getItem('flow'))
-        if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
-          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_new/`;
-        } else {
-          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/reflection/`;
-        }
-      } else {
-        url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_one_shot/`;
-      }
-    }
-    
-    socket = new WebSocket(url);
-
-    console.log("socket: ", socket)
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
       const message = data["text"];
@@ -702,7 +520,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         });
     
         // Update chat history in the same manner
-        
+        console.log('2222')
         setChatHistory((prevChatHistory) => {
           const updatedChatHistory = [...prevChatHistory];
     
@@ -710,15 +528,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             updatedChatHistory.length > 0 &&
             updatedChatHistory[updatedChatHistory.length - 1]?.source === "bot"
           ) {
-            
+            console.log("HERE 1")
             // Append to the last bot message in chat history
             if (message?.msg) {
               updatedChatHistory[updatedChatHistory.length - 1].msg += message?.msg;
             }
           } else {
             // Create a new bot message in chat history
-            
-            
+            console.log("HERE 2")
+            console.log('updatedChatHistory.length: ', updatedChatHistory.length);
             updatedChatHistory.push({
               msg: message?.msg || "",
               source: "bot",
@@ -745,39 +563,32 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     };
 
     socket.onopen = () => {
-      console.log('websocket open')
       setChatSocket(socket);
-      let sessionid = JSON.parse(localStorage.getItem('sessionid'))
-      let route = JSON.parse(localStorage.getItem('route'))
-      let tempProfId = localStorage.getItem('profileid')
-      
-      if(tempProfId && sessionid){
-        socket.send(JSON.stringify({
-          type: 'authenticate',
-          sessionid: sessionid,
-          profileid: tempProfId,
-          projectid: searchParams.get("projectId"),
-          access_token: access_token,
-          route: route,
-        }));
+      if (isShikshalokamPublicType){
+        let profileid = JSON.parse(localStorage.getItem('profileid'))
+        let sessionid = JSON.parse(localStorage.getItem('sessionid'))
+        let route = JSON.parse(localStorage.getItem('route'))
+        if(profileid && sessionid){
+          socket.send(JSON.stringify({
+            type: 'authenticate',
+            sessionid: sessionid,
+            profileid: profileid,
+            route: route,
+          }));
+        }
       }
     };
 
     socket.onclose = (event) => {
-      console.log("closed ", strandStep, isResetCalled)
-      console.log("event ", event)
-      if(!isResetCalled){
+      console.log("Socket connection closed", event);
+      if(strandStep < 3 && !isResetCalled){
         showConfirmationPopup()
       }
     };
 
-    socket.onerror = (event) => {
-      console.log("error ", event)
-    };
-
     return () => {
       if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-        
+        console.log("Socket connection closed")
         chatSocket.close();
       }
     };
@@ -786,13 +597,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   function showConfirmationPopup() {
     <div className="div-popup">
     {Swal.fire({
-      title: isnt_english?
-      `
-      <div class='text-class'>
-        आप कुछ समय से निष्क्रिय हैं।  
-        क्या आप जारी रखना चाहते हैं?
-      </div>
-      `:
+      title: 
       `<div class='text-class'>
         You've been inactive for a while.
         Do you want to continue?
@@ -800,20 +605,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       `,
       // icon: 'question',
       showCancelButton: true,
-      confirmButtonText: isnt_english? 'हाँ':'Yes',
-      cancelButtonText: isnt_english? "नहीं":'No',
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload();
       } else {
-        if (projectId){
-          clearFromStorage()
-          navigate(-1)
-          // window.location.href=ROUTES.EXIT_ROUTE;
-
-        } else {
-          ResetChat();
-        }
+        ResetChat();
       }
     })}
     </div>
@@ -827,7 +625,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [])
 
   useEffect(()=>{
-    // showConfirmationPopup()
  
     localStorage.setItem('showFileInput', showFileInput)
 
@@ -842,9 +639,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     async function getStoryBySession(sessionID, accessToken){
       const res = await axiosInstance({
         url: `api/get-story/?session=${sessionID}`,
+        headers:{
+          Authorization: `Bearer ${accessToken}`,
+        }
       })
-      
-      return res?.data?.results;
+      return res?.data;
     }
 
   function extractTextBlocks(formattedContent) {
@@ -853,30 +652,28 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   useEffect(()=>{
-    if (!globalSessionID) return;
+      const sessionID = JSON.parse(localStorage.getItem('sessionid'))
+      if (!access_token || !sessionID) return;
 
     (async () => {
-      const story_data = await getStoryBySession(globalSessionID, access_token);
-      
-      if (story_data && story_data?.length > 0 && story_data[0]) {
+      const story_data = await getStoryBySession(sessionID, access_token);
+      if (story_data && story_data[0]) {
         setStoryData(story_data[0]);
         const formatted_content = story_data[0].formatted_content;
-        
+        console.log(formatted_content)
         const textBlocks = extractTextBlocks(formatted_content);
         setEditorCopyChanges(textBlocks);
       }
     })();
 
-  }, [access_token, globalSessionID])
+  }, [access_token])
 
   function handleFileUpload(e) {
-    
     const story_id = storyData?.id;
-    
     if (!story_id || story_id === '') return;
   
     const selectedFiles = Array.from(e.target.files); 
-    const maxFileSize = 50 * 1024 * 1024; 
+    const maxFileSize = 5 * 1024 * 1024; 
     const currentFiles = [...files];  
   
     const uploadPromises = selectedFiles.map((uploadedFile) => {
@@ -885,28 +682,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         // Skip oversized files
         return Promise.resolve();
       }
-      const fileName = uploadedFile?.name;
-      const fileExtension =  fileName ?  fileName.split('.').pop().toLowerCase() : '';
-      const mediaTypes = {
-        "jpeg": "image/jpeg",
-        "jpg": "image/jpeg",
-        "png": "image/png",
-        "svg": "image/svg+xml",
-      };
-      
-      const mediaType = mediaTypes[fileExtension] || null;
-      
-
+  
       const formData = new FormData();
       formData.append("file", uploadedFile);
       formData.append("story", story_id);
-      formData.append("name", fileName);
-      formData.append("mediaType", mediaType);
+      formData.append("name", uploadedFile?.name);
       formData.append('include_in_story', true);
-      formData.append('access_token', access_token);
-      formData.append('flow', localStorage.getItem('flow'));
-      formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
-      formData.append("media_type", mediaType);
   
       // Return a promise for each file upload
       return uploadImage(formData, story_id);
@@ -933,13 +714,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             });
           },
           errorHandler: (err) => {
-            //navigate(ROUTES.EXIT_ROUTE)
-            if (projectId){
-              clearFromStorage()
-              navigate(-1)
-              // window.location.href=ROUTES.EXIT_ROUTE;
-
-            }
             setError(err);
             reject(err); 
           },
@@ -949,13 +723,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         });
       } catch (error) {
         console.error({ error });
-        //navigate(ROUTES.EXIT_ROUTE)
-        if (projectId){
-          clearFromStorage()
-          navigate(-1)
-          // window.location.href=ROUTES.EXIT_ROUTE;
-
-        }
         reject(error);
       }
     });
@@ -963,27 +730,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
 
   useEffect(() => {
-    if (storyData && storyData?.id !== '') {
+    if (!isModalOpen && access_token && storyData && storyData?.id !== '') {
       const story_id = storyData?.id;
       const tempMediaArr = []
 
       getStoryAllMedia({
         setter: (data) => {
-          
-          for (let item of Object.values(data?.results || [])) {
-            
+          for (let item of Object.values(data || [])) {
             if (item.include_in_story) {
               item.base64_str = `data:image/jpeg;charset=utf-8;base64,${item.base64_str}`
               tempMediaArr.push(item);
             }
           }
-          
           setFiles(tempMediaArr);
         },
         loader: setIsLoading,
         data: {
           story: story_id,
         },
+        token: access_token,
       });
     }
 
@@ -994,9 +759,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     try {
       const formData = new FormData();
       formData.append('include_in_story', include_in_story);
-      formData.append('flow', localStorage.getItem('flow'));
-      formData.append('access_token', access_token);
-      formData.append('session', JSON.parse(localStorage.getItem('sessionid')));
   
       createAuthRequest({
         setter: () => {
@@ -1017,10 +779,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function getCompanyDetail(){
     
+    let profID = cookies?.get("profileid");
+    if(isShikshalokamPublicType){
+      profID = JSON.parse(localStorage.getItem('profileid'))
+    }
     const res = await axiosInstance({
-      url: `/api/profileuser/${profileToUse}/`,
+      url: `/api/profileuser/${profID}/`,
+      headers:{
+        Authorization: `Bearer ${access_token}`,
+      }
     })
-    
     return res?.data?.company?.slug;
   }
 
@@ -1028,11 +796,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     let translate_api_url = 'api/ai4bharat/translate';
     let targetLanguage = 'en';
     try {
-      let temp_route = JSON.parse(localStorage.getItem('route')) || 'en';
-      if (temp_route === 'hi'){
+      let temp_route = JSON.parse(localStorage.getItem('route')) || '/';
+      if (temp_route === '/hindi'){
         targetLanguage = 'en'
       }
-      
       const response = await axiosInstance.post(translate_api_url, {
         message_body: message,
         source_language: 'hi',
@@ -1050,38 +817,28 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(() => {
     const fetchBotInfo = async () => {
-      
       setIsIntroLoading(true);
       let companyName = await getCompanyDetail();
       try {
         const response = await axiosInstance({
           url: company_bot_list_url,
+          headers: {
+            Authorization: access_token,
+          },
           params: {
             company__slug: companyName,
           },
         });
-        const bots = response?.data?.results;
-        
+        const bots = response?.data;
   
         if (bots) {
-          let storedRoute = '/';
-
-          if (selectedType === 'oneshot'){
-            storedRoute = '/oneshot_bot';
-          } else {
-            if(localStorage.getItem('flow') && localStorage.getItem('flow') === 'login'){
-              storedRoute = '/';
-            } else {
-              storedRoute = '/reflection';
-            }
-          }
+          const storedRoute = '/';
           
           let selectedBot = bots.find(bot => bot.route === storedRoute);
           if (!selectedBot) {
             selectedBot = bots[0] || { route: '/' };
           }
-          localStorage.setItem('statemachine_length', selectedBot?.statemachine_length);
-          setStateMachineLength(selectedBot?.statemachine_length)
+
           const botName = selectedBot?.name || 'Bot';
           localStorage.setItem('botName', botName);
           setBotNameToDisplay(botName);
@@ -1097,17 +854,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           let latestBot;
           for (const bot of bots) {
             if(isShikshalokamPublicType){
-              let storedRoute = '/';
-              if (selectedType === 'oneshot'){
-                storedRoute = '/oneshot_bot';
-              } else {
-                if(localStorage.getItem('flow') && localStorage.getItem('flow') === 'login'){
-                  storedRoute = '/';
-                } else {
-                  storedRoute = '/reflection';
-                }
-              }
-              if (bot.route === storedRoute){
+              if (bot.route === '/'){
                 latestBot = bot
               }
             }
@@ -1119,7 +866,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             handleFirstMessage('');
             return;
           }
-          
           let message = latestBot.introductory_message;
           let firstName = JSON.parse(localStorage.getItem("first_name")) || '';
           if (message && firstName) {
@@ -1128,7 +874,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             message = words.join(' ');
           }
           
-          if (isTestimonial !== 'hi'){
+          if (isTestimonial !== '/hindi'){
             message = await getTranslatedIntroMessage(message)
           }
           if (message && !!message?.trim() && (chatHistory[chatHistory?.length - 1]?.msg !== message)) {
@@ -1143,7 +889,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             ]);
           }
         } else {
-          const message = response?.data?.introductory_message;
+          const message = response?.data[0]?.introductory_message;
           if (message === null) {
             handleFirstMessage('');
             return;
@@ -1165,9 +911,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         console.error({ error });
       }
     };
-    
-    
-    if (chatHistory?.length === 0 && shouldFetchIntro && profileToUse) {
+  
+    if (!!access_token && chatHistory?.length === 0 && shouldFetchIntro) {
 
       fetchBotInfo().then(() => {
         setShouldFetchIntro(false);
@@ -1176,22 +921,22 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
     
     return () => {};
-  }, [access_token, shouldFetchIntro, profileToUse]);
+  }, [access_token, shouldFetchIntro]);
 
   useEffect(()=>{
-    
+    console.log('sentences: ', sentences);
   }, [sentences])
 
   //copying to local storage
   useEffect(() => {
-    
+    console.log('chatHistory: ', chatHistory);
     setLocalChatHistory(chatHistory);
     lastBotMessageIndex.current = chatHistory?.length - 1;
     if (!showFileInput) handleScrollToView();
   }, [chatHistory]);
 
   useEffect(() => {
-    if(!isLoading && showFileInput && acceptedTnc!=="ONGOING"){
+    if(!isLoading && showFileInput){
       endPageToScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [isLoading, showFileInput]);
@@ -1201,7 +946,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       !!recordings?.length &&
       chatHistory[chatHistory?.length - 1]?.source !== "bot"
     ) {
-        
+        console.log('333')
         setChatHistory((prev) => {
         prev[chatHistory?.length - 1] = {
           ...prev[chatHistory?.length - 1],
@@ -1241,7 +986,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isMute])
 
   useEffect(()=>{
-    if(!isModalOpen && profileToUse){
+    if(!isModalOpen){
       setIsLoading(true);
       const titleTime = setTimeout(()=>{
         if(shouldShowChatHistoryFeature) showChatTitle();
@@ -1252,7 +997,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         clearTimeout(titleTime);
       }
     }
-  },[profileToUse, isModalOpen])
+  },[])
 
 
   useEffect(() => {
@@ -1260,7 +1005,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isChatVisible]);
 
   const handleScrollToView = () => {
-    if(acceptedTnc==="ONGOING") return;
     try {
       document?.querySelector("#last-chat-boundary")?.scrollIntoView({
         behavior: "smooth",
@@ -1293,20 +1037,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         setIsLoading(true);
         setIsPdfDownloading(true);
         
-        
         // Fetch story by session ID
         const story = await getStoryBySession(sessionid, access_token);
-        
         const story_media = story[0]?.story_media;
         const pdfMedia = story_media?.filter(media => media.media_type === 'application/pdf') || [];
-        
         
         const pdfFileName = pdfMedia[0]?.name;
         const fileUrl = pdfMedia[0]?.public_url;
 
         if (fileUrl && pdfFileName) {
             const response = await fetch(fileUrl);
-            
 
             if (response.ok) {
                 const reader = response.body.getReader();
@@ -1351,6 +1091,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   async function getCompanyChatApi(currentSession) {
     const resp = await axiosInstance({
       url: `/api/companychat/?session=${currentSession}`,
+      headers: {
+          Authorization: `Bearer ${access_token}`,
+      }
     });
     return resp
   }
@@ -1368,8 +1111,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         const resp = await getCompanyChatApi(currentSession);
 
         const newChatSessionDetail = [];
-        
-        let sortedResult = quickSort(resp?.data?.results, compareById);
+        let sortedResult = quickSort(resp?.data, compareById);
 
         // Ensure intro message is added only once
         if (introMessageRef.current) {
@@ -1426,7 +1168,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
         }));
         
         // Avoid adding duplicates
-        
+        console.log('444')
         setChatHistory((prev) => {
             const existingMessages = new Set(prev.map(msg => msg.msg));
             const filteredItems = newChatHistoryItems.filter(item => !existingMessages.has(item.msg));
@@ -1455,7 +1197,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }
 
   function quickSort(arr, compare) {
-    if (arr?.length <= 1) {
+    if (arr.length <= 1) {
         return arr;
     }
 
@@ -1463,7 +1205,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     const left = [];
     const right = [];
 
-    for (let i = 1; i < arr?.length; i++) {
+    for (let i = 1; i < arr.length; i++) {
         if (compare(arr[i], pivot) < 0) {
             left.push(arr[i]);
         } else {
@@ -1476,28 +1218,27 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function showChatTitle(){
     try{
+      const profID = JSON.parse(localStorage.getItem('profileid'));
       const currentSessionID = JSON.parse(localStorage.getItem('sessionid'));
       let sessionComplete;
       const TitleAndSession = [];
       const response = await axiosInstance({
-        url: `/api/chatsession?profile=${profileToUse}`,
+        url: `/api/chatsession?profile=${profID}`,
       })
-      
-      if (response) {
-        let sortedResult = quickSort(response?.data?.results, compareByIdDesc);
-        sortedResult.forEach((sessionObj, index)=>{
-          const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
-          TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
-          if (sessionObj.session === currentSessionID) {
-            sessionComplete = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase();
-          }
-        })
-        setShowFileInput(sessionComplete === true);
-        setSessionTitleDetail(TitleAndSession);
-        setChatTitle([...TitleAndSession.slice(0, chatToAddLength)]);
-      }
+      console.log(response)
+      let sortedResult = quickSort(response?.data, compareByIdDesc);
+      sortedResult.forEach((sessionObj, index)=>{
+        const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
+        TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
+        if (sessionObj.session === currentSessionID) {
+          sessionComplete = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase();
+        }
+      })
+      setShowFileInput(sessionComplete === true);
+      setSessionTitleDetail(TitleAndSession);
+      setChatTitle([...TitleAndSession.slice(0, chatToAddLength)]);
     } catch (error){
-      
+      console.log('Error while fetching chat session data: ', error);
     } finally{
       setIsLoading(false);
     }
@@ -1561,7 +1302,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             {(item?.sessionStatus === completedStatusText)&& <button
               className="span5"
               onClick={() => {
-                
+                console.log('Download initiated for', item?.title);
 
                 pdfDownloadSidebar(item?.session)
               }}
@@ -1582,7 +1323,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const handleSendMessage = useCallback(
     (event) => {
       try {
-        
+        console.log('Sending message: ', textMessage);
         setIsChatVisible(true);
         setShowHomepage(false);
         setNotMute(true);
@@ -1619,6 +1360,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   const handleOnInputText = (e) => {
     e.preventDefault();
+    // console.log('msg in inp: ', e.target.value)
     setTextMessage(e.target.value);
     
     // If the input is cleared, reset the recognition flags
@@ -1634,19 +1376,19 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       
       const lastMessage = chatHistory[chatHistory?.length - 1];
       if (lastMessage?.msg === sentence && lastMessage?.source === "bot") {
-        
+        console.log('Duplicate message detected, skipping...');
         return;
       }
 
       if (chatHistory[chatHistory?.length - 1]?.source === "bot") {
-        
+        console.log('5555')
         setChatHistory((prevMessages) => {
           const lastMessage = prevMessages[prevMessages?.length - 1];
           lastMessage.msg += " " + sentence;
           return [...prevMessages];
         });
       } else {
-        
+        console.log('666')
         setChatHistory((prevMessages) => {
           return [
             ...prevMessages,
@@ -1764,9 +1506,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   };
 
   async function ai4BharatASR(base64, gender = 'female'){
-    
-    let sourceLanguage = JSON.parse(localStorage.getItem('route'));
+    console.log("CALLING Ai 4 bharat")
+    let sourceLanguage = 'en';
     try {
+      if (isnt_english) {
+        sourceLanguage = 'hi';
+      }
       const response = await axiosInstance.post('/api/ai4bharat/asr', {
         base_64: base64,
         source_language: sourceLanguage,
@@ -1787,14 +1532,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   useEffect(() => {
     let unnarratedMessages = sentences.filter((x) => !x?.isNarrated);
     let hasUnnarratedMessages = !!unnarratedMessages?.length;
-    let sourceLanguage = JSON.parse(localStorage.getItem('route')) || 'en';
 
     if (isNextAllowed && hasUnnarratedMessages) {
-      handleAI4BharatTTSRequest(
-        unnarratedMessages[0].message,
-        unnarratedMessages[0].id,
-        sourceLanguage
-      )
+      if (isnt_english) {
+        if (isShikshalokamPublicType){
+          handleAI4BharatTTSRequest(
+            unnarratedMessages[0].message,
+            unnarratedMessages[0].id,
+            'hi'
+          )
+        }
+      } else {
+        if (isShikshalokamPublicType){
+          handleAI4BharatTTSRequest(
+            unnarratedMessages[0].message,
+            unnarratedMessages[0].id,
+            'en'
+          )
+        }
+      }
     }
 
     return () => {};
@@ -1805,7 +1561,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       !!appendix?.length &&
       chatHistory[chatHistory?.length - 1].source === "bot"
     ) {
-        
+        console.log('777')
         setChatHistory((prevMessages) => {
         const lastMessage = prevMessages[prevMessages?.length - 1];
         lastMessage.appendixURL = appendix;
@@ -1881,25 +1637,25 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   
           recorder.start();
           setHasStartedRecording(true);
-          
+          console.log("Recording started...");
   
           recorder.ondataavailable = (event) => {
             // Collect audio data chunks in the local array
             localAudioChunks.push(event.data);
-            
+            console.log("Audio chunk received:", event.data);
           };
   
           recorder.onstop = async () => {
-            
+            console.log("Recording stopped.");
             if (localAudioChunks.length > 0) {
               // Combine all audio chunks into a single Blob
               const audioBlob = new Blob(localAudioChunks, { type: 'audio/webm;codecs=opus' });
-              
+              console.log("Audio blob created:", audioBlob);
   
               // Check if the audio blob contains any significant sound
               const wavBlob = await convertToWav(audioBlob);
               if (!wavBlob) {
-                
+                console.log("No significant audio detected. Skipping API call.");
                 return; // Skip if no meaningful audio
               }
               setIsFetchingData(true);
@@ -2047,7 +1803,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if (mediaRecorder) {
       mediaRecorder.stop(); // Stop the recording
       setHasStartedRecording(false);
-      
+      console.log("Stopping recording...");
     }
   };
 
@@ -2062,7 +1818,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if(!current_company){
       current_company = cookies.get('company');
     }
-    
+    console.log("Parent Story Data: ", storyData);
 
     return (
       <>
@@ -2087,25 +1843,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     ResetChat(e);
   }
 
-  function handleAcceptTnC() {
-    
-    localStorage.setItem('has_accepted_tnc', true)
-    setAcceptedTnC(true);
-  }
-
-  function handleDeclineTnC() {
-    
-    localStorage.setItem('has_accepted_tnc', false)
-    setAcceptedTnC(false);
-    // navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
-    navigate(-1)
-  }
-
   return (
     <>
-      {(acceptedTnc==="ONGOING" && !isLoading)&& <PrivacyPolicyPage tncText={privacyPolicyText} onAccept={handleAcceptTnC} onDecline={handleDeclineTnC} />}
-      <></>
-      <div className={`div27 ${isOpen&& ' div70'} ${(projectId)&& ' div21'}`}>
+      <div className={`div27 ${isOpen&& ' div70'}`}>
         <div className={`div28 ${isOpen ? "div29" : ""}`}>
           {(isShikshalokamPublicType)&& <Sidebar
             isOpen={isOpen}
@@ -2168,35 +1908,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
         </div>
       </div> }
-      <div className={`${projectId? 'div72' : isOpen? 'div71': ''}`}>
-       {(projectId)&& 
-        <>
-            <button
-              onClick={(e) => {
-                if (projectId){
-                  clearFromStorage()
-                  navigate(-1)
-                  // window.location.href=ROUTES.EXIT_ROUTE;
-
-                }
-              }}
-              className="button-13"
-            >
-              <div
-              >
-                {
-                  isnt_english?
-                  'मैं इसे बाद में करूंगा':
-                  'I will do it later'
-                }
-                
-              </div>
-            </button>
-          </>
-        }
+      <div className={`${isOpen&& ' div71'}`}>
         <HiddenRecorder />
         <div
-          className={`${projectId? 'div33-a': 'div33'} div9`}
+          className="div33 div9"
         >
           {(!showHomepage)&&
             <ul className="div34">
@@ -2243,18 +1958,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
           {(showHomepage)&&
             <>
-              {(localStorage.getItem('flow'))&&<>
-                <div className="div10" >
-                  <h3 className="h3-1">
-                    Micro Improvement Report<br />with Mohini!
-                  </h3>
-                </div>
-                <ul className="div11" >
-                  <li>Start chatting with Mohini below</li>
-                  <li>Add photos to your report</li>
-                  <li>Download your report</li>
-                </ul>
-              </>}
+              <div className="div10" >
+                <h3 className="h3-1">
+                  Micro Improvement Report<br />with Mitra!
+                </h3>
+              </div>
+              <ul className="div11" >
+                <li>Start chatting with Mitra below</li>
+                <li>Add photos to your report</li>
+                <li>Download your report</li>
+              </ul>
 
               {chatHistory?.length > 0 && (
                 <div className="div26">
@@ -2310,25 +2023,20 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <div className="div14">
                   <label className="clickable-label" htmlFor="file-upload">
                     <GrGallery className="icon-1" />
-                    <span className="div16">{
-                      isnt_english?
-                      'फोटो अपलोड करें':
-                      'Upload Photos'
-                    }
-                    </span>
+                    <span className="div16">Upload Photos</span>
                     <input 
                       id="file-upload"
                       type="file" 
-                      accept="image/*,image/svg+xml" 
+                      accept="image/*" 
                       multiple
                       onChange={handleFileUpload} 
-                      // onClick={(e) => {
-                      //   if (files?.length >= 5) {
-                      //     setFileErrorText(fileExceedText);
-                      //   } else {
-                      //     setFileErrorText('');
-                      //   }
-                      // }}
+                      onClick={(e) => {
+                        if (files?.length >= 5) {
+                          setFileErrorText(fileExceedText);
+                        } else {
+                          setFileErrorText('');
+                        }
+                      }}
                       disabled={isLoading || (fileErrorText !== '' && fileErrorText !== fileSizeText && fileErrorText === fileExceedText)}
                       className="div17"
                     />
@@ -2346,8 +2054,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                       )}
                       {files.map((file, index) => (
                         <li key={index} className="li-2">
-                          {file.name.slice(0, 20)}
-                          {file.name.length > 20 && '...'} 
+                          {file.name}
                           <button 
                             className="button-1" 
                             onClick={() => partialUpdateMedia(file?.id)}
@@ -2386,31 +2093,20 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   chatId={"download-story-id"}
                   isStaticMessage={true}
                 />
-                {(!projectId)&& <div className="div20">
+                <div className="div20">
                   <button
                     className="clickable-button"
-                    onClick={()=>{
-                      const sessionToUse = JSON.parse(localStorage.getItem('sessionid'));
-                      if (sessionToUse) {
-                        pdfDownloadSidebar(sessionToUse);
-                      }
-                    }}
+                    onClick={handleDownloadClick}
                     disabled={isLoading || isPdfDownloading}
                   >
                     <div className="download-story-div">
                       <FiDownload className="icon-1" />
-                      <span className="div16" ref={endPageToScrollRef}>
-                      {
-                        isnt_english?
-                        'कहानी डाउनलोड करें':
-                        'Download Story'
-                      }
-                      </span>
+                      <span className="div16" ref={endPageToScrollRef}>Download Story</span>
                     </div>
                   </button>
 
-                  {triggerDownload && isPdfDownloading && !isLoading && downloadPdf()}
-                </div>}
+                  {triggerDownload && isPdfDownloading && isLoading && downloadPdf()}
+                </div>
                 <div className="div20">
                   <button
                     className="clickable-button"
@@ -2419,13 +2115,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   >
                     <div className="download-story-div">
                       <MdEdit className="icon-1" />
-                      <span className="div16" ref={endPageToScrollRef}>
-                      {
-                        isnt_english?
-                        'कहानी संपादित करें':
-                        'Edit Story'
-                      }
-                      </span>
+                      <span className="div16" ref={endPageToScrollRef}>Edit Story</span>
                     </div>
                   </button>
                 </div>
@@ -2434,7 +2124,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     progressBarClass="w-[273px] progress-div-download"
                   />} */}
               </div>
-              {(isModalOpen && storyData )&& handleEditClick()}
+              {isModalOpen && storyData && handleEditClick()}
             </>
           )}
           <div id="last-chat-boundary" className="div38" />
@@ -2508,7 +2198,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 >
                   
                   {hasStartedRecording ? <FaMicrophone /> : <FaMicrophone />}
-                </button>                
+                </button>
+                {transcript && console.log("TRANSCRIPT: ", transcript)}
+                
               </div>
             )}
           </form>
@@ -2653,16 +2345,3 @@ export const LoadingChat = () => (
   </div>
 );
 /* eslint-disable react-hooks/exhaustive-deps */
-
-
-export function clearFromStorage() {
-  const keysToRemove = [
-    'botName', 'chat-history', 'company', 'first_name', 'has_accepted_tnc', 'intro_message', 
-    'isChatVisible', 'isNewChatOpen', 'isOldChatOpen', 'profileid', 'route', 'sessionid', 'showFileInput', 
-    'showHomepage', 'state'
-  ];
-
-  keysToRemove.forEach((key) => {
-    localStorage.removeItem(key);
-  });
-}

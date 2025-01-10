@@ -21,12 +21,6 @@ export const lang_codes = {
   enus: "en-US"
 };
 
-
-export const lang_routes = {
-  en: "/",
-  hi: "/hindi",
-};
-
 export const company_list = {
   shikshalokam: "shikshalokam",
 };
@@ -68,7 +62,7 @@ let init_config = {
   company_subdomain: "",
   company_name: "",
   preferredLanguage: lang_codes.en,
-  collab_logo: 'https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png',
+  collab_logo: './images/shikshagrahaLogo.png',
   allowed_languages: [lang_codes.en]
 };
 
@@ -82,12 +76,12 @@ const getConfiguration = () => {
       case "":
         return {
           ...init_config,
-          company_logo: 'https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png',
+          company_logo: './images/shikshagrahaLogo.png',
           after_login_url: ROUTES.STORY_LIST,
           websocket_url: "demo",
           company_subdomain: company_list.demo,
           company_name: "Demo",
-          collab_logo: '/images/shikshalokam_logo_pdf.png',
+          collab_logo: '/images/shikshagrahaLogo.png',
           host: company_host_list.demo,
           reroute: company_reroute_list.demo,
           register_url: company_register_list.demo,

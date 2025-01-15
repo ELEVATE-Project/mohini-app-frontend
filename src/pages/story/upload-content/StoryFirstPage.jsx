@@ -20,8 +20,8 @@ function StoryFirstPage(props){
                     <p className="story-school-fmt1">{props.schoolName}</p>
                     <img src="/images/nagaland_govt_logo.png" className="story-logo-fmt1" alt="pdf_bg1"></img>
                     <img src="/images/nagaland_samagra_logo.png" className="story-logo1-fmt1" alt="pdf_bg1"></img>
-                    <img src="/images/shikshalokam_logo_pdf.png" className="story-logo2-fmt1" alt="pdf_bg1"></img>
-                    <img src="/images/shikshalokam_logo_pdf.png" className="story-logo3-fmt1" alt="pdf_bg1"></img>
+                    <img src="/images/shikshagrahaLogo.png" className="story-logo2-fmt1" alt="pdf_bg1"></img>
+                    <img src="/images/shikshagrahaLogo.png" className="story-logo3-fmt1" alt="pdf_bg1"></img>
                 </div>
             </div>
             :
@@ -36,8 +36,8 @@ function StoryFirstPage(props){
                     {
                         (props.currentState === stateLabelArray[2]?.state) ?
                         <>
-                            <img src='/images/shikshalokam_logo_pdf.png' className="story-company-logo1" alt="company_logo" />
-                            <img src='/images/shikshalokam_logo_pdf.png' className="story-shikshalokam-logo" alt="company_logo" />
+                            <img src='/images/shikshagrahaLogo.png' className="story-company-logo1" alt="company_logo" />
+                            <img src='/images/shikshagrahaLogo.png' className="story-shikshalokam-logo" alt="company_logo" />
                             <img src='/images/Govt_of_Haryana-Logo.png' className="story-govt-logo" alt="Govt_of_Haryana-Logo" />
                             <img src='/images/SCERT_Haryana-Logo.png' className="story-haryana-logo" alt="SCERT_Haryana-Logo.png" />
                         </> :

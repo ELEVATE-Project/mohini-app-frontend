@@ -12,7 +12,7 @@ export const modelLabel = {
 
  export const selectedLabel = {
     types: [
-        {label:'Normal', value:'normal'}, 
-        {label:'Oneshot', value:'oneshot'}, 
+        {label:'Guided Reflection', value:'normal'}, 
+        {label:'One-Step Reflection ', value:'oneshot'}, 
     ]
  }; 

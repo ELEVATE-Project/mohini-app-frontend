@@ -16,3 +16,9 @@ export const modelLabel = {
         {label:'One-Step Reflection ', value:'oneshot'}, 
     ]
  }; 
+
+ export const languageList = [
+    {label:'English', value:'en'},
+    {label:'Hindi', value:'hi'},
+    {label:'Kannada', value:'kn'}
+];

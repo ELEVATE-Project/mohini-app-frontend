@@ -47,7 +47,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ROUTES from "../../url";
 import PrivacyPolicyPage from "../../components/TnC/privacyPolicy";
 import { getPrivacyPolicyText } from "./privacy_policy_text";
-import { getComfirmButtonTranslation, getConfirmChanges, getDenyButtonTranslation, getDoLaterTranslation, getDownloadLoaderTranslation, getDownloadStoryTextTranslation, getEditStoryTextTranslation, getEvidenceTranslation, getHomepageHeading1Translation, getHomepageHeadingTranslation, getHomepageList1Translation, getHomepageList2Translation, getHomepageListTranslation, getPlaceholder1Translation, getPlaceholder2Translation, getPlaceholder3Translation, getPopUpChanges, getStoryLoaderTranslation, getStoryTextTranslation, getUploadTranslation } from "./static_language";
+import { useTranslation } from "react-i18next";
 
 
 const cookies = new Cookies();
@@ -153,6 +153,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
   const [stateMachineLength, setStateMachineLength] = useState(localStorage.getItem('statemachine_length') || 0);
 
+  const { t } = useTranslation();
+
   const privacyPolicyText = getPrivacyPolicyText();
   const endPageToScrollRef = useRef(null);
 
@@ -238,6 +240,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const language = preferredLanguage.value || 'en';
           localStorage.setItem('route', JSON.stringify(language || "en"));
           setLanguageToUse(JSON.stringify(language || "en"));
+          console.log('setting lang: ', language)
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
@@ -554,7 +557,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               }}
               disabled={isLoading || isSaving}
             >
-              {getConfirmChanges(languageToUse)}
+              {t('confirmChanges')}
+
             </PrimaryButton>
             </div>
           </div>
@@ -645,6 +649,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       url = `${wss_protocol}${window.location.host}/ws/chat/company/`;
     } else {
       if (selectedType === 'normal') {
+        console.log('flow: ', localStorage.getItem('flow'))
         if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
           url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_new/`;
         } else {
@@ -753,6 +758,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
     socket.onclose = (event) => {
       console.log("closed ", strandStep, isResetCalled)
+      console.log("event ", event)
       if(!isResetCalled){
         showConfirmationPopup()
       }
@@ -773,11 +779,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   function showConfirmationPopup() {
     <div className="div-popup">
     {Swal.fire({
-      title: getPopUpChanges(languageToUse),
+      title: t('popUpChanges'),
       // icon: 'question',
       showCancelButton: true,
-      confirmButtonText: getComfirmButtonTranslation(languageToUse),
-      cancelButtonText: getDenyButtonTranslation(languageToUse),
+      // confirmButtonText: getComfirmButtonTranslation(languageToUse),
+      confirmButtonText: t('confirmChanges'),
+      cancelButtonText: t('denyButton'),
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload();
@@ -2128,12 +2135,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           <BiLoader className="loader-rotate-loader loader-icon" />
           {isPdfDownloading&& 
             <div className="div68">
-              <label className="form-label label1">{getDownloadLoaderTranslation(languageToUse)}</label>
+              <label className="form-label label1">{t('downloadLoader')}</label>
             </div>
           }
           {isEndStoryLoading&& 
             <div className="div69">
-              <label className="form-label label1">{getStoryLoaderTranslation(languageToUse)}</label>
+              <label className="form-label label1">{t('storyLoader')}</label>
             </div>
           }
         </div>
@@ -2154,7 +2161,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             >
               <div
               >
-                {getDoLaterTranslation(languageToUse)}
+                {t('doLater')}
               </div>
             </button>
           </>
@@ -2211,15 +2218,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               {(localStorage.getItem('flow'))&&<>
                 <div className="div10" >
                   <h3 className="h3-1">
-                    {getHomepageHeadingTranslation(languageToUse)}
+                    {t('homepageHeading')}
                     <br/>
-                    {getHomepageHeading1Translation(languageToUse)}
+                    {t('homepageHeading1')}
                   </h3>
                 </div>
                 <ul className="div11" >
-                  <li>{getHomepageListTranslation(languageToUse)}</li>
-                  <li>{getHomepageList1Translation(languageToUse)}</li>
-                  <li>{getHomepageList2Translation(languageToUse)}</li>
+                  <li>{t('homepageList')}</li>
+                  <li>{t('homepageList1')}</li>
+                  <li>{t('homepageList2')}</li>
                 </ul>
               </>}
 
@@ -2257,12 +2264,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message={getEvidenceTranslation(languageToUse)}
+                  message={t('evidence')}
                   // message="क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?"
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    const message_to_use = getEvidenceTranslation(languageToUse)
+                    const message_to_use = t('evidence')
                     handleOnSpeaking(message_to_use, "upload-img-id",
                       {msg: message_to_use, updated_at: "upload-img-id", source:"bot"}
                     )}
@@ -2278,7 +2285,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   <label className="clickable-label" htmlFor="file-upload">
                     <GrGallery className="icon-1" />
                     <span className="div16">
-                      {getUploadTranslation(languageToUse)}
+                      {t('upload')}
                     </span>
                     <input 
                       id="file-upload"
@@ -2334,11 +2341,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message={getStoryTextTranslation(languageToUse)}
+                  message={t('storyText')}
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    const message_to_use = getStoryTextTranslation(languageToUse)
+                    const message_to_use = t('storyText')
                     handleOnSpeaking(message_to_use, "download-story-id",
                       {msg: message_to_use, updated_at: "download-story-id", source:"bot"}
                     )}
@@ -2364,7 +2371,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     <div className="download-story-div">
                       <FiDownload className="icon-1" />
                       <span className="div16" ref={endPageToScrollRef}>
-                      {getDownloadStoryTextTranslation(languageToUse)}
+                      {t('downloadStoryText')}
                       </span>
                     </div>
                   </button>
@@ -2380,7 +2387,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     <div className="download-story-div">
                       <MdEdit className="icon-1" />
                       <span className="div16" ref={endPageToScrollRef}>
-                      {getEditStoryTextTranslation(languageToUse)}
+                      {t('editStoryText')}
                       </span>
                     </div>
                   </button>
@@ -2408,8 +2415,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 className="input-2 input-1"
                 onChange={handleOnInputText}
                 placeholder={hasStartedRecording? 
-                  getPlaceholder1Translation(languageToUse): 
-                  isFetchingData? getPlaceholder2Translation(languageToUse): getPlaceholder3Translation(languageToUse)
+                  t('placeholder1'): 
+                  isFetchingData? t('placeholder2'): t('placeholder3')
                 }
                 name="message-box"
                 value={textMessage}

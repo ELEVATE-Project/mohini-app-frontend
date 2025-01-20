@@ -6,13 +6,15 @@ import ROUTES from "../../url";
 import { FiPlus } from "react-icons/fi";
 import { FaArrowLeft, FaPowerOff } from "react-icons/fa6";
 import "./shikshaChatStyle.css"
-import { getAllMicroImprovementTranslation, getNewChatTranslation } from "./static_language";
+import { useTranslation } from "react-i18next";
+
 
 const Sidebar = ({ 
   isOpen, toggle, isMobileFirst=false, showLogout=true, showScrollbarContent, resetChat, setIsResetCalled, languageToUse 
 }) => {
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   function handleLogout(){
     navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
@@ -37,7 +39,7 @@ const Sidebar = ({
             <>
               <div className="div23">
                 <div className="div65 div24">
-                  <p>{getAllMicroImprovementTranslation(languageToUse)}</p>
+                  <p>{t('allMicroImprovement')}</p>
                 </div>
                 <div className="div65">
                   <button 
@@ -47,7 +49,7 @@ const Sidebar = ({
                       resetChat(e)
                     }}
                   >
-                    <FiPlus className="icon-2" /> {getNewChatTranslation(languageToUse)}
+                    <FiPlus className="icon-2" /> {t('newChat')}
                   </button>
                 </div>
               </div>

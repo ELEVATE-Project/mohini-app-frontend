@@ -47,13 +47,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ROUTES from "../../url";
 import PrivacyPolicyPage from "../../components/TnC/privacyPolicy";
 import { getPrivacyPolicyText } from "./privacy_policy_text";
+import { getComfirmButtonTranslation, getConfirmChanges, getDenyButtonTranslation, getDoLaterTranslation, getDownloadLoaderTranslation, getDownloadStoryTextTranslation, getEditStoryTextTranslation, getEvidenceTranslation, getHomepageHeading1Translation, getHomepageHeadingTranslation, getHomepageList1Translation, getHomepageList2Translation, getHomepageListTranslation, getPlaceholder1Translation, getPlaceholder2Translation, getPlaceholder3Translation, getPopUpChanges, getStoryLoaderTranslation, getStoryTextTranslation, getUploadTranslation } from "./static_language";
 
 
 const cookies = new Cookies();
 const company_bot_list_url = `/api/companybot/`;
 
 const current_company_config = getConfiguration();
-let isnt_english = false;
 
 const wss_protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 
@@ -176,6 +176,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   const projectId = searchParams.get("projectId");
 
+  const [languageToUse, setLanguageToUse] = useState(JSON.parse(localStorage.getItem("route")) || "en");
+
+
   let params = new URL(document.location).searchParams;
   const code = params.get("code");
   const {
@@ -197,16 +200,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     
     setIsModalOpen(true);
   };
-
-  useEffect(()=>{
-    if(!projectId) return
-    const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language'));
-    if(!preferredLanguage) return;
-    const language = preferredLanguage.value || 'en';
-    isnt_english = !(language === 'en');
-    
-    
-  }, [projectId])
 
   useEffect(()=>{
     
@@ -243,8 +236,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       }
           const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language') || '{}');
           const language = preferredLanguage.value || 'en';
-          
           localStorage.setItem('route', JSON.stringify(language || "en"));
+          setLanguageToUse(JSON.stringify(language || "en"));
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
@@ -343,7 +336,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const sessionid = JSON.parse(localStorage.getItem('sessionid'));
           const end_story_api_url = `/api/end-story/`;
           
-          let sourceLanguage = JSON.parse(localStorage.getItem('preferred_language'))?.value || JSON.parse(localStorage.getItem('route'));
+          let sourceLanguage = JSON.parse(localStorage.getItem('preferred_language'))?.value || languageToUse;
   
           const endStoryResponse = await axiosInstance({
             url: end_story_api_url,
@@ -383,7 +376,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength) {
       callEndStory();
     }
-  }, [isStreamingComplete, strandStep, access_token, stateMachineLength]);
+  }, [isStreamingComplete, strandStep, access_token, stateMachineLength, languageToUse]);
     useEffect(()=>{
     let profileid = cookies.get('profileid') || localStorage.getItem('profileid')
     if(!profileid && !access_token) window.location.href=ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN;
@@ -561,11 +554,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               }}
               disabled={isLoading || isSaving}
             >
-              {
-                isnt_english?
-                'परिवर्तन पुष्टि करें':
-                'Confirm Changes'
-              }
+              {getConfirmChanges(languageToUse)}
             </PrimaryButton>
             </div>
           </div>
@@ -656,7 +645,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       url = `${wss_protocol}${window.location.host}/ws/chat/company/`;
     } else {
       if (selectedType === 'normal') {
-        console.log('flow: ', localStorage.getItem('flow'))
         if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
           url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_new/`;
         } else {
@@ -748,7 +736,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       console.log('websocket open')
       setChatSocket(socket);
       let sessionid = JSON.parse(localStorage.getItem('sessionid'))
-      let route = JSON.parse(localStorage.getItem('route'))
+      let route = languageToUse
       let tempProfId = localStorage.getItem('profileid')
       
       if(tempProfId && sessionid){
@@ -765,7 +753,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
     socket.onclose = (event) => {
       console.log("closed ", strandStep, isResetCalled)
-      console.log("event ", event)
       if(!isResetCalled){
         showConfirmationPopup()
       }
@@ -786,22 +773,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   function showConfirmationPopup() {
     <div className="div-popup">
     {Swal.fire({
-      title: isnt_english?
-      `
-      <div class='text-class'>
-        आप कुछ समय से निष्क्रिय हैं।  
-        क्या आप जारी रखना चाहते हैं?
-      </div>
-      `:
-      `<div class='text-class'>
-        You've been inactive for a while.
-        Do you want to continue?
-      </div>
-      `,
+      title: getPopUpChanges(languageToUse),
       // icon: 'question',
       showCancelButton: true,
-      confirmButtonText: isnt_english? 'हाँ':'Yes',
-      cancelButtonText: isnt_english? "नहीं":'No',
+      confirmButtonText: getComfirmButtonTranslation(languageToUse),
+      cancelButtonText: getDenyButtonTranslation(languageToUse),
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload();
@@ -1026,17 +1002,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function getTranslatedIntroMessage(message){
     let translate_api_url = 'api/ai4bharat/translate';
-    let targetLanguage = 'en';
     try {
-      let temp_route = JSON.parse(localStorage.getItem('route')) || 'en';
-      if (temp_route === 'hi'){
-        targetLanguage = 'en'
-      }
-      
       const response = await axiosInstance.post(translate_api_url, {
         message_body: message,
         source_language: 'hi',
-        target_language: targetLanguage,
+        target_language: languageToUse,
       });
       
       // Return the audio content
@@ -1089,11 +1059,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
        
         if (!shouldFetchIntro || chatHistory?.length) return;
   
-        let isTestimonial = cookies.get('route');
-        if (isShikshalokamPublicType) {
-          isTestimonial = JSON.parse(localStorage.getItem('route'));
-        }
-        if (isTestimonial && bots && bots.length > 0) {
+        if (languageToUse && bots && bots.length > 0) {
           let latestBot;
           for (const bot of bots) {
             if(isShikshalokamPublicType){
@@ -1128,7 +1094,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             message = words.join(' ');
           }
           
-          if (isTestimonial !== 'hi'){
+          if (languageToUse !== 'hi'){
             message = await getTranslatedIntroMessage(message)
           }
           if (message && !!message?.trim() && (chatHistory[chatHistory?.length - 1]?.msg !== message)) {
@@ -1164,6 +1130,9 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       } catch (error) {
         console.error({ error });
       }
+      finally {
+        window.location.reload();
+      }
     };
     
     
@@ -1176,7 +1145,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
     
     return () => {};
-  }, [access_token, shouldFetchIntro, profileToUse]);
+  }, [access_token, shouldFetchIntro, profileToUse, languageToUse]);
 
   useEffect(()=>{
     
@@ -1765,7 +1734,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   async function ai4BharatASR(base64, gender = 'female'){
     
-    let sourceLanguage = JSON.parse(localStorage.getItem('route'));
+    let sourceLanguage = languageToUse;
     try {
       const response = await axiosInstance.post('/api/ai4bharat/asr', {
         base_64: base64,
@@ -1787,7 +1756,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   useEffect(() => {
     let unnarratedMessages = sentences.filter((x) => !x?.isNarrated);
     let hasUnnarratedMessages = !!unnarratedMessages?.length;
-    let sourceLanguage = JSON.parse(localStorage.getItem('route')) || 'en';
+    let sourceLanguage = languageToUse;
 
     if (isNextAllowed && hasUnnarratedMessages) {
       handleAI4BharatTTSRequest(
@@ -1798,7 +1767,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     }
 
     return () => {};
-  }, [isNextAllowed, sentences]);
+  }, [isNextAllowed, sentences, languageToUse]);
 
   useEffect(() => {
     if (
@@ -2114,6 +2083,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             showScrollbarContent={showScrollbarContent}
             resetChat={ResetChat}
             setIsResetCalled={setIsResetCalled}
+            languageToUse={languageToUse}
           />}
         </div>
         {isOpen && (
@@ -2158,12 +2128,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           <BiLoader className="loader-rotate-loader loader-icon" />
           {isPdfDownloading&& 
             <div className="div68">
-              <label className="form-label label1">Downloading please wait...</label>
+              <label className="form-label label1">{getDownloadLoaderTranslation(languageToUse)}</label>
             </div>
           }
           {isEndStoryLoading&& 
             <div className="div69">
-              <label className="form-label label1">Creating your story, this may take a moment. Please wait...</label>
+              <label className="form-label label1">{getStoryLoaderTranslation(languageToUse)}</label>
             </div>
           }
         </div>
@@ -2184,12 +2154,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             >
               <div
               >
-                {
-                  isnt_english?
-                  'मैं इसे बाद में करूंगा':
-                  'I will do it later'
-                }
-                
+                {getDoLaterTranslation(languageToUse)}
               </div>
             </button>
           </>
@@ -2246,13 +2211,15 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               {(localStorage.getItem('flow'))&&<>
                 <div className="div10" >
                   <h3 className="h3-1">
-                    Micro Improvement Report<br />with Mohini!
+                    {getHomepageHeadingTranslation(languageToUse)}
+                    <br/>
+                    {getHomepageHeading1Translation(languageToUse)}
                   </h3>
                 </div>
                 <ul className="div11" >
-                  <li>Start chatting with Mohini below</li>
-                  <li>Add photos to your report</li>
-                  <li>Download your report</li>
+                  <li>{getHomepageListTranslation(languageToUse)}</li>
+                  <li>{getHomepageList1Translation(languageToUse)}</li>
+                  <li>{getHomepageList2Translation(languageToUse)}</li>
                 </ul>
               </>}
 
@@ -2290,12 +2257,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message={isnt_english? "क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?" : "Would you like to add evidences to the project?"}
+                  message={getEvidenceTranslation(languageToUse)}
                   // message="क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?"
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    const message_to_use = isnt_english? "क्या आप परियोजना में साक्ष्य जोड़ना चाहेंगे?" : "Would you like to add evidences to the project?"
+                    const message_to_use = getEvidenceTranslation(languageToUse)
                     handleOnSpeaking(message_to_use, "upload-img-id",
                       {msg: message_to_use, updated_at: "upload-img-id", source:"bot"}
                     )}
@@ -2310,11 +2277,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <div className="div14">
                   <label className="clickable-label" htmlFor="file-upload">
                     <GrGallery className="icon-1" />
-                    <span className="div16">{
-                      isnt_english?
-                      'फोटो अपलोड करें':
-                      'Upload Photos'
-                    }
+                    <span className="div16">
+                      {getUploadTranslation(languageToUse)}
                     </span>
                     <input 
                       id="file-upload"
@@ -2370,11 +2334,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                 <ChatMessage 
                   botNameToDisplay={botNameToDisplay}
                   userType="bot"
-                  message={isnt_english? "ये है आपकी इम्प्रूवमेंट स्टोरी" : "Here is your improvement story"}
+                  message={getStoryTextTranslation(languageToUse)}
                   isTalking={false}
                   handleOnStopSpeaking={() => handleOnStopSpeaking()}
                   handleOnSpeaking={(message, updatedAt, staticMessage) =>{
-                    const message_to_use = isnt_english? "ये है आपकी इम्प्रूवमेंट स्टोरी" : "Here is your improvement story"
+                    const message_to_use = getStoryTextTranslation(languageToUse)
                     handleOnSpeaking(message_to_use, "download-story-id",
                       {msg: message_to_use, updated_at: "download-story-id", source:"bot"}
                     )}
@@ -2400,11 +2364,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     <div className="download-story-div">
                       <FiDownload className="icon-1" />
                       <span className="div16" ref={endPageToScrollRef}>
-                      {
-                        isnt_english?
-                        'कहानी डाउनलोड करें':
-                        'Download Story'
-                      }
+                      {getDownloadStoryTextTranslation(languageToUse)}
                       </span>
                     </div>
                   </button>
@@ -2420,11 +2380,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     <div className="download-story-div">
                       <MdEdit className="icon-1" />
                       <span className="div16" ref={endPageToScrollRef}>
-                      {
-                        isnt_english?
-                        'कहानी संपादित करें':
-                        'Edit Story'
-                      }
+                      {getEditStoryTextTranslation(languageToUse)}
                       </span>
                     </div>
                   </button>
@@ -2451,7 +2407,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
               <textarea
                 className="input-2 input-1"
                 onChange={handleOnInputText}
-                placeholder={hasStartedRecording? "Listening... Speak now": isFetchingData? "Processing speech... Please wait": "Type your message"}
+                placeholder={hasStartedRecording? 
+                  getPlaceholder1Translation(languageToUse): 
+                  isFetchingData? getPlaceholder2Translation(languageToUse): getPlaceholder3Translation(languageToUse)
+                }
                 name="message-box"
                 value={textMessage}
                 autoFocus={true}

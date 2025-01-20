@@ -6,8 +6,11 @@ import ROUTES from "../../url";
 import { FiPlus } from "react-icons/fi";
 import { FaArrowLeft, FaPowerOff } from "react-icons/fa6";
 import "./shikshaChatStyle.css"
+import { getAllMicroImprovementTranslation, getNewChatTranslation } from "./static_language";
 
-const Sidebar = ({ isOpen, toggle, isMobileFirst=false, showLogout=true, showScrollbarContent, resetChat, setIsResetCalled }) => {
+const Sidebar = ({ 
+  isOpen, toggle, isMobileFirst=false, showLogout=true, showScrollbarContent, resetChat, setIsResetCalled, languageToUse 
+}) => {
 
   const navigate = useNavigate();
 
@@ -34,7 +37,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst=false, showLogout=true, showScr
             <>
               <div className="div23">
                 <div className="div65 div24">
-                  <p>All Micro Improvements</p>
+                  <p>{getAllMicroImprovementTranslation(languageToUse)}</p>
                 </div>
                 <div className="div65">
                   <button 
@@ -44,7 +47,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst=false, showLogout=true, showScr
                       resetChat(e)
                     }}
                   >
-                    <FiPlus className="icon-2" /> New chat
+                    <FiPlus className="icon-2" /> {getNewChatTranslation(languageToUse)}
                   </button>
                 </div>
               </div>

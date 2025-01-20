@@ -17,6 +17,7 @@ import {
 import { BiLoader } from "react-icons/bi";
 import "./custom-style.css"
 import "../index.css"
+import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 
 const cookies = new Cookies();
 const login_api_url = `/api/login/`;
@@ -307,9 +308,7 @@ function Login({ type, variant }) {
                     inputValue = {emailId}
                   />
                   <FormData layOut={2} labelName="language" id="languageID" selectID="languageID" selectName="language"
-                    selectOptions={[{label:'English', value:'en'}
-                    ,{label:'Hindi', value:'hi'}
-                  ]}  
+                    selectOptions={languageList}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     selectValue = {userLanguage}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"

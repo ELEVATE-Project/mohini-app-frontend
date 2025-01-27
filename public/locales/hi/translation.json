@@ -26,6 +26,8 @@
     "tncDecline": "अस्वीकार करें",
     "guidedReflection": "निर्देशित प्रतिबिंब",
     "oneStepReflection": "एक कदम प्रतिबिंब",
-    "logout": "लॉगआउट"
+    "logout": "लॉगआउट",
+    "chooseAnOption": "एक विकल्प चुनें",
+    "cancel": "रद्द करें"
 
 }

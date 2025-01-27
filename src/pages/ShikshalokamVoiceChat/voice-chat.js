@@ -42,11 +42,9 @@ import "./shikshaChatStyle.css"
 import Swal from 'sweetalert2';
 import { PrimaryButton } from "../../components/Buttons";
 import { IoClose } from "react-icons/io5";
-import { selectedLabel } from "./enum";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ROUTES from "../../url";
 import PrivacyPolicyPage from "../../components/TnC/privacyPolicy";
-import { getPrivacyPolicyText } from "./privacy_policy_text";
 import { useTranslation } from "react-i18next";
 
 
@@ -150,12 +148,19 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [shouldSendMessage, ] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [acceptedTnc, setAcceptedTnC] = useState(localStorage.getItem('has_accepted_tnc')|| 'ONGOING');
-  const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
   const [stateMachineLength, setStateMachineLength] = useState(localStorage.getItem('statemachine_length') || 0);
 
   const { t } = useTranslation();
 
-  const privacyPolicyText = getPrivacyPolicyText();
+  const selectedLabel = {
+    types: [
+      {label:t('guidedReflection'), value:'normal'}, 
+      {label:t('oneStepReflection'), value:'oneshot'}, 
+    ]
+ }; 
+
+ const selectedType = JSON.parse(localStorage.getItem('selected_type')) || selectedLabel.types[0].value;
+
   const endPageToScrollRef = useRef(null);
 
   const [error, setError] = useState({
@@ -2079,7 +2084,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   return (
     <>
-      {(acceptedTnc==="ONGOING" && !isLoading)&& <PrivacyPolicyPage tncText={privacyPolicyText} onAccept={handleAcceptTnC} onDecline={handleDeclineTnC} />}
+      {(acceptedTnc==="ONGOING" && !isLoading)&& <PrivacyPolicyPage tncText={t('tncText')} onAccept={handleAcceptTnC} onDecline={handleDeclineTnC} />}
       <></>
       <div className={`div27 ${isOpen&& ' div70'} ${(projectId)&& ' div21'}`}>
         <div className={`div28 ${isOpen ? "div29" : ""}`}>

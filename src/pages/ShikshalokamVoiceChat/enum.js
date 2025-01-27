@@ -10,13 +10,6 @@ export const modelLabel = {
     ]
  }; 
 
- export const selectedLabel = {
-    types: [
-        {label:'Guided Reflection', value:'normal'}, 
-        {label:'One-Step Reflection ', value:'oneshot'}, 
-    ]
- }; 
-
  export const languageList = [
     {label:'English', value:'en'},
     {label:'Hindi', value:'hi'},

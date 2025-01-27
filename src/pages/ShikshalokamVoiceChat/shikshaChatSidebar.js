@@ -63,7 +63,7 @@ const Sidebar = ({
             <button className="button-5"
               onClick={handleLogout}
             >
-              <FaPowerOff className="icon-6 icon-2" /> Logout
+              <FaPowerOff className="icon-6 icon-2" /> {t('logout')}
             </button>
           </div>
         )}

@@ -26,5 +26,7 @@
     "tncDecline": "Decline",
     "guidedReflection": "Guided Reflection",
     "oneStepReflection": "One-Step Reflection",
-    "logout": "Logout"
+    "logout": "Logout",
+    "chooseAnOption": "Choose an option",
+    "cancel": "Cancel"
 }

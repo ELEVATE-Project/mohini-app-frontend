@@ -2467,7 +2467,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                     }}
                     className="div40"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                 )}
 

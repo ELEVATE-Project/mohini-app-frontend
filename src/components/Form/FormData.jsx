@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 function FormData({selectOptions, selectClassName, selectName, selectOnChange, selectID, selectValue, inputDivClass, isRequired, inputType, inputName, id,
     inputClass, inputOnChange, inputValue, labelDivClass, labelClass, labelName, layOut, isimportant, isMultiple, showWithinInput=false,
@@ -7,6 +8,14 @@ function FormData({selectOptions, selectClassName, selectName, selectOnChange, s
     let optionArr = selectOptions;
     let multipleValue = false;
     if(isMultiple === 'true') multipleValue = true;
+
+    const { t } = useTranslation();
+    let defaultText = 'Choose an option'
+
+    if (t('chooseAnOption')) {
+        defaultText = t('chooseAnOption')
+    }
+    
     function showDropDown(){
         if(optionArr === undefined || optionArr === null) optionArr = []; 
         return(
@@ -20,7 +29,7 @@ function FormData({selectOptions, selectClassName, selectName, selectOnChange, s
                   value={selectValue}
                   multiple={multipleValue}
                 >
-                    <option value="">Choose an option</option>
+                    <option value="">{defaultText}</option>
                     {(optionArr).map((option) => {
                         return (
                             <option key={option.value} value={option.value}>

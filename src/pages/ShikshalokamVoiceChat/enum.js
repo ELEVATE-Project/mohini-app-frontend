@@ -10,9 +10,8 @@ export const modelLabel = {
     ]
  }; 
 
- export const selectedLabel = {
-    types: [
-        {label:'Normal', value:'normal'}, 
-        {label:'Oneshot', value:'oneshot'}, 
-    ]
- }; 
+ export const languageList = [
+    {label:'English', value:'en'},
+    {label:'Hindi', value:'hi'},
+    {label:'Kannada', value:'kn'}
+];

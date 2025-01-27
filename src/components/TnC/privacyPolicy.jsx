@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from "rehype-raw";
 
 import "./privacyPolicyStyle.css";
+import { useTranslation } from "react-i18next";
 
 
 const PrivacyPolicyPage = ({ tncText, onAccept, onDecline }) => {
@@ -18,6 +19,7 @@ const PrivacyPolicyPage = ({ tncText, onAccept, onDecline }) => {
     };
   }, []);
   
+  const { t } = useTranslation();
 
   return (
     <>
@@ -31,10 +33,10 @@ const PrivacyPolicyPage = ({ tncText, onAccept, onDecline }) => {
             </div>
             <div className="tnc-buttons">
                 <button className="tnc-button accept" onClick={onAccept}>
-                Accept
+                  {t('tncConfirm')}
                 </button>
                 <button className="tnc-button decline" onClick={onDecline}>
-                Decline
+                  {t('tncDecline')}
                 </button>
             </div>
             </div>

@@ -28,6 +28,14 @@
     "oneStepReflection": "एक कदम प्रतिबिंब",
     "logout": "लॉगआउट",
     "chooseAnOption": "एक विकल्प चुनें",
-    "cancel": "रद्द करें"
+    "cancel": "रद्द करें",
+    "uploadedFiles": "अपलोड की गई फ़ाइलें",
+    "uploadLoadMsg": "कृपया प्रतीक्षा करें, आपकी छवि अपलोड हो रही है...",
+    "replyMsg": "उत्तर दिया जा रहा है..",
+    "fileExceedText": "आप 5 से अधिक फ़ाइलें अपलोड नहीं कर सकते",
+    "fileSizeText": "फ़ाइल का आकार 50MB से अधिक नहीं हो सकता",
+    "completedStatusText": "पूर्ण है",
+    "inProgressStatusText": "प्रगति पर है"
+
 
 }

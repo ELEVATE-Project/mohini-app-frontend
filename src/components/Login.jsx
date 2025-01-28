@@ -67,6 +67,7 @@ function Login({ type, variant }) {
     localStorage.removeItem('model');
     localStorage.removeItem('has_accepted_tnc');
     localStorage.removeItem('flow');
+    localStorage.removeItem('statemachine_length');
     
     cookies.remove("profileid", {
       path: "/",
@@ -227,6 +228,7 @@ function Login({ type, variant }) {
       localStorage.setItem('company', JSON.stringify(response?.data?.company));
       localStorage.setItem('state', JSON.stringify(response?.data?.state));
       localStorage.setItem('flow', 'login');
+      localStorage.setItem('has_accepted_tnc', false)
       cookies.set("profileid", JSON.stringify(response?.data?.id), {
         path: "/",
       });

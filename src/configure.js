@@ -21,6 +21,18 @@ export const lang_codes = {
   enus: "en-US"
 };
 
+export const bot_routes = {
+  normal: "/",
+  reflection: "/reflection",
+  oneshot: "/oneshot_bot",
+};
+
+export const bot_websocket = {
+  normal: "/ws/shikshalokam_new/",
+  reflection: "/ws/reflection/",
+  oneshot: "/ws/shikshalokam_one_shot/",
+};
+
 
 export const lang_routes = {
   en: "/",

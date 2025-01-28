@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 function FormData({selectOptions, selectClassName, selectName, selectOnChange, selectID, selectValue, inputDivClass, isRequired, inputType, inputName, id,
     inputClass, inputOnChange, inputValue, labelDivClass, labelClass, labelName, layOut, isimportant, isMultiple, showWithinInput=false,
-    withinInputType, withinInputName, withinInputOnChange, withinInputValue, withinInputClass, withinInputDisabled, fieldError
+    withinInputType, withinInputName, withinInputOnChange, withinInputValue, withinInputClass, withinInputDisabled, fieldError, showDefaultDropdownText=true
 }){
     let optionArr = selectOptions;
     let multipleValue = false;
@@ -12,7 +12,7 @@ function FormData({selectOptions, selectClassName, selectName, selectOnChange, s
     const { t } = useTranslation();
     let defaultText = 'Choose an option'
 
-    if (t('chooseAnOption')) {
+    if (t('chooseAnOption') && !showDefaultDropdownText) {
         defaultText = t('chooseAnOption')
     }
     

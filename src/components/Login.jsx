@@ -248,7 +248,7 @@ function Login({ type, variant }) {
       <div className="px-5 hidden sm:block">
           <div className="flex">
             <img
-              src="./images/shikshagrahaLogo.png"
+              src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png"
               className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0"
               alt="shikshalokam_logo"
             />

@@ -66,7 +66,7 @@
     }
   
     #shikshaScrollableDiv::-webkit-scrollbar-thumb {
-      background: #41a675;
+      background: #4192a6;
     }
     
   }
@@ -75,17 +75,15 @@
   /* Voice-chat page  */
 
 .div1 {
-    height: 376px;
+    /* height: 376px; */
     padding: 0;
-    overflow-y: scroll;
-    margin-top: 13px;
+    /* overflow-y: scroll; */
+    /* margin-top: 13px; */
 }
 
 .div2 {
-    height: 500px;
+    /* height: 375px; */
     padding: 0;
-    overflow-y: scroll;
-    margin-top: 66px;
 }
 
 .div3 {
@@ -926,20 +924,24 @@
     transition: all 0.1s;
     font-size: 1.125rem;
     z-index: 1000 !important;
+    height: 100%;
 }
 
 .aside-3 {
     min-width: 300px;
     color: #ffffff;
     transition-timing-function: ease-in;
-    min-height: 100%;
     z-index: 20;
 }
 
 .aside-4 {
     color: #4b5563;
-    background-color: #ffffff;
     transition-timing-function: ease-out;
+}
+
+.aside-div {
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .icon-4 {
@@ -960,8 +962,15 @@
 }
 
 .div66 {
-    display: flex;
+    position: relative;
+    bottom: 0;
+    left: 0;
     width: 100%;
+    background-color: #fff;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
 }
 
 .icon-6 {

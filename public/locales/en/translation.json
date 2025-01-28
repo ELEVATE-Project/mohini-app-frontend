@@ -28,5 +28,12 @@
     "oneStepReflection": "One-Step Reflection",
     "logout": "Logout",
     "chooseAnOption": "Choose an option",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "uploadedFiles": "Uploaded Files",
+    "uploadLoadMsg": "Please wait, your image is uploading...",
+    "replyMsg": "Replying..",
+    "fileExceedText": "You cannot upload more than 5 files",
+    "fileSizeText": "File size cannot exceed 50MB",
+    "completedStatusText": "Completed",
+    "inProgressStatusText": "In Progress"
 }

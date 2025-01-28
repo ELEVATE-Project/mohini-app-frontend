@@ -36,23 +36,27 @@ const Sidebar = ({
             </button>
           </div>
           {!!isOpen && (
-            <>
-              <div className="div23">
-                <div className="div65 div24">
-                  <p>{t('allMicroImprovement')}</p>
-                </div>
-                <div className="div65">
-                  <button 
-                    className="button-4"
-                    onClick={(e)=>{
-                      setIsResetCalled(true);
-                      resetChat(e)
-                    }}
-                  >
-                    <FiPlus className="icon-2" /> {t('newChat')}
-                  </button>
-                </div>
+            <div className="div23">
+              <div className="div65 div24">
+                <p>{t('allMicroImprovement')}</p>
               </div>
+              <div className="div65">
+                <button 
+                  className="button-4"
+                  onClick={(e)=>{
+                    setIsResetCalled(true);
+                    resetChat(e)
+                  }}
+                >
+                  <FiPlus className="icon-2" /> {t('newChat')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="aside-div" id="shikshaScrollableDiv">
+          {!!isOpen && (
+            <>
               {showScrollbarContent && showScrollbarContent()}
             </>
           )}

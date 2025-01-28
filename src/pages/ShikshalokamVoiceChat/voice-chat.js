@@ -7,7 +7,7 @@ import {
   MdSend,
 } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
-import getConfiguration from "../../configure";
+import getConfiguration, { bot_routes, bot_websocket } from "../../configure";
 import { useLocalStorage } from "react-use";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
@@ -171,13 +171,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [files, setFiles] = useState([]);
   const [fileErrorText, setFileErrorText] = useState('');
 
-  const fileExceedText = 'You cannot upload more than 5 files';
-  const fileSizeText = 'File size cannot exceed 50MB';
-  const completedStatusText = 'Completed';
-  const inProgressStatusText = 'In Progress';
+  const fileExceedText = t('fileExceedText');
+  const fileSizeText = t('fileSizeText');
+  const completedStatusText = t('completedStatusText');
+  const inProgressStatusText = t('inProgressStatusText');
 
   let isMobile = useCustomMediaQuery('(max-width: 500px)');
-  let chatToAddLength = isMobile? 7: 13;
+  let chatToAddLength = isMobile? 10: 10;
   const [visibleItemCount, setVisibleItemCount] = useState(chatToAddLength);
   const isNewChatOpen = JSON.parse(localStorage.getItem('isNewChatOpen'));
 
@@ -264,7 +264,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           // window.location.href=ROUTES.EXIT_ROUTE
 
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
     
@@ -653,15 +653,16 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     if (!!code) {
       url = `${wss_protocol}${window.location.host}/ws/chat/company/`;
     } else {
-      if (selectedType === 'normal') {
+        const base_url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}`
+        if (selectedType === 'normal') {
         console.log('flow: ', localStorage.getItem('flow'))
         if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
-          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_new/`;
+          url = `${base_url+bot_websocket.normal}`;
         } else {
-          url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/reflection/`;
+          url = `${base_url+bot_websocket.reflection}`;
         }
       } else {
-        url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/shikshalokam_one_shot/`;
+        url = `${base_url+bot_websocket.oneshot}`;
       }
     }
     
@@ -1036,10 +1037,20 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       setIsIntroLoading(true);
       let companyName = await getCompanyDetail();
       try {
+        let filter_route = bot_routes.normal;
+        if (selectedType === 'normal') {
+          if (localStorage.getItem('flow') && localStorage.getItem('flow') !== 'login') {
+            filter_route=bot_routes.reflection
+          } 
+        } else {
+          filter_route=bot_routes.oneshot
+        }
         const response = await axiosInstance({
           url: company_bot_list_url,
           params: {
             company__slug: companyName,
+            target_language: languageToUse,
+            route: filter_route
           },
         });
         const bots = response?.data?.results;
@@ -1142,9 +1153,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       } catch (error) {
         console.error({ error });
       }
-      finally {
-        window.location.reload();
-      }
     };
     
     
@@ -1223,13 +1231,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
   useEffect(()=>{
     if(!isModalOpen && profileToUse){
-      setIsLoading(true);
       const titleTime = setTimeout(()=>{
         if(shouldShowChatHistoryFeature) showChatTitle();
       }, 4000);
   
       return ()=>{
-        setIsLoading(false);
         clearTimeout(titleTime);
       }
     }
@@ -1467,10 +1473,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       if (response) {
         let sortedResult = quickSort(response?.data?.results, compareByIdDesc);
         sortedResult.forEach((sessionObj, index)=>{
-          const status = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase() ? completedStatusText: inProgressStatusText;
+          const status = sessionObj.session_status?.toLowerCase() === 'completed' ? completedStatusText: inProgressStatusText;
           TitleAndSession.push({ session: sessionObj.session, title: sessionObj.title, sessionStatus: status });
           if (sessionObj.session === currentSessionID) {
-            sessionComplete = sessionObj.session_status?.toLowerCase() === completedStatusText?.toLowerCase();
+            sessionComplete = sessionObj.session_status?.toLowerCase() === 'completed';
           }
         })
         setShowFileInput(sessionComplete === true);
@@ -1501,7 +1507,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     return(
       <div
         className={isMobile? 'div1': 'div2'}
-        id="shikshaScrollableDiv"
       >
       <InfiniteScroll
         dataLength={visibleItemCount}
@@ -2115,6 +2120,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   selectValue = {selectedType}
                   selectClassName="div31"
                   selectOnChange={handleSelectedTypeNameChanges}
+                  showDefaultDropdownText={false}
                 />
                 <button
                   onClick={async (e) => {
@@ -2210,7 +2216,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   </div>
                   {!hasStartedListening && chatHistory[chatHistory?.length - 1].source === "user" &&
                   i === chatHistory?.length - 1 ? (
-                    <LoadingChat />
+                    <LoadingChat t={t} />
                   ) : (
                     ""
                   )}
@@ -2313,7 +2319,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
 
                 {files?.length > 0 && (
                   <div className="div18">
-                    <h4 className="h4-1">Uploaded Files:</h4>
+                    <h4 className="h4-1">{t('uploadedFiles')}:</h4>
                     <ul>
                       {fileErrorText && (
                         <li className="li-1">
@@ -2334,7 +2340,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                       ))}
                       {isUploading && (
                         <li className="li-3">
-                          Please wait, your image is uploading...
+                          {t('uploadLoadMsg')}
                         </li>
                       )}
                     </ul>
@@ -2568,58 +2574,25 @@ function ChatMessage({
             />
           </div>
         )}
-        {!!recording ? (
-          <div className="div51">
-            Transcription: {message}
-          </div>
-        ) : (
-          <div
+        <div
           className={` ${
             userType === "bot" ? "div53" : "div54"
           } div52 custom-voice-chat-chats`}
           id={chatId}
         >
             <ReactMarkdown  children={sanitizedContent} remarkPlugins={[remarkGfm]} 
-      rehypePlugins={[rehypeRaw]} />
-            {isTalking && (
-              <div className="div55">
-                (Typing...)
-              </div>
-            )}
-            {!!appendixURL?.length && (
-              <div>
-                <h6 className="h6-1">Resource:</h6>
-                {appendixURL?.map((url, index) => (
-                  <div key={index} className="div56">
-                    {url === "nan" ? (
-                      "Not available"
-                    ) : (
-                      <a
-                        key={index}
-                        href={url}
-                        rel="noreferrer"
-                        target="_blank"
-                        className="a-1"
-                      >
-                        {url}
-                      </a>
-                    )}
-                    <br />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+              rehypePlugins={[rehypeRaw]} 
+            />
+        </div>
       </div>
     </div>
   );
 }
 
-export const LoadingChat = () => (
+export const LoadingChat = (t) => (
   <div className="div57">
     <div className="div58">
-      <div>Replying...</div>
+      <div>{t('replyMsg')}</div>
     </div>
   </div>
 );

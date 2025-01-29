@@ -249,7 +249,8 @@ function Login({ type, variant }) {
           <div className="text-left sm:text-2xl text-md text-slate-700">
                 <b>Impact Stories</b>
               </div>
-          <p className="pt-4 pb-4">MItra is an AI-powered multi-lingual, voice-enabled chatbot that helps school leaders reflect on their Micro-Improvement journeys. Through guided prompts, MItra enables leaders to share the highlights, challenges and impacts of thier efforts, compiling responses into an inspiring and meaningful story.</p>
+          <p className="pt-4 pb-4">MItra is an AI-powered multi lingual, voice-enabled chatbot that helps education leaders (teachers, school leaders, community leaders, parent, youth leaders, etc.) reflect and share their micro-improvement journeys towards improving schools. Through guided prompts, MItra enables leaders to share their highlights, challenges and impact of their school improvement efforts, compiling responses into an inspiring and meaningful story.
+          </p>
           </div>
         <img
           src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png"

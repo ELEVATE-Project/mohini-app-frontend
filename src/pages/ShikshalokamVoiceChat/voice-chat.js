@@ -2216,7 +2216,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
                   </div>
                   {!hasStartedListening && chatHistory[chatHistory?.length - 1].source === "user" &&
                   i === chatHistory?.length - 1 ? (
-                    <LoadingChat t={t} />
+                    <div className="div57">
+                      <div className="div58">
+                        <div>{t('replyMsg')}</div>
+                      </div>
+                    </div>
                   ) : (
                     ""
                   )}
@@ -2589,13 +2593,6 @@ function ChatMessage({
   );
 }
 
-export const LoadingChat = (t) => (
-  <div className="div57">
-    <div className="div58">
-      <div>{t('replyMsg')}</div>
-    </div>
-  </div>
-);
 /* eslint-disable react-hooks/exhaustive-deps */
 
 

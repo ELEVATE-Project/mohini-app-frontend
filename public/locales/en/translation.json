@@ -1,5 +1,5 @@
 {
-    "confirmChanges": "Confirm Changes",
+    "confirmChanges": "Yes",
     "popUpChanges": "<div class='text-class'>\n    You've been inactive for a while.\n    Do you want to continue?\n</div>",
     "comfirmButton": "Yes",
     "denyButton": "No",

@@ -52,7 +52,6 @@ function StoryFirstPage(props){
                 <div>
                     <p className="story-title">{props.title}</p>
                     <p className="story-author">{props.author}</p>
-                    <a href="https://demo.shikshalokam.org" className="story-link">https://demo.shikshalokam.org</a>
                 </div>
             </div>
     );

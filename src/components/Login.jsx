@@ -247,7 +247,7 @@ function Login({ type, variant }) {
           </div>
           <div>
           <div className="text-left sm:text-2xl text-md text-slate-700">
-                <b>Impact Stories</b>
+                <b>Share Your Impact Story Easily</b>
               </div>
           <p className="pt-4 pb-4">MItra is an AI-powered multi lingual, voice-enabled chatbot that helps education leaders (teachers, school leaders, community leaders, parent, youth leaders, etc.) reflect and share their micro-improvement journeys towards improving schools. Through guided prompts, MItra enables leaders to share their highlights, challenges and impact of their school improvement efforts, compiling responses into an inspiring and meaningful story.
           </p>

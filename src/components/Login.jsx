@@ -236,7 +236,7 @@ function Login({ type, variant }) {
   };
 
   return (
-    <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 justify-center h-screen">
+    <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 h-screen">
       <div className="px-5 hidden sm:block">
           <div className="flex">
             <img
@@ -262,18 +262,13 @@ function Login({ type, variant }) {
       </div>
       <div className="">
         <div className="justify-center w-full flex sm:hidden">
-          <div className="w-[75%]">
+          <div className="w-[100%]">
             
                 <div className="flex p-2 mx-auto px-auto items-center justify-center">
                   <img
                   src="./images/shikshagrahaLogo.png"
                   className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0"
                   alt="shikshalokam_logo"
-                />
-                 <img
-                  src="./images/shikshagrahaLogo.png"
-                  className="h-[60px] w-[auto] mt-6 object-fill aspect-auto align-top object-[center_center] relative ml-2"
-                  alt="grit_Logo"
                 />
               </div>
           </div>

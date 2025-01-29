@@ -1960,11 +1960,11 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
             <>
               <div className="div10" >
                 <h3 className="h3-1">
-                  Micro Improvement Report<br />with Mitra!
+                  Micro Improvement Report<br />with MItra!
                 </h3>
               </div>
               <ul className="div11" >
-                <li>Start chatting with Mitra below</li>
+                <li>Start chatting with MItra below</li>
                 <li>Add photos to your report</li>
                 <li>Download your report</li>
               </ul>

@@ -1037,10 +1037,10 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
       setIsIntroLoading(true);
       let companyName = await getCompanyDetail();
       try {
-        let filter_route = bot_routes.normal;
+        let filter_route = bot_routes.reflection;
         if (selectedType === 'normal') {
-          if (localStorage.getItem('flow') && localStorage.getItem('flow') !== 'login') {
-            filter_route=bot_routes.reflection
+          if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
+            filter_route=bot_routes.normal
           } 
         } else {
           filter_route=bot_routes.oneshot

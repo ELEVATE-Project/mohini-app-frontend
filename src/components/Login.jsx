@@ -228,7 +228,6 @@ function Login({ type, variant }) {
       localStorage.setItem('company', JSON.stringify(response?.data?.company));
       localStorage.setItem('state', JSON.stringify(response?.data?.state));
       localStorage.setItem('flow', 'login');
-      localStorage.setItem('has_accepted_tnc', false)
       cookies.set("profileid", JSON.stringify(response?.data?.id), {
         path: "/",
       });

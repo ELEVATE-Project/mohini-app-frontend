@@ -125,6 +125,7 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   const [appendix, setAppendix] = useState([]);
   const [hasOverRideId, setHasOverRideId] = useState(null);
   const [shouldFetchIntro, setShouldFetchIntro] = useState(false);
+  const [hasFetchIntro, setHasFetchIntro] = useState(false);
   const [isChatVisible, setIsChatVisible] = useState(() => {
     const storedVisibility = localStorage.getItem('isChatVisible');
     return storedVisibility !== null ? JSON.parse(storedVisibility) : false;
@@ -245,7 +246,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           const language = preferredLanguage.value || 'en';
           localStorage.setItem('route', JSON.stringify(language || "en"));
           setLanguageToUse(JSON.stringify(language || "en"));
-          console.log('setting lang: ', language)
           localStorage.setItem('isNewChatOpen', JSON.stringify(true));
           localStorage.setItem('first_name', JSON.stringify(data?.first_name));
           localStorage.setItem('company', JSON.stringify(data?.company?.slug));
@@ -397,17 +397,18 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isShikshalokamPublicType])
 
   useEffect(() => {
-    if(shouldShowChatHistoryFeature) {const isOldChatOpen = JSON.parse(localStorage.getItem('isOldChatOpen'));
-    if(isOldChatOpen === true){
-      setShouldFetchIntro(false);
-      setShowHomepage(false);
-      // removeLocalChatHistory();
-      handleChatSessionButtonClick({key: null})
-      MakeSocketConnection();
-    } else if(isNewChatOpen === true){
-      const showStartPage = JSON.parse(localStorage.getItem('showHomepage'));
-      setShowHomepage(showStartPage !== null ? showStartPage : true);
-      MakeSocketConnection();}
+    if(shouldShowChatHistoryFeature) {
+      const isOldChatOpen = JSON.parse(localStorage.getItem('isOldChatOpen'));
+      if(isOldChatOpen === true){
+        setShouldFetchIntro(false);
+        setShowHomepage(false);
+        // removeLocalChatHistory();
+        MakeSocketConnection();
+      } else if(isNewChatOpen === true){
+        const showStartPage = JSON.parse(localStorage.getItem('showHomepage'));
+        setShowHomepage(showStartPage !== null ? showStartPage : true);
+        MakeSocketConnection();
+      }
     } else{
       removeLocalChatHistory();
       MakeSocketConnection();
@@ -415,8 +416,12 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   }, [isNewChatOpen]);
 
   useEffect(()=>{
-    
-  }, [showHomepage])
+    const isOldChatOpen = JSON.parse(localStorage.getItem('isOldChatOpen'))
+    const flow = localStorage.getItem('flow')
+    if(isOldChatOpen === true && (hasFetchIntro || flow==='login') ) {
+      handleChatSessionButtonClick({key: null})
+    }
+  }, [isNewChatOpen, hasFetchIntro])
 
 
   useEffect(() => {
@@ -655,7 +660,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     } else {
         const base_url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}`
         if (selectedType === 'normal') {
-        console.log('flow: ', localStorage.getItem('flow'))
         if (localStorage.getItem('flow') && localStorage.getItem('flow') === 'login') {
           url = `${base_url+bot_websocket.normal}`;
         } else {
@@ -1152,6 +1156,8 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
   
       } catch (error) {
         console.error({ error });
+      } finally {
+        setHasFetchIntro(true);
       }
     };
     
@@ -1166,10 +1172,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
     
     return () => {};
   }, [access_token, shouldFetchIntro, profileToUse, languageToUse]);
-
-  useEffect(()=>{
-    
-  }, [sentences])
 
   //copying to local storage
   useEffect(() => {

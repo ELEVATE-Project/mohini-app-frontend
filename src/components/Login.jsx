@@ -9,11 +9,6 @@ import { useLocalStorage } from "react-use";
 import USER_ACTIONS from "../context/user/user-actions";
 import FormData from "./Form/FormData";
 import ROUTES from "../url";
-import {
-  districtLabelArray,
-  blockLabelArray,
-  stateLabelArray,
-} from "../shikshalokam-field-data";
 import { BiLoader } from "react-icons/bi";
 import "./custom-style.css"
 import "../index.css"
@@ -38,6 +33,11 @@ function Login({ type, variant }) {
   const [, setLocalUserData] = useLocalStorage("grit", {});
   const [, , removeLocalChatHistory] =
   useLocalStorage("chat-history", []);
+
+  const [stateLabelArray, setStateLabelArray] = useState([]);
+  const [districtLabelArray, setDistrictLabelArray] = useState([]);
+  const [blockLabelArray, setBlockLabelArray] = useState([]);
+
 
   useEffect(() => {
     localStorage.removeItem('selected_type');
@@ -106,24 +106,25 @@ function Login({ type, variant }) {
 
   }, []);
 
-
-  const handlePhoneChange = (e) => {
-    if (e?.target?.value?.length <= 10) {
-      const numericInput = e?.target?.value?.replace(/[^0-9]/g, "");
-      setPhoneNumberField(numericInput);
-    }
-  };
+  useEffect(()=>{
+    getStateLabelValue()
+  }, [])
 
   const handleLanguageChange = (e) => {
     setUserLanguage(e.target.value);
   };
 
   const handleStateChange = (e) => {
-    setUserState(e.target.value);
+    setUserState(e?.target?.value);
+    setDistrictLabelArray([])
+    setBlockLabelArray([])
+    getDistrictLabelValue(e?.target?.value)
   };
 
   const handleDistrictChange = (e) => {
     setUserDistrict(e.target.value);
+    setBlockLabelArray([])
+    getBlockLabelValue(e?.target?.value)
   };
 
   const handleBlockChange = (e) => {
@@ -143,29 +144,86 @@ function Login({ type, variant }) {
     return regex.test(number);
   };
 
-  const getDistrictLabelValue = () => {
-    return districtLabelArray[userState]?.map((district) => ({
-      label: district,
-      value: district,
-    }));
+  const getStateLabelValue = async () => {
+    try {
+      const response = await axiosInstance({
+        url: 'api/get-location/',
+        method: "GET",
+      });
+  
+      const list = response?.data?.list;
+  
+      if (Array.isArray(list) && list.length > 0) {
+        setStateLabelArray(
+          list.map(item => ({
+            label: item?.name || "",
+            value: item?.id || ""
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
   };
 
-  const getBlockLabelValue = () => {
-    const districtName = userDistrict.toUpperCase();
-    return blockLabelArray[userState]
-      ?.filter((block) => block.district.toUpperCase() === districtName)
-      ?.map((block) => ({
-        label: block.block,
-        value: block.block,
-      }));
+  const getDistrictLabelValue = async (id) => {
+    try {
+
+      if(!id) {
+        setDistrictLabelArray([])
+        return;
+      }
+      const response = await axiosInstance({
+        url: `api/get-location/?parentId=${id}`,
+        method: "GET",
+      });
+  
+      const list = response?.data?.list;
+  
+      if (Array.isArray(list) && list.length > 0) {
+        setDistrictLabelArray(
+          list.map(item => ({
+            label: item?.name || "",
+            value: item?.id || ""
+          }))
+        );
+      } else{
+        setDistrictLabelArray([])
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
   };
 
-  const getStateLabelValue = () => {
-    return stateLabelArray.map((state) => ({
-      label: state?.state,
-      value: state?.state,
-    }));
+  const getBlockLabelValue = async (id) => {
+    try {
+
+      if(!id) {
+        setBlockLabelArray([])
+        return;
+      }
+      const response = await axiosInstance({
+        url: `api/get-location/?parentId=${id}`,
+        method: "GET",
+      });
+  
+      const list = response?.data?.list;
+  
+      if (Array.isArray(list) && list.length > 0) {
+        setBlockLabelArray(
+          list.map(item => ({
+            label: item?.name || "",
+            value: item?.id || ""
+          }))
+        );
+      } else{
+        setBlockLabelArray([])
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
   };
+  
 
   const submitForm = async (event) => {
     event.preventDefault();
@@ -297,12 +355,13 @@ function Login({ type, variant }) {
                     type="text"
                     value={firstName}
                     onChange={handleNameChange}
+                    placeholder="First name"
                   />
                 </div>
               </>
 
                 <>
-                  <FormData layOut={1} isRequired={true}  labelName="E-mail ID" id="emailID" inputType="email" inputName="email"
+                  <FormData layOut={1} isRequired={true}  labelName="E-mail ID" id="emailID" inputType="email" inputName="email" placeholder="Email ID"
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     inputClass="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     inputOnChange={handleEmailChange}
@@ -316,25 +375,28 @@ function Login({ type, variant }) {
                     selectOnChange={handleLanguageChange}
                   />
                   <FormData layOut={2} labelName="State" id="stateNameID" selectID="stateNameID" selectName="stateName"
-                    selectOptions={getStateLabelValue()}
+                    selectOptions={stateLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     selectValue = {userState}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleStateChange}
+                    isRequired={true}
                   />
                   <FormData layOut={2} labelName="District Name" id="districtNameID" selectID="districtNameID" selectName="districtName"
-                    selectOptions={getDistrictLabelValue()}
+                    selectOptions={districtLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     selectValue = {userDistrict}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleDistrictChange}
+                    isRequired={districtLabelArray?.length > 0 ? true : false}
                   />
                   <FormData layOut={2} labelName="Block Name" id="blockNameID" selectID="blockNameID" selectName="blockName"
-                    selectOptions={getBlockLabelValue()}
+                    selectOptions={blockLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
                     selectValue = {userBlock}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleBlockChange}
+                    isRequired={blockLabelArray?.length > 0 ? true : false}
                   />
                 </>
               

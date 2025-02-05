@@ -35,6 +35,14 @@
     "fileExceedText": "ನೀವು 5 ಗಿಂತ ಹೆಚ್ಚು ಫೈಲ್‌ಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ",
     "fileSizeText": "ಫೈಲ್ ಗಾತ್ರವು 50MB ಗಿಂತ ಹೆಚ್ಚು ಇರಬಾರದು",
     "completedStatusText": "ಪೂರ್ಣಗೊಂಡಿದೆ",
-    "inProgressStatusText": "ಪ್ರಗತಿಯಲ್ಲಿದೆ"
+    "inProgressStatusText": "ಪ್ರಗತಿಯಲ್ಲಿದೆ",
+    "EditorConfirm": "ಕಥೆ ರಚಿಸಿ",
+    "uploadImagesStory": "ನಿಮ್ಮ ಕಥೆಗೆ ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    "UploadErrorMsg": "ಅಯ್ಯೋ, ನೀವು ಈ ಫೈಲ್ ಈಗಾಗಲೇ ಅಪ್‌ಲೋಡ್ ಮಾಡಿರುವಂತೆ ತೋರುತ್ತದೆ!",
+    "removeImage": "ತೆಗೆದುಹಾಕಿ",
+    "EditorFirstTab": "ಕಥೆ",
+    "EditorSecondTab": "ಗ್ಯಾಲರಿ",
+    "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "chooseFile": "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ"
 
 }

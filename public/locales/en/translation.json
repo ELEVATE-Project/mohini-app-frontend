@@ -35,5 +35,13 @@
     "fileExceedText": "You cannot upload more than 5 files",
     "fileSizeText": "File size cannot exceed 50MB",
     "completedStatusText": "Completed",
-    "inProgressStatusText": "In Progress"
+    "inProgressStatusText": "In Progress",
+    "EditorConfirm": "Create Story",
+    "uploadImagesStory": "Upload Images for your story",
+    "UploadErrorMsg":"Opps, It seems you have already uploaded this file!",
+    "removeImage": "Remove",
+    "EditorFirstTab": "Story",
+    "EditorSecondTab": "Gallery",
+    "saveChanges": "Save Changes",
+    "chooseFile": "Choose File"
 }

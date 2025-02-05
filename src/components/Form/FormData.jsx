@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 function FormData({selectOptions, selectClassName, selectName, selectOnChange, selectID, selectValue, inputDivClass, isRequired, inputType, inputName, id,
     inputClass, inputOnChange, inputValue, labelDivClass, labelClass, labelName, layOut, isimportant, isMultiple, showWithinInput=false,
-    withinInputType, withinInputName, withinInputOnChange, withinInputValue, withinInputClass, withinInputDisabled, fieldError, showDefaultDropdownText=true
+    withinInputType, withinInputName, withinInputOnChange, withinInputValue, withinInputClass, withinInputDisabled, fieldError, showDefaultDropdownText=true, placeholder=''
 }){
     let optionArr = selectOptions;
     let multipleValue = false;
@@ -24,10 +24,10 @@ function FormData({selectOptions, selectClassName, selectName, selectOnChange, s
                   className={selectClassName}
                   name={selectName}
                   onChange={selectOnChange}
-                  required
                   id={selectID}
                   value={selectValue}
                   multiple={multipleValue}
+                  {...(isRequired && { required: true })}
                 >
                     <option value="">{defaultText}</option>
                     {(optionArr).map((option) => {
@@ -51,15 +51,15 @@ function FormData({selectOptions, selectClassName, selectName, selectOnChange, s
                         {(fieldError && fieldError!== '')&& <p className="error-phn-field">{fieldError}</p>}
                         {(showWithinInput)&& <input type={withinInputType} name={withinInputName} id={id} className={withinInputClass} 
                             onChange={withinInputOnChange} value={withinInputValue} required
-                            disabled = {withinInputDisabled}
+                            disabled = {withinInputDisabled} placeholder={placeholder}
                         />}
                         <input type={inputType} name={inputName} id={id} className={inputClass} 
-                            onChange={inputOnChange} value={inputValue} required
+                            onChange={inputOnChange} value={inputValue} required placeholder={placeholder}
                         />
                     </>
                     :
                     <input type={inputType} name={inputName} id={id} className={inputClass} 
-                        onChange={inputOnChange} value={inputValue}
+                        onChange={inputOnChange} value={inputValue} placeholder={placeholder}
                     /> )}
                 </div>
             </>

@@ -35,7 +35,14 @@
     "fileExceedText": "आप 5 से अधिक फ़ाइलें अपलोड नहीं कर सकते",
     "fileSizeText": "फ़ाइल का आकार 50MB से अधिक नहीं हो सकता",
     "completedStatusText": "पूर्ण है",
-    "inProgressStatusText": "प्रगति पर है"
-
+    "inProgressStatusText": "प्रगति पर है",
+    "EditorConfirm": "कहानी बनाएं",
+    "uploadImagesStory": "अपनी कहानी के लिए छवियां अपलोड करें",
+    "UploadErrorMsg": "उफ़, ऐसा लगता है कि आपने पहले ही इस फ़ाइल को अपलोड किया है!",
+    "removeImage": "हटाएं",
+    "EditorFirstTab": "कहानी",
+    "EditorSecondTab": "गैलरी",
+    "saveChanges": "परिवर्तन सहेजें",
+    "chooseFile": "फ़ाइल चुनें"
 
 }

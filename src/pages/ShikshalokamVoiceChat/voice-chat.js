@@ -1045,9 +1045,6 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           }
           localStorage.setItem('statemachine_length', selectedBot?.statemachine_length);
           setStateMachineLength(selectedBot?.statemachine_length)
-          const botName = selectedBot?.name || 'Bot';
-          localStorage.setItem('botName', botName);
-          setBotNameToDisplay(botName);
         }
        
         if (!shouldFetchIntro || chatHistory?.length) return;
@@ -1081,9 +1078,13 @@ const ShikshalokamVoiceBasedChat = ({ type="", variant="" }) => {
           
           let firstName = JSON.parse(localStorage.getItem("first_name")) || '';
           
-          let message = await getTranslatedIntroMessage(storedRoute)
+          let data = await getTranslatedIntroMessage(storedRoute)
+          let message = data[0]?.introductory_message
+          const botName = data[0]?.name || 'Bot';
+          localStorage.setItem('botName', botName);
+          setBotNameToDisplay(botName);
+
           if (message && firstName) {
-            message = message[0]?.introductory_message
             const words = message.split(' ');
             words.splice(1, 0, firstName);
             message = words.join(' ');

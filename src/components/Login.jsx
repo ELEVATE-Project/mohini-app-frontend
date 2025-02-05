@@ -22,9 +22,18 @@ function Login({ type, variant }) {
   const [firstName, setFirstName] = useState("");
   const [emailId, setEmailId] = useState("");
   const [userLanguage, setUserLanguage] = useState("");
-  const [userState, setUserState] = useState("");
-  const [userDistrict, setUserDistrict] = useState("");
-  const [userBlock, setUserBlock] = useState("");
+  const [userState, setUserState] = useState({
+    key: "",
+    value: ""
+  });
+  const [userDistrict, setUserDistrict] = useState({
+    key: "",
+    value: ""
+  });
+  const [userBlock, setUserBlock] = useState({
+    key: "",
+    value: ""
+  });
   const [phoneNumberField, setPhoneNumberField] = useState("");
   const [fieldError, setFieldError] = useState("");
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
@@ -115,20 +124,29 @@ function Login({ type, variant }) {
   };
 
   const handleStateChange = (e) => {
-    setUserState(e?.target?.value);
+    setUserState({
+      key: e?.target?.selectedOptions[0]?.text,
+      value: e?.target?.value
+    });
     setDistrictLabelArray([])
     setBlockLabelArray([])
     getDistrictLabelValue(e?.target?.value)
   };
 
   const handleDistrictChange = (e) => {
-    setUserDistrict(e.target.value);
+    setUserDistrict({
+      key: e?.target?.selectedOptions[0]?.text,
+      value: e?.target?.value
+    });
     setBlockLabelArray([])
     getBlockLabelValue(e?.target?.value)
   };
 
   const handleBlockChange = (e) => {
-    setUserBlock(e.target.value);
+    setUserBlock({
+      key: e?.target?.selectedOptions[0]?.text,
+      value: e?.target?.value
+    });
   };
 
   const handleEmailChange = (e) => {
@@ -245,9 +263,9 @@ function Login({ type, variant }) {
       password: "grit@123",
       profile_address: [
         {
-          state: userState,
-          block: userBlock,
-          district: userDistrict,
+          state: userState?.key,
+          block: userBlock?.key,
+          district: userDistrict?.key,
         },
       ],
     };
@@ -377,7 +395,7 @@ function Login({ type, variant }) {
                   <FormData layOut={2} labelName="State" id="stateNameID" selectID="stateNameID" selectName="stateName"
                     selectOptions={stateLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
-                    selectValue = {userState}
+                    selectValue = {userState?.value}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleStateChange}
                     isRequired={true}
@@ -385,7 +403,7 @@ function Login({ type, variant }) {
                   <FormData layOut={2} labelName="District Name" id="districtNameID" selectID="districtNameID" selectName="districtName"
                     selectOptions={districtLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
-                    selectValue = {userDistrict}
+                    selectValue = {userDistrict?.value}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleDistrictChange}
                     isRequired={districtLabelArray?.length > 0 ? true : false}
@@ -393,7 +411,7 @@ function Login({ type, variant }) {
                   <FormData layOut={2} labelName="Block Name" id="blockNameID" selectID="blockNameID" selectName="blockName"
                     selectOptions={blockLabelArray}
                     labelDivClass="text-left text-slate-700 mt-6 ml-[7%] md:ml-[18%]"
-                    selectValue = {userBlock}
+                    selectValue = {userBlock?.value}
                     selectClassName="bg-white text-slate-600 rounded-md p-3 mt-1 outline outline-slate-300 outline-1 outline-offset w-[95%] md:w-[65%]"
                     selectOnChange={handleBlockChange}
                     isRequired={blockLabelArray?.length > 0 ? true : false}

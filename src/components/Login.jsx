@@ -330,7 +330,10 @@ function Login({ type, variant }) {
               alt="shikshalokam_logo"
             />
           </div>
-          
+          <div className="text-left sm:text-2xl text-md text-slate-700">
+                    <b>Impact Stories</b>
+                </div>
+                 <p className="pt-4 pb-4">MItra is an AI-powered multi lingual, voice-enabled chatbot that helps education leaders (teachers, school leaders, community leaders, parent, youth leaders, etc.) reflect and share their micro-improvement journeys towards improving schools. Through guided prompts, MItra enables leaders to share their highlights, challenges and impact of their school improvement efforts, compiling responses into an inspiring and meaningful story.</p>
         <img
           src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png"
           width="500"
@@ -356,7 +359,7 @@ function Login({ type, variant }) {
 
             <>
               <div className="text-center sm:text-2xl text-md pt-10 text-slate-700">
-                <b>Welcome to ShikshaLokam!!</b>
+                <b>Welcome</b>
               </div>
             </>
           <div className="p-2 text-center">
@@ -432,7 +435,7 @@ function Login({ type, variant }) {
                 <button
                   id="demo"
                   className=" p-3 mt-6 mb-2 px-5 py-3 bg-mira-red-original hover:bg-mira-red-original text-white rounded-md"
-                  style={{backgroundColor: "#c3234a"}}
+                  style={{backgroundColor: "#572E91"}}
                   type="submit"
                 >
                   Let's Get Started

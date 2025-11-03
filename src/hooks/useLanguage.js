@@ -33,7 +33,7 @@ export const useLanguage = (usecaseType) => {
     if (urlLanguage) {
       setInStorage("hasSelectedLanguage", true);
       setLanguage(urlLanguage);
-      localStorage.setItem("local_route", JSON.stringify(urlLanguage));
+      setInStorage("local_route", JSON.stringify(urlLanguage), null, "localStorage");
       setInStorage("route", JSON.stringify(urlLanguage));
       setLanguageButtonSelect(true);
     }
@@ -45,14 +45,14 @@ export const useLanguage = (usecaseType) => {
     setStopAudioTriggered(true);
     stopAllAudio();
     setLanguage(newLanguage);
-    localStorage.setItem("local_route", JSON.stringify(newLanguage));
+    setInStorage("local_route", JSON.stringify(newLanguage), null, "localStorage");
   };
 
   const setSelectedLanguage = (language) => {
     setInStorage("hasSelectedLanguage", true);
     setUserLanguage(language);
     setLanguage(language);
-    localStorage.setItem("local_route", JSON.stringify(language));
+    setInStorage("local_route", JSON.stringify(language), null, "localStorage");
     setInStorage("route", JSON.stringify(language));
     setLanguageButtonSelect(true);
   };

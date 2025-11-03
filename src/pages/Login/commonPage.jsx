@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { clearFromStorage, getFromStorage } from "../../services/storage_service";
+import { clearFromStorage, getFromStorage, setInStorage } from "../../services/storage_service";
 
 // Custom Hooks
 import { useLanguage } from "../../hooks/useLanguage";
@@ -74,7 +74,7 @@ function CommonHomePage({ usecaseType }) {
       if (!userLanguage || userLanguage === null || userLanguage === "") {
         const defaultLang = getFromStorage(STORAGE_KEYS.LOCAL_ROUTE, true, "localStorage") || 
                            getDefaultLanguage(usecaseType);
-        localStorage.setItem(STORAGE_KEYS.LOCAL_ROUTE, JSON.stringify(defaultLang));
+        setInStorage(STORAGE_KEYS.LOCAL_ROUTE, JSON.stringify(defaultLang), null, "localStorage");
         setUserLanguage(defaultLang);
       }
       setUserLanguage(userLanguage);

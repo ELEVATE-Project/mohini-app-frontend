@@ -12,6 +12,7 @@ import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/en
 import FormData from "./Form/FormData";
 import { useTranslation } from "react-i18next";
 import axiosInstance from "../utils/axios";
+import { getFromStorage, setInStorage } from "../services/storage_service";
 
 const login_api_url = `/api/login/`;
 
@@ -19,15 +20,15 @@ function GuestPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [userLanguage, setUserLanguage] = useState(
-    JSON.parse(localStorage.getItem("local_route")) || languageList[0].value
+    getFromStorage("local_route", true, "localStorage") || languageList[0].value
   );
   const [userId, setUserId] = useState(null);
 
   const { t } = useTranslation();
   
   useEffect(() => {
-    if (!localStorage.getItem("local_route")) {
-      localStorage.setItem("local_route", JSON.stringify(languageList[0].value));
+    if (!getFromStorage("local_route", false, "localStorage")) {
+      setInStorage("local_route", JSON.stringify(languageList[0].value), null, "localStorage");
     }
   }, []);
 
@@ -46,10 +47,10 @@ function GuestPage() {
         window.screen.width +
         window.screen.height;
 
-      const storedUserId = localStorage.getItem('device_id');
+      const storedUserId = getFromStorage('device_id', false, 'localStorage');
       const newUserId = storedUserId || btoa(fingerprint);
 
-      localStorage.setItem('device_id', newUserId);
+      setInStorage('device_id', newUserId, null, 'localStorage');
       setUserId(newUserId);
     } catch (error) {
       console.error('Error handling user ID:', error);
@@ -60,18 +61,18 @@ function GuestPage() {
   const handleLanguageChange = (e) => {
     setUserLanguage(e?.target?.value);
     setLanguage(e?.target?.value);
-    localStorage.setItem('local_route', JSON.stringify(e?.target?.value));
+    setInStorage('local_route', JSON.stringify(e?.target?.value), null, 'localStorage');
   };
 
   const setFinalLanguage = async () => {
-    const currentFlow = localStorage.getItem('flow');
+    const currentFlow = getFromStorage('flow', false, 'localStorage');
     if(currentFlow && [sessionFlowName.GuestMiStory, sessionFlowName.GuestDiscussion].includes(currentFlow)){
       await initialSetup();
     }
-    const lang = localStorage.getItem('preferred_route');
+    const lang = getFromStorage('preferred_route', false, 'localStorage');
 
     if(lang){
-      localStorage.setItem('route', lang);
+      setInStorage('route', lang, null, 'localStorage');
       setLanguage(JSON.parse(lang));
     }
     else if(currentFlow && [sessionFlowName.GuestMiStory, sessionFlowName.GuestDiscussion].includes(currentFlow)){
@@ -82,9 +83,9 @@ function GuestPage() {
 
   async function initialSetup() {
     try{
-      const deviceId = localStorage.getItem('device_id')
+      const deviceId = getFromStorage('device_id', false, 'localStorage')
       const customEmail = deviceId + "@shikshalokam.org"
-      const currentFlow = localStorage.getItem('flow');
+      const currentFlow = getFromStorage('flow', false, 'localStorage');
       const body = {
         email: customEmail,
         company: "shikshalokamstaging",
@@ -92,9 +93,9 @@ function GuestPage() {
         latest_flow_used: currentFlow,
         other_params: {
           device_id: deviceId,
-          city: localStorage.getItem('ip_city') || "",
-          state: localStorage.getItem('ip_state') || "",
-          country: localStorage.getItem('ip_country') || "",
+          city: getFromStorage('ip_city', false, 'localStorage') || "",
+          state: getFromStorage('ip_state', false, 'localStorage') || "",
+          country: getFromStorage('ip_country', false, 'localStorage') || "",
         }
       }
       
@@ -106,10 +107,10 @@ function GuestPage() {
         return;
       }
   
-      localStorage.setItem('profileid', JSON.stringify(res.id));
+      setInStorage('profileid', JSON.stringify(res.id), null, 'localStorage');
   
       let session = await getSessionDetails();
-      localStorage.setItem('sessionid', JSON.stringify(session.sessionid));
+      setInStorage('sessionid', JSON.stringify(session.sessionid), null, 'localStorage');
   
       const response = await axiosInstance({
         url: login_api_url,
@@ -121,8 +122,8 @@ function GuestPage() {
       });
   
       if (!!response?.data?.access_token) {
-        localStorage.setItem('company', JSON.stringify(response?.data?.company));
-        localStorage.setItem('first_name', JSON.stringify(response?.data?.first_name));
+        setInStorage('company', JSON.stringify(response?.data?.company), null, 'localStorage');
+        setInStorage('first_name', JSON.stringify(response?.data?.first_name), null, 'localStorage');
       } else {
         window.location.reload();
       }
@@ -222,10 +223,10 @@ function GuestPage() {
                   className="w-full p-3 mt-6 mb-2 px-5 py-3 text-white rounded-md"
                   style={{backgroundColor: "#572E91"}}
                   onClick={async() => {
-                    if(!localStorage.getItem('sessionid')){
+                    if(!getFromStorage('sessionid', false, 'localStorage')){
                       setIsLoading(true);
-                      localStorage.setItem('isNewChatOpen', JSON.stringify(true));
-                      localStorage.setItem('flow', sessionFlowName.GuestMiStory);
+                      setInStorage('isNewChatOpen', JSON.stringify(true), null, 'localStorage');
+                      setInStorage('flow', sessionFlowName.GuestMiStory, null, 'localStorage');
                     }
                     await setFinalLanguage();
                     navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT);
@@ -238,18 +239,18 @@ function GuestPage() {
                   className="w-full p-3 mt-6 mb-2 px-5 py-3 text-white rounded-md"
                   style={{backgroundColor: "#572E91"}}
                   onClick={async () => {
-                    if(!localStorage.getItem('sessionid')){
+                    if(!getFromStorage('sessionid', false, 'localStorage')){
                       setIsLoading(true);
-                      localStorage.setItem('isNewChatOpen', JSON.stringify(true));
+                      setInStorage('isNewChatOpen', JSON.stringify(true), null, 'localStorage');
                       const locationData = await getIpLocation();
                       if (locationData && locationData?.location) {
-                        localStorage.setItem('ip_state', locationData?.location?.regionName);
-                        localStorage.setItem('ip_city', locationData?.location?.city);
-                        localStorage.setItem('ip_country', locationData?.location?.country);
+                        setInStorage('ip_state', locationData?.location?.regionName, null, 'localStorage');
+                        setInStorage('ip_city', locationData?.location?.city, null, 'localStorage');
+                        setInStorage('ip_country', locationData?.location?.country, null, 'localStorage');
                       }
-                      localStorage.setItem('flow', sessionFlowName.GuestDiscussion);
+                      setInStorage('flow', sessionFlowName.GuestDiscussion, null, 'localStorage');
                     } else {
-                      localStorage.setItem('flow', sessionFlowName.LoginDiscussion);
+                      setInStorage('flow', sessionFlowName.LoginDiscussion, null, 'localStorage');
                     }
                     await setFinalLanguage();
                     navigate(ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT);

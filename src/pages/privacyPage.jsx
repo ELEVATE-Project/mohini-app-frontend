@@ -8,12 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { languageList } from "./ShikshalokamVoiceChat/enum";
 import { clearFromStorage } from "./ShikshalokamVoiceChat/voice-chat";
+import { getFromStorage, setInStorage } from "../services/storage_service";
 
 
 function PrivacyPage() {
     const navigate = useNavigate();
     const [userLanguage, setUserLanguage] = useState(
-        JSON.parse(localStorage.getItem("local_route")) || languageList[0].value
+        getFromStorage("local_route", true, "localStorage") || languageList[0].value
     );
     
     const { t } = useTranslation();
@@ -21,7 +22,7 @@ function PrivacyPage() {
     const handleLanguageChange = (e) => {
         setUserLanguage(e?.target?.value);
         setLanguage(e?.target?.value);
-        localStorage.setItem('local_route', JSON.stringify(e?.target?.value));
+        setInStorage('local_route', JSON.stringify(e?.target?.value), null, "localStorage");
     };
 
     return (

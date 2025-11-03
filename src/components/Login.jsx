@@ -15,7 +15,7 @@ import "../index.css"
 import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
 import i18n, { setLanguage } from '../i18n';
 import { useTranslation } from "react-i18next";
-import { clearFromStorage } from "../services/storage_service";
+import { clearFromStorage, getFromStorage, setInStorage } from "../services/storage_service";
 
 const cookies = new Cookies();
 const login_api_url = `/api/login/`;
@@ -264,9 +264,9 @@ function Login({ type, variant }) {
         return;
       }
       let session = await getSessionDetails();
-      localStorage.setItem('profileid', JSON.stringify(res.id));
-      localStorage.setItem('sessionid', JSON.stringify(session.sessionid));
-      localStorage.setItem('isNewChatOpen', JSON.stringify(true));
+      setInStorage('profileid', JSON.stringify(res.id), null, 'localStorage');
+      setInStorage('sessionid', JSON.stringify(session.sessionid), null, 'localStorage');
+      setInStorage('isNewChatOpen', JSON.stringify(true), null, 'localStorage');
   
       const response = await axiosInstance({
         url: login_api_url,
@@ -283,12 +283,12 @@ function Login({ type, variant }) {
           type: USER_ACTIONS.LOGIN,
           payload: response?.data,
         });
-        localStorage.setItem('first_name', JSON.stringify(response?.data?.first_name));
-        localStorage.setItem('accessToken', JSON.stringify(response?.data?.access_token));
-        localStorage.setItem('company', JSON.stringify(response?.data?.company));
-        localStorage.setItem('state', JSON.stringify(response?.data?.state));
-        localStorage.setItem('flow', sessionFlowName.LoginMiStory);
-				localStorage.setItem('has_accepted_tnc', true);
+        setInStorage('first_name', JSON.stringify(response?.data?.first_name), null, 'localStorage');
+        setInStorage('accessToken', JSON.stringify(response?.data?.access_token), null, 'localStorage');
+        setInStorage('company', JSON.stringify(response?.data?.company), null, 'localStorage');
+        setInStorage('state', JSON.stringify(response?.data?.state), null, 'localStorage');
+        setInStorage('flow', sessionFlowName.LoginMiStory, null, 'localStorage');
+				setInStorage('has_accepted_tnc', true, null, 'localStorage');
         cookies.set("profileid", JSON.stringify(response?.data?.id), {
           path: "/",
         });
@@ -297,10 +297,10 @@ function Login({ type, variant }) {
         });
         setLocalUserData(response?.data);
         // temp code (need to remove below later)
-        const lang = localStorage.getItem('preferred_route');
+        const lang = getFromStorage('preferred_route', false, 'localStorage');
 
         if(lang){
-          localStorage.setItem('route', lang);
+          setInStorage('route', lang, null, 'localStorage');
           setLanguage(JSON.parse(lang));
         }
         // temp code (need to remove above later)

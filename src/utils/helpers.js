@@ -1,6 +1,7 @@
 // utils/helpers.js
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 import { STORAGE_KEYS } from "./constants";
+import { getFromStorage, setInStorage } from "../services/storage_service";
 
 /**
  * Get default language based on use case type
@@ -26,14 +27,16 @@ export const getFilteredLanguages = (usecaseType) => {
 };
 
 /**
- * Initialize language in localStorage if not exists
+ * Initialize language in storage if not exists
  * @param {string} usecaseType - The use case type
  */
 export const initializeLanguageStorage = (usecaseType) => {
-  if (!localStorage.getItem(STORAGE_KEYS.LOCAL_ROUTE)) {
-    localStorage.setItem(
+  if (!getFromStorage(STORAGE_KEYS.LOCAL_ROUTE, false, 'localStorage')) {
+    setInStorage(
       STORAGE_KEYS.LOCAL_ROUTE,
-      JSON.stringify(getDefaultLanguage(usecaseType))
+      JSON.stringify(getDefaultLanguage(usecaseType)),
+      null,
+      'localStorage'
     );
   }
 };

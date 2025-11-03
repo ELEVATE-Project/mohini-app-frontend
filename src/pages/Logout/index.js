@@ -7,6 +7,7 @@ import axiosInstance from "../../utils/axios";
 import getConfiguration, { company_list } from "../../configure";
 import { Link } from "react-router-dom";
 import ROUTES from "../../url";
+import { removeFromStorage } from "../../services/storage_service";
 
 const logout_api_url = `/api/logout/`;
 const company_config = getConfiguration();
@@ -86,27 +87,27 @@ const Logout = () => {
         removeCompanyData();
         removeIsStoryFormedAfterCall();
         removeIsRecordButtonClicked();
-        localStorage.removeItem('countdownTime');
-        localStorage.removeItem('profileid');
-        localStorage.removeItem('sessionid');
-        localStorage.removeItem('route');
-        localStorage.removeItem('countdownTime_times');
-        localStorage.removeItem('chatbot_clickedOn?');
-        localStorage.removeItem('isChatVisible');
-        localStorage.removeItem('chat-history');
-        localStorage.removeItem('isCallError');
-        localStorage.removeItem('timerStart');
-        localStorage.removeItem('botName');
-        localStorage.removeItem('type');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('company');
-        localStorage.removeItem('state');
-        localStorage.removeItem('showHomepage');
-        localStorage.removeItem('showFileInput');
-        localStorage.removeItem('intro_message');
-        localStorage.removeItem('isOldChatOpen');
-        localStorage.removeItem('isNewChatOpen');
-        localStorage.removeItem('model');
+        removeFromStorage('countdownTime', true, 'localStorage');
+        removeFromStorage('profileid', true, 'localStorage');
+        removeFromStorage('sessionid', true, 'localStorage');
+        removeFromStorage('route', true, 'localStorage');
+        removeFromStorage('countdownTime_times', true, 'localStorage');
+        removeFromStorage('chatbot_clickedOn?', true, 'localStorage');
+        removeFromStorage('isChatVisible', true, 'localStorage');
+        removeFromStorage('chat-history', true, 'localStorage');
+        removeFromStorage('isCallError', true, 'localStorage');
+        removeFromStorage('timerStart', true, 'localStorage');
+        removeFromStorage('botName', true, 'localStorage');
+        removeFromStorage('type', true, 'localStorage');
+        removeFromStorage('accessToken', true, 'localStorage');
+        removeFromStorage('company', true, 'localStorage');
+        removeFromStorage('state', true, 'localStorage');
+        removeFromStorage('showHomepage', true, 'localStorage');
+        removeFromStorage('showFileInput', true, 'localStorage');
+        removeFromStorage('intro_message', true, 'localStorage');
+        removeFromStorage('isOldChatOpen', true, 'localStorage');
+        removeFromStorage('isNewChatOpen', true, 'localStorage');
+        removeFromStorage('model', true, 'localStorage');
     
 
       } catch (error) {
@@ -168,23 +169,23 @@ const Logout = () => {
         removeCompanyData();
         removeIsStoryFormedAfterCall();
         removeIsRecordButtonClicked();
-        localStorage.removeItem('countdownTime');
-        localStorage.removeItem('profileid');
-        localStorage.removeItem('sessionid');
-        localStorage.removeItem('route');
-        localStorage.removeItem('countdownTime_times');
-        localStorage.removeItem('chatbot_clickedOn');
-        localStorage.removeItem('isChatVisible');
-        localStorage.removeItem('chat-history');
-        localStorage.removeItem('isCallError');
-        localStorage.removeItem('timerStart');
-        localStorage.removeItem('showHomepage');
-        localStorage.removeItem('showFileInput');
-        localStorage.removeItem('intro_message');
-        localStorage.removeItem('isOldChatOpen');
-        localStorage.removeItem('isNewChatOpen');
-        localStorage.removeItem('model');
-        localStorage.removeItem('llmError');
+        removeFromStorage('countdownTime', true, 'localStorage');
+        removeFromStorage('profileid', true, 'localStorage');
+        removeFromStorage('sessionid', true, 'localStorage');
+        removeFromStorage('route', true, 'localStorage');
+        removeFromStorage('countdownTime_times', true, 'localStorage');
+        removeFromStorage('chatbot_clickedOn', true, 'localStorage');
+        removeFromStorage('isChatVisible', true, 'localStorage');
+        removeFromStorage('chat-history', true, 'localStorage');
+        removeFromStorage('isCallError', true, 'localStorage');
+        removeFromStorage('timerStart', true, 'localStorage');
+        removeFromStorage('showHomepage', true, 'localStorage');
+        removeFromStorage('showFileInput', true, 'localStorage');
+        removeFromStorage('intro_message', true, 'localStorage');
+        removeFromStorage('isOldChatOpen', true, 'localStorage');
+        removeFromStorage('isNewChatOpen', true, 'localStorage');
+        removeFromStorage('model', true, 'localStorage');
+        removeFromStorage('llmError', true, 'localStorage');
       }
     }
     if (!!Object.keys(localUserData || {}).length) {

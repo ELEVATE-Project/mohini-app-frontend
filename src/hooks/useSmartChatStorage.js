@@ -1,29 +1,31 @@
-import { useLocalStorage, useSessionStorage } from "react-use";
+import { getFromStorage, removeFromStorage } from "../services/storage_service";
+import useChatStore from "../stores/chatStore";
 import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
 
+/**
+ * Hook for smart chat storage that automatically uses sessionStorage or localStorage
+ * based on flow type. Uses Zustand chatStore for state management.
+ */
 const useSmartChatStorage = () => {
-  const flow = sessionStorage.getItem('flow') || localStorage.getItem('flow');
+  const flow = getFromStorage('flow', false);
   const sessionFlows = [sessionFlowName.GuestDiscussion, sessionFlowName.GuestMiStory];
   const isTemporary = flow && sessionFlows.includes(flow);
 
-  const [sessionValue, setSessionValue] = useSessionStorage("chat-history", []);
-  const [localValue, setLocalValue, removeLocalValue] = useLocalStorage("chat-history", []);
+  // Get chat history from store
+  const chatHistory = useChatStore((state) => state['chat-history'] || []);
 
-  const removeVal = () => {
-    if (isTemporary) {
-      sessionStorage.removeItem("chat-history");
-      setSessionValue([]); // Update state after removing
-    } else {
-      localStorage.removeItem("chat-history");
-      setLocalValue([]); // Update state after removing
-    }
+  // Get the setter function from store (not via selector)
+  const setChatHistoryValue = (value) => {
+    useChatStore.getState().setChatHistory(value);
   };
 
-  if (isTemporary) {
-    return [sessionValue, setSessionValue, removeVal];
-  } else {
-    return [localValue, setLocalValue, removeVal];
-  }
+  const removeVal = () => {
+    removeFromStorage('chat-history', false);
+    setChatHistoryValue([]);
+  };
+
+  // Return value, setter, and remover matching the original API
+  return [chatHistory, setChatHistoryValue, removeVal];
 };
 
 export default useSmartChatStorage

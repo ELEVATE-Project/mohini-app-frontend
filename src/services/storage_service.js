@@ -1,66 +1,20 @@
-import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
 import axiosInstance from "../utils/axios";
+import { setInStorage as setInZustandStorage, getFromStorage as getFromZustandStorage, removeFromStorage as removeFromZustandStorage, clearFromStorage as clearFromZustandStorage } from "../stores";
 
-export const setInStorage = (key, value, currentFlow, storageName='') => {
-  let storage;
-  if (storageName && storageName !== '') {
-    const isTemporary = storageName === 'sessionStorage';
-    storage = isTemporary ? sessionStorage : localStorage;
-  } else {
-    const flow = currentFlow || sessionStorage.getItem('flow') || localStorage.getItem('flow');
-    const sessionFlows = [sessionFlowName.GuestDiscussion, sessionFlowName.GuestMiStory, sessionFlowName.ListeningActivity];
-    const isTemporary = flow && sessionFlows.includes(flow) && !(
-      localStorage.getItem('projectId') ||
-      sessionStorage.getItem('projectId')
-    );
-    storage = isTemporary ? sessionStorage : localStorage;
-  }
-  storage.setItem(key, value);
+// Re-export Zustand-backed storage functions for backward compatibility
+export const setInStorage = (key, value, currentFlow, storageName = '') => {
+  // Note: storageName and currentFlow are handled by Zustand stores via dynamic storage adapter
+  return setInZustandStorage(key, value, currentFlow, storageName);
 };
-  
-export const getFromStorage = (key, parseValue = false, storageName='') => {
-  let storage;
-  if (storageName && storageName !== '') {
-    storage = storageName === 'sessionStorage' ? sessionStorage : localStorage;
-  } else{
-    const flow = sessionStorage.getItem('flow') || localStorage.getItem('flow');
-    const sessionFlows = [sessionFlowName.GuestDiscussion, sessionFlowName.GuestMiStory, sessionFlowName.ListeningActivity];
-    const isTemporary = flow && sessionFlows.includes(flow) && !(
-      localStorage.getItem('projectId') ||
-      sessionStorage.getItem('projectId')
-    );
-    storage = isTemporary ? sessionStorage : localStorage;
-  }
-  const value = storage.getItem(key);
-  
-  if (value && parseValue) {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      console.error(`Error parsing value for key "${key}":`, e);
-      return null;
-    }
-  }
-  
-  return value;
+
+export const getFromStorage = (key, parseValue = false, storageName = '') => {
+  // Note: storageName is handled by Zustand stores via dynamic storage adapter
+  return getFromZustandStorage(key, parseValue, storageName);
 };
-  
-export const removeFromStorage = (key, removeFromAll=false, storageName='') => {
-  if (removeFromAll) {
-    sessionStorage.removeItem(key);
-    localStorage.removeItem(key);
-    return;
-  }
-  let storage;
-  if (storageName && storageName !== '') {
-    storage = storageName === 'sessionStorage' ? sessionStorage : localStorage;
-  } else{
-    const flow = sessionStorage.getItem('flow') || localStorage.getItem('flow');
-    const sessionFlows = [sessionFlowName.GuestDiscussion, sessionFlowName.GuestMiStory, sessionFlowName.ListeningActivity];
-    const isTemporary = flow && sessionFlows.includes(flow);
-    storage = isTemporary ? sessionStorage : localStorage;
-  }
-  storage.removeItem(key);
+
+export const removeFromStorage = (key, removeFromAll = false, storageName = '') => {
+  // Note: storageName is handled by Zustand stores via dynamic storage adapter
+  return removeFromZustandStorage(key, removeFromAll, storageName);
 };
 
 // Helper for exponential backoff with jitter
@@ -137,22 +91,7 @@ export const handleS3Upload = async (file, fileName, folderStructure, storyData,
   return '';
 };
 
-export function clearFromStorage(removeFromAll=false, excludeKeys = []) {
-  try{
-    const keysToRemove = [
-      'botName', 'chat-history', 'company', 'first_name', 'has_accepted_tnc', 'intro_message', 
-      'isChatVisible', 'isNewChatOpen', 'isOldChatOpen', 'profileid', 'route', 'sessionid', 'showFileInput', 
-      'showHomepage', 'state', 'accessToken', 'flow', 'statemachine_length', 'selected_type', 
-      'preferred_route', 'country', 'city', 'ip_city', 'ip_state', 'ip_country', 'llmError', 'lang_progress',
-      'grit', 'device_id', 'defaultBotName', 'phoneNumber', 'english_first_name', 'hasSelectedLanguage', 'chatLanguage',
-      'projectId', 'taskId', 'ssoRerouteURL'
-    ];
-    keysToRemove.forEach((key) => {
-      if (!excludeKeys.includes(key)) {
-        removeFromStorage(key, removeFromAll);
-      }
-    });
-  } catch (error){
-    console.error("Error while clearing: ", error);
-  }
+export function clearFromStorage(removeFromAll = false, excludeKeys = []) {
+  // Use Zustand-backed clearFromStorage
+  return clearFromZustandStorage(removeFromAll, excludeKeys);
 }

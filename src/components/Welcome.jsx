@@ -9,7 +9,7 @@ import FormData from "./Form/FormData";
 import { setLanguage } from "../i18n";
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 import { useTranslation } from "react-i18next";
-import { clearFromStorage } from "../services/storage_service";
+import { clearFromStorage, getFromStorage, setInStorage } from "../services/storage_service";
 
 const cookies = new Cookies();
 const login_api_url = `/api/login/`;
@@ -17,14 +17,14 @@ const login_api_url = `/api/login/`;
 function WelcomePage() {
   const navigate = useNavigate();
   const [userLanguage, setUserLanguage] = useState(
-    JSON.parse(localStorage.getItem("local_route")) || languageList[0].value
+    getFromStorage("local_route", true, "localStorage") || languageList[0].value
   );
   
   const { t } = useTranslation();
   
   useEffect(() => {
-    if (!localStorage.getItem("local_route")) {
-      localStorage.setItem("local_route", JSON.stringify(languageList[0].value));
+    if (!getFromStorage("local_route", false, "localStorage")) {
+      setInStorage("local_route", JSON.stringify(languageList[0].value), null, "localStorage");
     }
     clearFromStorage()
   }, []);
@@ -32,7 +32,7 @@ function WelcomePage() {
   const handleLanguageChange = (e) => {
     setUserLanguage(e?.target?.value);
     setLanguage(e?.target?.value);
-    localStorage.setItem('local_route', JSON.stringify(e?.target?.value));
+    setInStorage('local_route', JSON.stringify(e?.target?.value), null, "localStorage");
   };
 
   return (

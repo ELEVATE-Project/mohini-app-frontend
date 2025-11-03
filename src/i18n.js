@@ -1,11 +1,14 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import HttpApi from 'i18next-http-backend';
+import { getFromStorage } from './services/storage_service';
 
-const preferredLanguage = JSON.parse(localStorage.getItem('preferred_language'))?.value;
+const preferredLanguage = getFromStorage('preferred_language', true, 'localStorage')?.value;
 const languageToUse = 
-  JSON.parse(sessionStorage.getItem("route")) || JSON.parse(localStorage.getItem("route")) || 
-  JSON.parse(sessionStorage.getItem("local_route")) || JSON.parse(localStorage.getItem("local_route")) || 
+  getFromStorage("route", true, "sessionStorage") || 
+  getFromStorage("route", true, "localStorage") || 
+  getFromStorage("local_route", true, "sessionStorage") || 
+  getFromStorage("local_route", true, "localStorage") || 
   "en";
   
 i18n
@@ -23,7 +26,7 @@ i18n
   });
 
 export const setLanguage = (languageProp) => {
-  const route = JSON.parse(sessionStorage.getItem('route')) || JSON.parse(localStorage.getItem('route'));
+  const route = getFromStorage('route', true, 'sessionStorage') || getFromStorage('route', true, 'localStorage');
   const languageToUse = languageProp || route || 'en';
   console.log("Language set to: ", languageToUse);
   i18n.changeLanguage(languageToUse);

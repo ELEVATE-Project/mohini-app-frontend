@@ -56,3 +56,31 @@ export const getFlowConfig = flowType => {
   }
   return config
 }
+
+export const FLOW_CONFIG_V2 = {
+  [sessionFlowName.SchoolSurvey]: {
+    chatHeading: "{homepageHeading}\n{homepageHeading1}",
+    chatDescription: `1. {homepageList}\n2. {homepageList1}\n3. {homepageList2}`,
+    imageUploadLimit: 10,
+    postChatConfig: {
+      allowImageUpload: true,
+      imageUploadLimit: 10,
+      displayEditStory: true,
+    },
+  },
+}
+
+/**
+ * Extracts variable placeholders from a string
+ * @param {string} text - The text containing variable placeholders in the format {variableName}
+ * @returns {string[]|null} An array of matched variables (e.g., ["{homepageHeading}", "{homepageList}"]) or null if no matches found
+ * @example
+ * getStringVariables("Hello {name}, welcome to {place}")
+ */
+export const getStringVariables = text => {
+  return text.match(/{(\w+)}/g)
+}
+
+export const processStringSubstitution = (text, obj) => {
+  return text.replace(/{(\w+)}/g, (match, key) => obj[key] || match)
+}

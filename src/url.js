@@ -18,6 +18,7 @@ const ROUTES = {
   SSO_FLOW: "/sso",
   TERMS_AND_CONDITIONS: "/tnc",
   SHIKSHAGRAHA_REPOSITORY_MITRA_AI_ASSISTANT: "/create-profile/mitra-chat",
-}
+  AP_SCHOOL_SURVEY: "/school-survey",
+};
 
-export default ROUTES
+export default ROUTES;

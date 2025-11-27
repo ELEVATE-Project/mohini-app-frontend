@@ -1,21 +1,21 @@
 // components/FlowSelection.js
-import { FaArrowRightLong } from "react-icons/fa6"
-import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum"
-import { STORE_NAME_CONSTANTS } from "store/constants"
-import { useChatStorage } from "hooks/useStorage"
-import { useTranslation } from "react-i18next"
-import ShowPageButton from "./ShowPageButton"
+import { FaArrowRightLong } from "react-icons/fa6";
+import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
+import { STORE_NAME_CONSTANTS } from "store/constants";
+import { useChatStorage } from "hooks/useStorage";
+import { useTranslation } from "react-i18next";
+import ShowPageButton from "./ShowPageButton";
 
 const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, onFlowContinue, setIsLoading }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  const selectedFlow = useChatStorage()(state => state.flow)
-  const setSelectedFlow = useChatStorage().getState().setFlow
+  const selectedFlow = useChatStorage()(state => state.flow);
+  const setSelectedFlow = useChatStorage().getState().setFlow;
 
   const handleContinueClick = async () => {
-    setIsLoading(true)
-    await onFlowContinue()
-  }
+    setIsLoading(true);
+    await onFlowContinue();
+  };
 
   return (
     <>
@@ -50,6 +50,19 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
               setStopAudioTriggered={setStopAudioTriggered}
               logo="https://s3.ap-south-1.amazonaws.com/static-media.gritworks.ai/fe-images/PNG/Shikshalokam/mi_story_capture_logo.png"
             />
+
+            <FlowOption
+              flowName={sessionFlowName.SchoolSurvey}
+              // selectedFlow={selectedFlow}
+              onSelect={setSelectedFlow}
+              buttonText={t("commonPageButtonText1")}
+              buttonId="capture-mi-story"
+              // userLanguage={userLanguage}
+              audioRef={audioRef}
+              stopAudioTriggered={stopAudioTriggered}
+              setStopAudioTriggered={setStopAudioTriggered}
+              logo="https://s3.ap-south-1.amazonaws.com/static-media.gritworks.ai/fe-images/PNG/Shikshalokam/mi_story_capture_logo.png"
+            />
           </div>
 
           {/* Continue Button */}
@@ -59,8 +72,8 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 // Individual Flow Option Component
 const FlowOption = ({
@@ -75,8 +88,8 @@ const FlowOption = ({
   setStopAudioTriggered,
   logo,
 }) => {
-  const selectedFlow = useChatStorage()(state => state.flow)
-  const isSelected = selectedFlow === flowName
+  const selectedFlow = useChatStorage()(state => state.flow);
+  const isSelected = selectedFlow === flowName;
 
   return (
     <span
@@ -99,7 +112,7 @@ const FlowOption = ({
         />
       </span>
     </span>
-  )
-}
+  );
+};
 
-export default FlowSelection
+export default FlowSelection;

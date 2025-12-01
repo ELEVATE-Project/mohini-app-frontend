@@ -16,7 +16,7 @@ export const lang_codes = {
   ta: "ta-IN",
   bn: "bn-IN",
   id: "id-ID",
-  enus: "en-US"
+  enus: "en-US",
 };
 
 export const bot_routes = {
@@ -26,7 +26,8 @@ export const bot_routes = {
   oneshot: "/oneshot_bot",
   guest_oneshot: "/oneshot_guest",
   shikshalokam_chaupal: "/shikshalokam_chaupal",
-  listening_activity: "/listening_activity"
+  listening_activity: "/listening_activity",
+  school_survey: "/school_survey",
 };
 
 export const bot_websocket = {
@@ -38,7 +39,6 @@ export const bot_websocket = {
   shikshalokam_chaupal: "/ws/shikshalokam_chaupal/",
   listening_activity: "/ws/common/",
 };
-
 
 export const lang_routes = {
   en: "/",
@@ -54,7 +54,7 @@ export const company_host_list = {
 };
 
 export const company_reroute_list = {
-  shikshalokam: "https://demo.shikshalokam.org"+ROUTES.LOGIN,
+  shikshalokam: "https://demo.shikshalokam.org" + ROUTES.LOGIN,
 };
 
 export const company_register_list = {
@@ -86,10 +86,9 @@ let init_config = {
   company_subdomain: "",
   company_name: "",
   preferredLanguage: lang_codes.en,
-  collab_logo: 'https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png',
-  allowed_languages: [lang_codes.en]
+  collab_logo: "https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png",
+  allowed_languages: [lang_codes.en],
 };
-
 
 const getConfiguration = () => {
   const result = getDomainDetail();
@@ -100,12 +99,12 @@ const getConfiguration = () => {
       case "":
         return {
           ...init_config,
-          company_logo: 'https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png',
+          company_logo: "https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/shikshalokam-logo.png",
           after_login_url: ROUTES.STORY_LIST,
           websocket_url: "demo",
           company_subdomain: company_list.demo,
           company_name: "Demo",
-          collab_logo: '/images/shikshalokam_logo_pdf.png',
+          collab_logo: "/images/shikshalokam_logo_pdf.png",
           host: company_host_list.demo,
           reroute: company_reroute_list.demo,
           register_url: company_register_list.demo,

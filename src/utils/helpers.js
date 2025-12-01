@@ -1,9 +1,10 @@
 // utils/helpers.js
-import { languageList } from "../pages/ShikshalokamVoiceChat/enum"
-import { STORAGE_KEYS } from "./constants"
-import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum"
-import { bot_websocket } from "configure"
-import env from "./env"
+import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
+import { STORAGE_KEYS } from "./constants";
+import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
+import { bot_websocket } from "configure";
+import env from "./env";
+import { getRouteFromSession } from "../config/flowConfig";
 
 /**
  * Get default language based on use case type
@@ -13,9 +14,9 @@ import env from "./env"
 export const getDefaultLanguage = usecaseType => {
   switch (usecaseType) {
     default:
-      return languageList[0].value
+      return languageList[0].value;
   }
-}
+};
 
 /**
  * Filter languages by use case type
@@ -23,8 +24,8 @@ export const getDefaultLanguage = usecaseType => {
  * @returns {Array} Filtered language list
  */
 export const getFilteredLanguages = usecaseType => {
-  return languageList.filter(lang => !lang.excludeFor.some(x => x === usecaseType))
-}
+  return languageList.filter(lang => !lang.excludeFor.some(x => x === usecaseType));
+};
 
 /**
  * Initialize language in localStorage if not exists
@@ -32,9 +33,9 @@ export const getFilteredLanguages = usecaseType => {
  */
 export const initializeLanguageStorage = usecaseType => {
   if (!localStorage.getItem(STORAGE_KEYS.LOCAL_ROUTE)) {
-    localStorage.setItem(STORAGE_KEYS.LOCAL_ROUTE, JSON.stringify(getDefaultLanguage(usecaseType)))
+    localStorage.setItem(STORAGE_KEYS.LOCAL_ROUTE, JSON.stringify(getDefaultLanguage(usecaseType)));
   }
-}
+};
 
 /**
  * Get logo width class based on language
@@ -42,8 +43,8 @@ export const initializeLanguageStorage = usecaseType => {
  * @returns {string} CSS class for logo width
  */
 export const getLogoWidthClass = language => {
-  return language === "en" ? "w-[140px]" : "w-[100px]"
-}
+  return language === "en" ? "w-[140px]" : "w-[100px]";
+};
 
 /**
  * Check if language button should be visible
@@ -51,49 +52,49 @@ export const getLogoWidthClass = language => {
  * @returns {boolean} Whether language button should be visible
  */
 export const shouldShowLanguageButton = languageButtonSelect => {
-  return languageButtonSelect && ![null, ""].includes(languageButtonSelect)
-}
+  return languageButtonSelect && ![null, ""].includes(languageButtonSelect);
+};
 
 export function buildWebSocketUrl({ searchParams, storageFlow, selectedType, wssProtocol }) {
   // Handle SSO code path
   if (searchParams.get("code")) {
     // NOTE: revert this code after testing
     // return `${wssProtocol}${window.location.host}/ws/chat/company/`;
-    return `${wssProtocol}${env.WEBSOCKET_HOST()}/ws/chat/company/`
+    return `${wssProtocol}${env.WEBSOCKET_HOST()}/ws/chat/company/`;
   }
 
-  const baseUrl = `${wssProtocol}${env.WEBSOCKET_HOST()}`
-  const currentFlow = storageFlow
+  const baseUrl = `${wssProtocol}${env.WEBSOCKET_HOST()}`;
+  // const currentFlow = storageFlow;
 
-  // Direct flow to websocket mapping
-  const websocketConfig = {
-    [sessionFlowName.GuestDiscussion]: bot_websocket.shikshalokam_chaupal,
-    [sessionFlowName.LoginDiscussion]: bot_websocket.shikshalokam_chaupal,
-    [sessionFlowName.ListeningActivity]: bot_websocket.listening_activity,
-  }
+  // // Direct flow to websocket mapping
+  // const websocketConfig = {
+  //   [sessionFlowName.GuestDiscussion]: bot_websocket.shikshalokam_chaupal,
+  //   [sessionFlowName.LoginDiscussion]: bot_websocket.shikshalokam_chaupal,
+  //   [sessionFlowName.ListeningActivity]: bot_websocket.listening_activity,
+  // };
 
-  // Type-based flow to websocket mapping
-  const normalTypeConfig = {
-    normal: {
-      [sessionFlowName.LoginMiStory]: bot_websocket.normal,
-      [sessionFlowName.GuestMiStory]: bot_websocket.guest_normal,
-    },
-    oneshot: {
-      [sessionFlowName.LoginMiStory]: bot_websocket.oneshot,
-      [sessionFlowName.GuestMiStory]: bot_websocket.guest_oneshot,
-    },
-  }
+  // // Type-based flow to websocket mapping
+  // const normalTypeConfig = {
+  //   normal: {
+  //     [sessionFlowName.LoginMiStory]: bot_websocket.normal,
+  //     [sessionFlowName.GuestMiStory]: bot_websocket.guest_normal,
+  //   },
+  //   oneshot: {
+  //     [sessionFlowName.LoginMiStory]: bot_websocket.oneshot,
+  //     [sessionFlowName.GuestMiStory]: bot_websocket.guest_oneshot,
+  //   },
+  // };
 
   // Check direct flow mapping first
-  if (websocketConfig[currentFlow]) {
-    return `${baseUrl}${websocketConfig[currentFlow]}`
-  }
+  // if (websocketConfig[currentFlow]) {
+  //   return `${baseUrl}${websocketConfig[currentFlow]}`;
+  // }
 
-  // Check type-based mapping
-  const selectedTypeConfig = normalTypeConfig[selectedType]
-  if (selectedTypeConfig && selectedTypeConfig[currentFlow]) {
-    return `${baseUrl}${selectedTypeConfig[currentFlow]}`
-  }
+  // // Check type-based mapping
+  // const selectedTypeConfig = normalTypeConfig[selectedType];
+  // if (selectedTypeConfig && selectedTypeConfig[currentFlow]) {
+  //   return `${baseUrl}${selectedTypeConfig[currentFlow]}`;
+  // }
 
-  return null
+  return `${baseUrl}${getRouteFromSession(storageFlow, selectedType)}`;
 }

@@ -59,7 +59,7 @@ import useUserDataLocalStore from "store/slices/userData/userDataLocal";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import VoiceTextInput from "../../components/VoiceTextInput";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
-import { FLOW_CONFIG_V2, getStringVariables, processStringSubstitution } from "../../config/flowConfig";
+import { FLOW_CONFIG_V2, getRouteFromSession, getStringVariables, processStringSubstitution } from "../../config/flowConfig";
 
 const cookies = new Cookies();
 
@@ -2046,41 +2046,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   function getSessionRoute() {
     const currentFlow = storageFlow;
-    console.log("Current Flow:", currentFlow);
-    console.log("Is the flow equal", currentFlow === sessionFlowName.ListeningActivity);
-
-    // Configuration mapping flow names to bot routes
-    const flowToRouteMap = {
-      [sessionFlowName.GuestDiscussion]: bot_routes.shikshalokam_chaupal,
-      [sessionFlowName.LoginDiscussion]: bot_routes.shikshalokam_chaupal,
-      [sessionFlowName.ListeningActivity]: bot_routes.listening_activity,
-    };
-
-    const typeBasedRouteMap = {
-      normal: {
-        [sessionFlowName.LoginMiStory]: bot_routes.normal,
-        [sessionFlowName.GuestMiStory]: bot_routes.guest_normal,
-      },
-      oneshot: {
-        [sessionFlowName.LoginMiStory]: bot_routes.oneshot,
-        [sessionFlowName.GuestMiStory]: bot_routes.guest_oneshot,
-      },
-    };
-
-    // Check direct flow mapping first
-    if (currentFlow && flowToRouteMap[currentFlow]) {
-      return flowToRouteMap[currentFlow];
-    }
-
-    // Check type-based mapping
-    const routeMap = selectedType === "normal" ? typeBasedRouteMap.normal : typeBasedRouteMap.oneshot;
-
-    if (currentFlow && routeMap[currentFlow]) {
-      return routeMap[currentFlow];
-    }
-
-    // Default route
-    return bot_routes.reflection;
+    return getRouteFromSession(currentFlow, selectedType);
   }
 
   // ========================================================================
@@ -2779,7 +2745,9 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
                   let chatHeading = FLOW_CONFIG_V2[storageFlow].chatHeading;
 
-                  const stringVariables = getStringVariables(chatHeading);
+                  const stringVariables = getStringVariables(chatHeading).map(val => {
+                    return val.slice(1, -1);
+                  });
 
                   if (!stringVariables || stringVariables.length === 0) chatHeading = undefined;
                   else {
@@ -2788,14 +2756,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                     });
                   }
 
+                  console.log(chatHeading, "chatHeading");
+
                   return (
                     <>
                       <div className="div10">
-                        <h3 className="h3-1">
-                          chatHeading && {t(`${chatHeading}`)}
-                          <br />
-                          {t(`${prefix}homepageHeading1`)}
-                        </h3>
+                        <h3 className="h3-1 whitespace-pre-line">{chatHeading && t(`${chatHeading}`)}</h3>
                       </div>
                       <ul className="div11">
                         <li>{t(`${prefix}homepageList`)}</li>

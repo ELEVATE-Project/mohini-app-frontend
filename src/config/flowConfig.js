@@ -93,6 +93,13 @@ export const FLOW_TO_WEBSOCKET_MAP = {
   [sessionFlowName.SchoolSurvey]: bot_websocket.shikshalokam_chaupal,
 };
 
+export const getWebSocketUrlFromSession = (sessionName, selectedType = undefined) => {
+  if (!FLOW_TO_WEBSOCKET_MAP[sessionName]) return null;
+  if (typeof FLOW_TO_WEBSOCKET_MAP[sessionName] === "string") return FLOW_TO_WEBSOCKET_MAP[sessionName];
+  if (selectedType && FLOW_TO_WEBSOCKET_MAP[sessionName][selectedType]) return FLOW_TO_WEBSOCKET_MAP[sessionName][selectedType];
+  return bot_routes.reflection;
+};
+
 export const getRouteFromSession = (sessionName, selectedType = undefined) => {
   if (!FLOW_TO_ROUTE_MAP[sessionName]) return null;
   if (typeof FLOW_TO_ROUTE_MAP[sessionName] === "string") return FLOW_TO_ROUTE_MAP[sessionName];

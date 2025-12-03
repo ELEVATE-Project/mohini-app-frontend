@@ -1,10 +1,8 @@
 // utils/helpers.js
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 import { STORAGE_KEYS } from "./constants";
-import { sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
-import { bot_websocket } from "configure";
 import env from "./env";
-import { getRouteFromSession } from "../config/flowConfig";
+import { getWebSocketUrlFromSession } from "../config/flowConfig";
 
 /**
  * Get default language based on use case type
@@ -96,5 +94,5 @@ export function buildWebSocketUrl({ searchParams, storageFlow, selectedType, wss
   //   return `${baseUrl}${selectedTypeConfig[currentFlow]}`;
   // }
 
-  return `${baseUrl}${getRouteFromSession(storageFlow, selectedType)}`;
+  return `${baseUrl}${getWebSocketUrlFromSession(storageFlow, selectedType)}`;
 }

@@ -3,7 +3,7 @@ import ROUTES from "../url";
 import ptmQuestions from "../services/const/questions/ptmQuestions";
 import ylcQuestions, { ylcStoryTextAudio } from "../services/const/questions/ylcQuestions";
 import env from "../utils/env";
-import { bot_routes } from "../configure";
+import { bot_routes, bot_websocket } from "../configure";
 
 const base_path = env.AUDIO_PATH();
 
@@ -83,14 +83,14 @@ export const FLOW_TO_ROUTE_MAP = {
 };
 
 export const FLOW_TO_WEBSOCKET_MAP = {
-  [sessionFlowName.GuestDiscussion]: bot_routes.shikshalokam_chaupal,
-  [sessionFlowName.LoginDiscussion]: bot_routes.shikshalokam_chaupal,
-  [sessionFlowName.ListeningActivity]: bot_routes.listening_activity,
+  [sessionFlowName.GuestDiscussion]: bot_websocket.shikshalokam_chaupal,
+  [sessionFlowName.LoginDiscussion]: bot_websocket.shikshalokam_chaupal,
+  [sessionFlowName.ListeningActivity]: bot_websocket.listening_activity,
   [sessionFlowName.GuestMiStory]: {
-    normal: bot_routes.normal,
-    oneshot: bot_routes.oneshot,
+    normal: bot_websocket.normal,
+    oneshot: bot_websocket.oneshot,
   },
-  [sessionFlowName.SchoolSurvey]: bot_routes.shikshalokam_chaupal,
+  [sessionFlowName.SchoolSurvey]: bot_websocket.shikshalokam_chaupal,
 };
 
 export const getRouteFromSession = (sessionName, selectedType = undefined) => {
@@ -99,7 +99,6 @@ export const getRouteFromSession = (sessionName, selectedType = undefined) => {
   if (selectedType && FLOW_TO_ROUTE_MAP[sessionName][selectedType]) return FLOW_TO_ROUTE_MAP[sessionName][selectedType];
   return bot_routes.reflection;
 };
-
 /**
  * Extracts variable placeholders from a string
  * @param {string} text - The text containing variable placeholders in the format {variableName}

@@ -11,6 +11,14 @@ import { useChatStorage, useUserStorage, useSiteStorage } from "hooks/useStorage
 import useUserDataLocalStore from "store/slices/userData/userDataLocal"
 import { useSiteDataLocalStore } from "store"
 
+/**
+ * Render the Shikshalokam chat UI and perform guest initialization, session and profile setup, IP location detection, device fingerprinting, and language selection.
+ *
+ * @param {Object} props
+ * @param {string} props.type - Chat flow type to set for the session (e.g., which conversation flow to use).
+ * @param {string} props.variant - UI variant for the chat component.
+ * @returns {JSX.Element} The chat UI: the voice-based Shikshalokam chat when ready, or a loading spinner while setup is in progress.
+ */
 function ShikshalokamChat({ type, variant }) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
@@ -30,6 +38,7 @@ function ShikshalokamChat({ type, variant }) {
   const setIpCity = useUserStorage()(state => state.setIpCity)
   const setIpCountry = useUserStorage()(state => state.setIpCountry)
   const setIpState = useUserStorage()(state => state.setIpState)
+  const { setIpZipCode } = useUserStorage().getState()
   const setIsNewChatOpen = useChatStorage()(state => state.setIsNewChatOpen)
   const setProfileId = useUserStorage()(state => state.setProfileId)
   const setSessionId = useChatStorage()(state => state.setSessionId)
@@ -134,6 +143,7 @@ function ShikshalokamChat({ type, variant }) {
           setIpState(locationData?.location?.regionName)
           setIpCity(locationData?.location?.city)
           setIpCountry(locationData?.location?.country)
+          setIpZipCode(locationData?.location?.zip)
         }
         setFlow(type)
         getUserFingerPrint()

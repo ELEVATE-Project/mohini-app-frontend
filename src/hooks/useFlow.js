@@ -8,6 +8,7 @@ import { useSiteStorage, useStorage } from "hooks/useStorage";
 import ROUTES from "../url";
 import useChatDataLocalStore from "store/slices/chatData/chatDataLocal";
 import useSiteDataLocalStore from "store/slices/siteData/siteDataLocal";
+import { FLOW_TO_WEB_ROUTE_MAP } from "../config/flowConfig";
 
 export const useFlow = usecaseType => {
   const navigate = useNavigate();
@@ -20,19 +21,10 @@ export const useFlow = usecaseType => {
     setIsLoading(true);
     await stopAllAudio();
 
-    // const flow = useChatDataSessionStore.getState().getFlow();
-
     let navigateUrl = undefined;
-    let replaceUrl = undefined;
-
     setPreviousUrl(window.location.href);
 
-    const accessToken = useSiteDataLocalStore.getState().getAccessToken();
-    const flowRoutes = {
-      [sessionFlowName.GuestDiscussion]: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT,
-      [sessionFlowName.GuestMiStory]: ROUTES.SHIKSHALOKAM_GUEST_MI_STORY,
-      [sessionFlowName.SchoolSurvey]: ROUTES.AP_SCHOOL_SURVEY,
-    };
+    const flowRoutes = FLOW_TO_WEB_ROUTE_MAP;
 
     const route = flowRoutes[selectedFlow];
     if (!route) {

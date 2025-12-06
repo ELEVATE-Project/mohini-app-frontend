@@ -255,7 +255,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   const isSpecialFlow = useMemo(() => {
     if (!storageFlow) return false;
-    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory].includes(storageFlow);
+    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.SchoolSurvey].includes(storageFlow);
   }, [storageFlow]);
 
   const shouldFetchChatSession = useMemo(() => {

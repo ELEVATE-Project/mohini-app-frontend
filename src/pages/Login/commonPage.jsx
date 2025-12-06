@@ -21,6 +21,7 @@ import { useSiteDataLocalStore } from "store";
 import "../../components/custom-style.css";
 import "../../index.css";
 import "./commonPageStyle.css";
+import { FLOW_TO_WEB_ROUTE_MAP } from "../../config/flowConfig";
 
 function CommonHomePage({ usecaseType }) {
   const ptm_case = [SESSION_USECASE_TYPE.MEGA_PTM].some(x => x === usecaseType);
@@ -100,11 +101,7 @@ function CommonHomePage({ usecaseType }) {
       return navigate(ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE);
     }
 
-    const flowRoutes = {
-      [sessionFlowName.GuestMiStory]: ROUTES.SHIKSHALOKAM_GUEST_MI_STORY,
-      [sessionFlowName.GuestDiscussion]: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT,
-      [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
-    };
+    const flowRoutes = FLOW_TO_WEB_ROUTE_MAP;
 
     const route = flowRoutes[urlFlow];
     if (route) {

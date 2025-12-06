@@ -71,6 +71,13 @@ export const FLOW_CONFIG_V2 = {
   },
 };
 
+export const FLOW_TO_WEB_ROUTE_MAP = {
+  [sessionFlowName.GuestDiscussion]: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT,
+  [sessionFlowName.GuestMiStory]: ROUTES.SHIKSHALOKAM_GUEST_MI_STORY,
+  [sessionFlowName.SchoolSurvey]: ROUTES.AP_SCHOOL_SURVEY,
+  [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
+};
+
 export const FLOW_TO_ROUTE_MAP = {
   [sessionFlowName.GuestDiscussion]: bot_routes.shikshalokam_chaupal,
   [sessionFlowName.LoginDiscussion]: bot_routes.shikshalokam_chaupal,
@@ -79,7 +86,7 @@ export const FLOW_TO_ROUTE_MAP = {
     normal: bot_routes.normal,
     oneshot: bot_routes.oneshot,
   },
-  [sessionFlowName.SchoolSurvey]: bot_routes.shikshalokam_chaupal,
+  [sessionFlowName.SchoolSurvey]: bot_routes.school_survey,
 };
 
 export const FLOW_TO_WEBSOCKET_MAP = {
@@ -90,7 +97,7 @@ export const FLOW_TO_WEBSOCKET_MAP = {
     normal: bot_websocket.normal,
     oneshot: bot_websocket.oneshot,
   },
-  [sessionFlowName.SchoolSurvey]: bot_websocket.shikshalokam_chaupal,
+  [sessionFlowName.SchoolSurvey]: bot_websocket.listening_activity,
 };
 
 export const getWebSocketUrlFromSession = (sessionName, selectedType = undefined) => {

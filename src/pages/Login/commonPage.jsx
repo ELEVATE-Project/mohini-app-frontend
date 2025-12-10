@@ -29,7 +29,6 @@ function CommonHomePage({ usecaseType }) {
 
   // Custom hooks
   const chatLanguage = useSiteDataLocalStore(state => state.chatLanguage);
-  const storageFlow = useChatStorage()(state => state.flow);
   const setFlow = useChatStorage()(state => state.setFlow);
   const hasSelectedLanguage = useSiteDataLocalStore(state => state.hasSelectedLanguage);
   const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage);
@@ -131,7 +130,8 @@ function CommonHomePage({ usecaseType }) {
         <div className="bg-slate-50 sm:pt-6 sm:h-[100%] flex flex-col justify-center mt-0 w-full">
           <div className="flex justify-end mr-6 relative block sm:hidden"></div>
 
-          {shouldShowLanguageGrid ? <LanguageSelectionGrid usecaseType={usecaseType} /> : shouldShowFlowSelection ? <FlowSelection audioRef={audioRef} stopAudioTriggered={stopAudioTriggered} setStopAudioTriggered={setStopAudioTriggered} onFlowContinue={onFlowContinue} setIsLoading={setIsLoading} /> : null}
+          {shouldShowLanguageGrid && <LanguageSelectionGrid usecaseType={usecaseType} />}
+          {!shouldShowLanguageGrid && shouldShowFlowSelection && <FlowSelection audioRef={audioRef} stopAudioTriggered={stopAudioTriggered} setStopAudioTriggered={setStopAudioTriggered} onFlowContinue={onFlowContinue} setIsLoading={setIsLoading} />}
         </div>
       </div>
 

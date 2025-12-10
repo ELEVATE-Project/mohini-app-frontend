@@ -877,6 +877,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           clearFromStorage();
           navigateSsoFlow(ssoRerouteURL);
         } else {
+          console.log("navigating to login page");
           navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
         }
       }
@@ -1008,11 +1009,13 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         } else {
           navigate(ROUTES.EXIT_ROUTE);
           clearFromStorage();
+          console.log("navigating to on api fail");
           navigate(-1);
         }
       } catch (error) {
         console.error(error);
         clearFromStorage();
+        console.log("navigating to on api fail");
         navigate(-1);
       } finally {
         setIsLoading(false);
@@ -1835,8 +1838,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     setLanguage(LANGUAGE_ENUMS.ENGLISH);
     setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
     setHasSelectedLanguage(false);
-    // navigate(ROUTES.SHIKSHALOKAM_GUEST_PAGE)
-    // navigate("/", { replace: true });
     if (rerouteUrl && rerouteUrl !== null && rerouteUrl !== undefined && rerouteUrl !== "") {
       window.location.href = rerouteUrl;
     } else {

@@ -2,13 +2,13 @@ import "../../style.css";
 import "./shikshaChatStyle.css";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiLoader } from "react-icons/bi";
-import { bot_routes } from "../../configure";
 import { buildWebSocketUrl } from "utils/helpers";
 import { clearFromStorage, handleS3Upload } from "../../services/storage_service";
 import { createMessage } from "../interview-voice";
 import { createStoryMediaApi, getStoryAllMedia, partialUpdateStoryById } from "api/endpoints/story";
 import { createUserProfileApi, getProfileUserApi } from "api/endpoints/user";
 import { FiDownload } from "react-icons/fi";
+import { FLOW_CONFIG_V2, getRouteFromSession, getStringVariables, processStringSubstitution } from "../../config/flowConfig";
 import { getChatSessionApi } from "api/endpoints/chat";
 import { getCompanyBotApi } from "api/endpoints/chat";
 import { getSessionDetails } from "../../services/api.service";
@@ -52,6 +52,7 @@ import remarkGfm from "remark-gfm";
 import ReportEditor from "components/ReportEditor";
 import ROUTES from "../../url";
 import Sidebar from "./shikshaChatSidebar";
+import Swal from "sweetalert2";
 import UploadImages from "./upload-images";
 import useCustomMediaQuery from "hooks/useCustomMediaQuery";
 import useSmartChatStorage from "hooks/useSmartChatStorage";
@@ -59,7 +60,6 @@ import useUserDataLocalStore from "store/slices/userData/userDataLocal";
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord";
 import VoiceTextInput from "../../components/VoiceTextInput";
 import WaveSurferPlayer from "../interview-text-voice/voice-player";
-import { FLOW_CONFIG_V2, getRouteFromSession, getStringVariables, processStringSubstitution } from "../../config/flowConfig";
 
 const cookies = new Cookies();
 
@@ -117,9 +117,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const [companySlug, setCompanySlug] = useState("");
   const [error, setError] = useState({ response: "", status: 200 });
   const [visibleItemCount, setVisibleItemCount] = useState(10);
-  // const [showHomepage, setShowHomepage] = useState(true)
-  // const [isReconnectInProgress, setIsReconnectInProgress] = useState(false);
-  // const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
   // ========== useRef Hooks ==========
   const lastBotMessageIndex = useRef(-1);
@@ -127,9 +124,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const editorContainerRef = useRef(null);
   const endPageToScrollRef = useRef(null);
   const isIntroPlayed = useRef(false);
-  // const retryConnectionRef = useRef(null);
-  const chatSocketRef = useRef(null);
-  // const introMessageRef = useRef(null);
 
   // ========== Other Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory] = useSmartChatStorage();
@@ -451,6 +445,28 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       }
     }
   };
+
+  function showCompletionPopupFn() {
+    Swal.fire({
+      title: t(FLOW_CONFIG_V2[storageFlow].completionMessageKey),
+      showCancelButton: false,
+      confirmButtonText: t(FLOW_CONFIG_V2[storageFlow].completionCTAKey),
+      showCloseButton: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+      imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+      imageHeight: "100",
+    }).then(result => {
+      if (result.isConfirmed) {
+        clearFromStorage();
+        window.location.reload();
+        setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
+        setHasSelectedLanguage(false);
+        stopAllAudio();
+        window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE);
+      }
+    });
+  }
 
   /**
    * Transforms chat data from API into sentences and chat history format
@@ -920,8 +936,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   useEffect(() => {
     if (!profileToUse) setCompanySlug("shikshalokamstaging");
-    const profile = getProfileUserApi(profileToUse, accessToken);
-    setCompanySlug(profile?.company?.slug);
+    getProfileUserApi(profileToUse, accessToken);
+    // setCompanySlug(profile?.company?.slug);
   }, [profileToUse]);
 
   /**
@@ -1209,7 +1225,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    */
   useEffect(() => {
     if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && noStoryFound && (!llmError || llmError === "") && acceptedTnc && acceptedTnc !== "ONGOING") {
-      callEndStory();
+      if (FLOW_CONFIG_V2[storageFlow].postChatConfig.generateStory) {
+        callEndStory();
+      } else {
+        // setShowHomepage(showHomepage !== null ? showHomepage : true);
+        showCompletionPopupFn();
+      }
     }
   }, [isStreamingComplete, strandStep, accessToken, stateMachineLength, languageToUse, noStoryFound]);
 

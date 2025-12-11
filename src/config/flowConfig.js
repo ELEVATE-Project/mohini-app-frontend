@@ -63,10 +63,14 @@ export const FLOW_CONFIG_V2 = {
     chatHeading: "{homepageHeading}\n{homepageHeading1}",
     chatDescription: `1. {homepageList}\n2. {homepageList1}\n3. {homepageList2}`,
     imageUploadLimit: 10,
+    completionMessageKey: "ptmCompletionMessage",
+    completionCTAKey: "ptmCompletionCTA",
+    introHeadingKey: "ptmIntroductionHeading",
     postChatConfig: {
       allowImageUpload: true,
       imageUploadLimit: 10,
       displayEditStory: true,
+      generateStory: false,
     },
   },
 };

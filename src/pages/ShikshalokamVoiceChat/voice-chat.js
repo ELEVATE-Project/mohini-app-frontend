@@ -1074,7 +1074,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         setShouldFetchIntro(true);
         setShowHomepage(false);
       } else if (isNewChatOpen === true) {
-        // setShowHomepage(showHomepage !== null ? showHomepage : true);
         setShowHomepage(true);
       }
     } else {

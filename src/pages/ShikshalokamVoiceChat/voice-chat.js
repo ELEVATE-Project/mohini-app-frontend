@@ -126,9 +126,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const editorContainerRef = useRef(null);
   const endPageToScrollRef = useRef(null);
   const isIntroPlayed = useRef(false);
-  // const retryConnectionRef = useRef(null);
-  const chatSocketRef = useRef(null);
-  // const introMessageRef = useRef(null);
 
   // ========== Other Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory] = useSmartChatStorage();

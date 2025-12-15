@@ -44,6 +44,8 @@ export const env = {
   // URLs
   RECORD_STORY_URL: () => getEnv("REACT_APP_RECORD_STORY_URL", ""),
 
+  AUTH_ROUTE: () => getEnv("REACT_APP_AUTH_ROUTE", ""),
+
   // Generic getter for any environment variable
   get: (key, defaultValue) => getEnv(key, defaultValue),
 };

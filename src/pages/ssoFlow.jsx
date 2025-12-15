@@ -67,7 +67,7 @@ function SsoFlow() {
               setHasSelectedLanguage(true);
               setChatLanguage(languagePassed);
               setLanguage(languagePassed);
-            } else {
+            } else if (profile_details.route) {
               setChatLanguage(profile_details.route);
               setLanguage(profile_details.route);
             }
@@ -79,7 +79,7 @@ function SsoFlow() {
             setFlow(flow_type);
             const hasAcc = profile_details.has_accepted_tnc;
             setAcceptedTnC(typeof hasAcc === "string" ? hasAcc : "ONGOING");
-            setAccessToken(accessToken);
+            setAccessToken(env.AUTH_METHOD() === "url" ? accessToken : true);
             setProfileId(profile_details.profileid);
             setIsNewChatOpen(true);
             setProjectId(projectId);

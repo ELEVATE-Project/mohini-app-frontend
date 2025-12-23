@@ -60,11 +60,11 @@ export const getFlowConfig = flowType => {
 
 export const FLOW_CONFIG_V2 = {
   [sessionFlowName.SchoolSurvey]: {
-    chatHeading: "{homepageHeading}\n{homepageHeading1}",
-    chatDescription: `1. {homepageList}\n2. {homepageList1}\n3. {homepageList2}`,
+    chatHeading: "{homepageHeading}",
+    chatDescription: `1. {homepageList}\n`,
     imageUploadLimit: 10,
     completionMessageKey: "ptmCompletionMessage",
-    completionCTAKey: "ptmCompletionCTA",
+    completionCTAKey: "flowCompletionReturn",
     introHeadingKey: "ptmIntroductionHeading",
     postChatConfig: {
       allowImageUpload: true,

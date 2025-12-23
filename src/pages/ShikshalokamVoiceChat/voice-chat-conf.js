@@ -458,12 +458,21 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       imageHeight: "100",
     }).then(result => {
       if (result.isConfirmed) {
-        clearFromStorage();
-        window.location.reload();
-        setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
-        setHasSelectedLanguage(false);
-        stopAllAudio();
-        window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE + "?flow=" + storageFlow);
+        
+
+        // For School Survey flow, navigate back
+        if (storageFlow === sessionFlowName.SchoolSurvey) {
+          clearFromStorage();
+          navigate(-3);
+        } else {
+          // For other flows, keep existing behavior
+          clearFromStorage();
+          window.location.reload();
+          setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
+          setHasSelectedLanguage(false);
+          stopAllAudio();
+          window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE + "?flow=" + storageFlow);
+        }
       }
     });
   }
@@ -2765,30 +2774,35 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                   const prefix = isListening ? "la_" : "";
 
                   let chatHeading = FLOW_CONFIG_V2[storageFlow].chatHeading;
+                  let chatDescription = FLOW_CONFIG_V2[storageFlow].chatDescription;
 
-                  const stringVariables = getStringVariables(chatHeading).map(val => {
+                  const headingVariables = getStringVariables(chatHeading).map(val => {
                     return val.slice(1, -1);
                   });
 
-                  if (!stringVariables || stringVariables.length === 0) chatHeading = undefined;
+                  if (!headingVariables || headingVariables.length === 0) chatHeading = undefined;
                   else {
-                    stringVariables.forEach(variable => {
+                    headingVariables.forEach(variable => {
                       chatHeading = processStringSubstitution(chatHeading, { [variable]: t(`${variable}`) });
                     });
                   }
 
-                  console.log(chatHeading, "chatHeading");
+                  const descriptionVariables = getStringVariables(chatDescription)?.map(val => {
+                    return val.slice(1, -1);
+                  });
+
+                  if (descriptionVariables && descriptionVariables.length > 0) {
+                    descriptionVariables.forEach(variable => {
+                      chatDescription = processStringSubstitution(chatDescription, { [variable]: t(`${prefix}${variable}`) });
+                    });
+                  }
 
                   return (
                     <>
                       <div className="div10">
                         <h3 className="h3-1 whitespace-pre-line">{chatHeading && t(`${chatHeading}`)}</h3>
                       </div>
-                      <ul className="div11">
-                        <li>{t(`${prefix}homepageList`)}</li>
-                        <li>{t(`${prefix}homepageList1`)}</li>
-                        <li>{t(`${prefix}homepageList2`)}</li>
-                      </ul>
+                      <div className="div11 whitespace-pre-line">{chatDescription}</div>
                     </>
                   );
                 })()}

@@ -19,8 +19,6 @@ import { CONVERSATION_USER_TYPES } from "../../../constants/mitra.constants";
 /* styles */
 import "../stylesheet/chatStyle.css";
 import { useAICreationSessionStore } from "store";
-import { sessionFlowName } from "../../../../ShikshalokamVoiceChat/enum";
-import { useSearchParams } from "react-router-dom";
 import ChatWindow from "./components/ChatWindow";
 import ChatMessage from "./components/chat-message/ChatMessage";
 import LoadingChat from "./components/LoadingChat";

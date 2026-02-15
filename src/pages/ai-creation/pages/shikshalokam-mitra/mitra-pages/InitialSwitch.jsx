@@ -11,36 +11,43 @@ import { sessionFlowName } from '../../../../ShikshalokamVoiceChat/enum';
 import { bot_routes, FLOW_TYPES } from '../../../../../configure';
 import { getNewSessionID } from '../../../../../api/endpoints/chat_flow';
 import { compareFlowTypesEquality } from '../../../utils/common_flow';
-
+import env from "../../../../../../src/utils/env";
+import { useConfirmationPopup } from "../../../../../../src/hooks/useConfirmationPopup";
 const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected, isInitialSwitchSection, acceptedTnc }) => {
   const textInputRef = useRef(null);
   const isConnectedRef = useRef(false); 
   const hasAttemptedConnectionRef = useRef(false);
   const pendingMessageRef = useRef(null);
-
-  const initialSwitchChatHistory = useAICreationSessionStore(state => state.initialSwitchChatHistory);
-  const profileId = useAICreationSessionStore(state => state.profileId);
-  const session = useAICreationSessionStore(state => state.session);
-  const preferredLanguage = useAICreationSessionStore(state => state.preferredLanguage);
-
-  // Setters from store
-  const { getSession, setSession: setSessionStore, setInitialSwitchChatHistory, getInitialSwitchChatHistory, setSelectedFlowType } = useAICreationSessionStore.getState();
-
   const [textMessage, setTextMessage] = useState('');
   const [isWaitingForBot, setIsWaitingForBot] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
-  const [isWelcomeScreen, setIsWelcomeScreen] = useState(
-    !initialSwitchChatHistory?.length
-  );
 
   // Use refs to store callback dependencies to prevent websocket reconnection
   const handleScrollIntoViewRef = useRef(handleScrollIntoView);
   const onFlowTypeSelectedRef = useRef(onFlowTypeSelected);
+  const { commonsNetworkReconnectionPopup } = useConfirmationPopup()
 
   useEffect(() => {
     handleScrollIntoViewRef.current = handleScrollIntoView;
     onFlowTypeSelectedRef.current = onFlowTypeSelected;
   }, [handleScrollIntoView, onFlowTypeSelected]);
+
+  const localChatHistory = useAICreationSessionStore.getState().getInitialSwitchChatHistory();
+
+  const [initialSwitchChatHistory, setInitialSwitchChatHistory] = useState(
+    localChatHistory?.length ? localChatHistory : []
+  );
+
+  const [isWelcomeScreen, setIsWelcomeScreen] = useState(
+    !localChatHistory?.length
+  );
+
+  const {
+    profileId,
+    setSession: setSessionStore,
+    getInitialSwitchChatHistory,
+    setInitialSwitchChatHistory : setInitialSwitchChatHistoryStore,
+  } = useAICreationSessionStore.getState();
 
   const [searchParams] = useSearchParams();
   const storageFlow = sessionFlowName.Creation;
@@ -48,11 +55,13 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
 
   useEffect(() => {
     const initializeSession = async () => {
-      if (!session) {
-        const newSession = await getNewSessionID();
-        setSessionStore(newSession);
+      let currentSessionId = useAICreationSessionStore.getState().getSession();
+      if (!currentSessionId) {
+        const session = await getNewSessionID();
+        setSessionStore(session);
       }
 
+      const preferredLanguage = useAICreationSessionStore.getState().getPreferredLanguage() || {};
       const language = preferredLanguage?.value || "en";
       sessionStorage.setItem("route", JSON.stringify(language));
       
@@ -65,7 +74,7 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
   const onWebSocketOpen = useCallback(() => {
     isConnectedRef.current = true;
     
-    const currentSessionId = getSession();
+    const currentSessionId = useAICreationSessionStore.getState().getSession();
     sendSocketMessage({
       type: 'authenticate',
       sessionid: currentSessionId,
@@ -109,8 +118,16 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
           updated_at: Date.now(),
         };
 
-        const currentStoreHistory = getInitialSwitchChatHistory();
-        setInitialSwitchChatHistory([...currentStoreHistory, newMessage]);
+        setInitialSwitchChatHistory((prev) => [...prev, newMessage]);
+
+        const currentStoreHistory =
+          useAICreationSessionStore
+            .getState()
+            .getInitialSwitchChatHistory();
+
+        useAICreationSessionStore
+          .getState()
+          .setInitialSwitchChatHistory([...currentStoreHistory, newMessage]);
 
         setIsWaitingForBot(false);
         handleScrollIntoViewRef.current?.();
@@ -124,20 +141,50 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
         setIsWaitingForBot(false);
         
         if (compareFlowTypesEquality(validation, FLOW_TYPES.MIP)) {
-          setSelectedFlowType(FLOW_TYPES.MIP);
+          useAICreationSessionStore.getState().setSelectedFlowType(FLOW_TYPES.MIP);
           onFlowTypeSelectedRef.current?.(FLOW_TYPES.MIP);
         } else if (
           compareFlowTypesEquality(validation, FLOW_TYPES.LFA) || 
           compareFlowTypesEquality(validation, FLOW_TYPES.LCF) || 
           compareFlowTypesEquality(validation, FLOW_TYPES.FREE_FLOW)
         ) {
-            setSelectedFlowType(validation?.toLowerCase());
+            useAICreationSessionStore.getState().setSelectedFlowType(validation?.toLowerCase());
             onFlowTypeSelectedRef.current?.(validation?.toLowerCase());
         }
       }
     },
     []
   );
+
+  const onFinalReconnectAttempt = useCallback(() => {
+    function onYesButtonClick() {
+      try {
+        let chat_history = getInitialSwitchChatHistory();
+
+        if (Array.isArray(chat_history) && chat_history.length) {
+          const lastIndex = chat_history.length - 1;
+
+          if (chat_history[chat_history.length - 1]?.source === "user") {
+            chat_history = chat_history.slice(0, -1);
+          }
+        }
+
+        setInitialSwitchChatHistoryStore(chat_history);
+
+        window.location.reload();
+      } catch (error) {
+        console.error("Error cleaning chat history before reload:", error);
+        window.location.reload();
+      }
+    }
+
+    function onNoButtonClick() {
+      useAICreationSessionStore.getState().reset();
+      window.location.reload();
+    }
+
+    commonsNetworkReconnectionPopup(onYesButtonClick, onNoButtonClick);
+  }, []);
 
   const {
     sendMessage: sendSocketMessage,
@@ -154,8 +201,10 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
       onMessage: onWebSocketMessage,
       onClose: onWebSocketClose,
       onError: onWebSocketError,
+      onFinalReconnectAttempt,
       autoConnect: false,
-      reconnect: false,
+      reconnect: true,
+      reconnectAttempts: env.WEBSOCKET_RETRY_NUM(),
     }
   );
 
@@ -198,7 +247,16 @@ const InitialSwitch = ({ introMessage, handleScrollIntoView, onFlowTypeSelected,
       updated_at: Date.now(),
     };
 
-    setInitialSwitchChatHistory([...initialSwitchChatHistory, newMessage]);
+    setInitialSwitchChatHistory((prev) => [...prev, newMessage]);
+
+    const currentStoreHistory =
+      useAICreationSessionStore
+        .getState()
+        .getInitialSwitchChatHistory();
+
+    useAICreationSessionStore
+      .getState()
+      .setInitialSwitchChatHistory([...currentStoreHistory, newMessage]);
 
     setIsWaitingForBot(true);
     setIsWelcomeScreen(false);

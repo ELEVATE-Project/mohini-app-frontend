@@ -14,6 +14,7 @@ import ChatBox from './components/ChatBox';
 import ChatWindow from './components/ChatWindow';
 import LoadingChat from './components/LoadingChat';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import env from "../../../../../utils/env";
 
 const { USER } = CONVERSATION_USER_TYPES;
 
@@ -36,6 +37,7 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
   const navigate = useNavigate()
 
   const handleScrollIntoViewRef = useRef(handleScrollIntoView);
+  
 
   useEffect(() => {
     handleScrollIntoViewRef.current = handleScrollIntoView;
@@ -85,7 +87,7 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
     }
   }, [flowType]);
 
-  function onFinalReconnectAttempt() {
+  const onFinalReconnectAttempt = useCallback(() => {
     function onYesButtonClick() {
       try {
         let chat_history = getCommonFlowChatHistory();
@@ -93,22 +95,21 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
           chat_history = chat_history.filter((chat, index) => !(index == chat_history.length - 1 && chat.source === "user"))
         }
         setCommonFlowChatHistory(chat_history)
-
-        window.location.reload()
+        window.location.reload();
       } catch (error) {
-        console.error("Error cleaning chat history before reload:", error)
-        window.location.reload()
+        console.error("Error cleaning chat history before reload:", error);
+        window.location.reload();
       }
     }
 
     function onNoButtonClick() {
       clearMitraSessionStorage()
       navigate("/")
-      window.location.reload()
+      window.location.reload();
     }
 
-    commonsNetworkReconnectionPopup(onYesButtonClick, onNoButtonClick)
-  }
+    commonsNetworkReconnectionPopup(onYesButtonClick, onNoButtonClick);
+  }, []);
 
   const onWebSocketOpen = useCallback(() => {
     const currentSessionId = getSession();
@@ -166,10 +167,20 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
               updatedLastMessage["sources"] = message?.extra_content?.sources;
             }
 
+            if(message?.extra_content?.file_url) {
+              updatedLastMessage["file_url"] = message?.extra_content?.file_url;
+            }
             setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
-          } else if (Array.isArray(message?.extra_content?.sources) && message?.extra_content?.sources.length) {
+          }
+          
+          if (Array.isArray(message?.extra_content?.sources) && message?.extra_content?.sources.length) {
             let updatedLastMessage = { ...lastMessage };
             updatedLastMessage["sources"] = message?.extra_content?.sources;
+            setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
+          }
+
+          if(message?.extra_content?.file_url) {
+            let updatedLastMessage = { ...lastMessage, file_url: message?.extra_content?.file_url };
             setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
           }
         } else {
@@ -180,6 +191,9 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
           }
           if (Array.isArray(message?.extra_content?.sources) && message?.extra_content?.sources.length) {
             updatedMessage["sources"] = message?.extra_content?.sources;
+          }
+          if(message?.extra_content?.file_url) {
+            updatedMessage["file_url"] = message?.extra_content?.file_url;
           }
           setCommonFlowChatHistory([...prevChatHistory, updatedMessage]);
         }
@@ -208,9 +222,10 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
     {
       onOpen: onWebSocketOpen,
       onMessage: onWebSocketMessage,
+      onFinalReconnectAttempt,
       autoConnect: false,
-      reconnect: false,
-      onFinalReconnectAttempt
+      reconnect: true,
+      reconnectAttempts: env.WEBSOCKET_RETRY_NUM(),
     }
   );
 

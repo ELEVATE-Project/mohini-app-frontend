@@ -4,8 +4,8 @@ import { BiLoader } from "react-icons/bi"
 import { clearFromStorage } from "../services/storage_service"
 import { getSessionDetailsApi } from "../api/endpoints/chat"
 import { LANGUAGE_ENUMS } from "./ShikshalokamVoiceChat/enum"
-import { readElevateProfileApi } from "../api/endpoints/user"
 import { sessionFlowName } from "../constants/session"
+import { readElevateProfileApi } from "../api/endpoints/user"
 import { setLanguage } from "../i18n"
 import { updateReflectionStatusApi } from "../api/endpoints/project"
 import { URL_PARAMS } from "constants/urls"
@@ -13,6 +13,7 @@ import { useChatDataLocalStore, useSiteDataLocalStore, useUserDataLocalStore } f
 import { useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import ROUTES from "../url"
+import { env } from "utils/env"
 
 function SsoFlow() {
   const navigate = useNavigate()
@@ -37,19 +38,20 @@ function SsoFlow() {
       console.log(rerouteRaw, URL_PARAMS.RE_ROUTE_URL)
       // const rerouteUrl = decodeURIComponent(rerouteRaw)
 
-      if (!accessToken || accessToken === "") {
-        navigate(-1)
-        window.location.reload()
+      if (env.AUTH_METHOD() === "url" && (!accessToken || accessToken === "")) {
+        navigate(-1);
+        window.location.reload();
       }
       try {
-        const data = await readElevateProfileApi(accessToken)
+        // const data = await readElevateProfileApi(accessToken);
+        const data = await readElevateProfileApi();
         if (data) {
           const profile_details = data?.profile_details
           if (profile_details) {
-            if (!!projectId) {
+            if (projectId) {
               const statusRes = await updateReflectionStatusApi(projectId, "started", sessionFlowName.SsoFlow, accessToken)
-              if (!!projectId && statusRes?.status !== 200) {
-                clearFromStorage()
+              if (statusRes?.status !== 200) {
+                clearFromStorage();
                 navigate(-1)
               }
             }
@@ -67,7 +69,7 @@ function SsoFlow() {
               setHasSelectedLanguage(true)
               setChatLanguage(languagePassed)
               setLanguage(languagePassed)
-            } else {
+            } else if (profile_details.route) {
               setChatLanguage(profile_details.route)
               setLanguage(profile_details.route)
             }
@@ -77,9 +79,9 @@ function SsoFlow() {
             setCompanyName(profile_details.company)
             setState(profile_details.state)
             setFlow(flow_type)
-            const hasAcc = profile_details.has_accepted_tnc
+            const hasAcc = profile_details.has_accepted_tnc;
             setAcceptedTnC(typeof hasAcc === "string" ? hasAcc : "ONGOING")
-            setAccessToken(accessToken)
+            setAccessToken(env.AUTH_METHOD() === "url" ? accessToken : true)
             setProfileId(profile_details.profileid)
             setIsNewChatOpen(true)
             setProjectId(projectId)
@@ -101,7 +103,7 @@ function SsoFlow() {
           navigate(-1)
         }
       } catch (err) {
-        console.error("Error fetching profile:", err)
+        console.error("Error fetching profile:", err);
         navigate(-1)
       }
     }
@@ -121,5 +123,3 @@ function SsoFlow() {
 }
 
 export default SsoFlow
-
-/* eslint-disable react-hooks/exhaustive-deps */

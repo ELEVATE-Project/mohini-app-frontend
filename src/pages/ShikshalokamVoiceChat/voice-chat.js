@@ -1,6 +1,7 @@
 import "../../style.css"
 import "./shikshaChatStyle.css"
 import { AiOutlineEye } from "react-icons/ai"
+import { API_ENDPOINTS } from "../../constants/urls"
 import { BiLoader } from "react-icons/bi"
 import { bot_routes } from "../../configure"
 import { buildWebSocketUrl } from "../../utils/helpers"
@@ -23,15 +24,15 @@ import { sessionFlowName } from "../../constants/session"
 import { setLanguage } from "../../i18n"
 import { TbReload } from "react-icons/tb"
 import { toast } from "react-toastify"
-import { updateReflectionStatusApi, getAI4BharatAudioApi, ai4BharatASRApi, updateStoryMediaApi, getStoryBySessionAPI } from "api/endpoints"
+import { updateReflectionStatusApi, getAI4BharatAudioApi, ai4BharatASRApi, updateStoryMediaApi, getStoryBySessionAPI, endStoryApi } from "api/endpoints"
 import { useAudio } from "hooks/useAudio"
 import { useCallback, useEffect, useRef, useState, useMemo } from "react"
-import { useChatDataSessionStore } from "store"
 import { useChatStorage, useUserStorage, useSiteStorage } from "hooks/useStorage"
 import { useChatWebhook } from "hooks/useChatWebhook"
 import { useConfirmationPopup } from "hooks/useConfirmationPopup"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useSiteDataLocalStore } from "store"
+import { useSiteDataSessionStore, useChatDataSessionStore } from "store"
 import { useTranslation } from "react-i18next"
 import axiosInstance from "../../utils/axios"
 import Cookies from "universal-cookie"
@@ -59,6 +60,7 @@ import useSmartChatStorage from "hooks/useSmartChatStorage"
 import useUserDataLocalStore from "store/slices/userData/userDataLocal"
 import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-voice/useVoiceRecord"
 import WaveSurferPlayer from "../interview-text-voice/voice-player"
+import { getChatsFromDB } from "../../api/endpoints/chat_flow"
 
 const cookies = new Cookies()
 
@@ -68,7 +70,7 @@ const cookies = new Cookies()
 const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // ========== useState Hooks ==========
   const [appendix, setAppendix] = useState([])
-  const [asrAudio, setAsrAudio] = useState(null)
+  const [asrAudio, setAsrAudio] = useState([])
   const [audioCache, setAudioCache] = useState({})
   const [botNameToDisplay, setBotNameToDisplay] = useState("Bot")
   const [chatTitle, setChatTitle] = useState([])
@@ -78,16 +80,15 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const [error, setError] = useState({ response: "", status: 200 })
   const [fileErrorText, setFileErrorText] = useState("")
   const [files, setFiles] = useState([])
-  const [hasFetchIntro, setHasFetchIntro] = useState(false)
+  // const [hasFetchIntro, setHasFetchIntro] = useState(false)
   const [hasOverRideId, setHasOverRideId] = useState(null)
   const [hasStartedListening, setHasStartedListening] = useState(false)
   const [hasStartedRecording, setHasStartedRecording] = useState(false)
   const [intervalId, setIntervalId] = useState(null)
-  const [isEndStoryLoading, setIsEndStoryLoading] = useState(false)
   const [isFetchingData, setIsFetchingData] = useState(false)
-  const [isFetchingOldIntro, setIsFetchingOldIntro] = useState(false)
+  // const [isFetchingOldIntro, setIsFetchingOldIntro] = useState(false)
   const [isImageUploading, setIsImageUploading] = useState(false)
-  const [isIntroLoading, setIsIntroLoading] = useState(false)
+  // const [isIntroLoading, setIsIntroLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMute, setNotMute] = useState(true)
@@ -116,12 +117,14 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const [visibleItemCount, setVisibleItemCount] = useState(10)
 
   // ========== useRef Hooks ==========
+  const inputWrapperRef = useRef(null)
   const textAreaRef = useRef(null)
   const lastBotMessageIndex = useRef(-1)
   const isInitialLoadRef = useRef(true)
   const editorContainerRef = useRef(null)
   const endPageToScrollRef = useRef(null)
   const isIntroPlayed = useRef(false)
+  const mediaStreamRef = useRef(null)
 
   const companyBotSignalRef = useRef(new AbortController())
   const companyChatSignalRef = useRef(new AbortController())
@@ -137,14 +140,14 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   const acceptedTnc = useUserStorage()(state => state.has_accepted_tnc)
   const botName = useChatStorage()(state => state.botName)
-  const chatLanguage = useSiteDataLocalStore(state => state.chatLanguage)
+  const chatLanguage = useSiteDataSessionStore(state => state.chatLanguage)
   const companyName = useUserStorage()(state => state.companyName)
   const firstName = useUserStorage()(state => state.firstName)
   const introMessage = useChatStorage()(state => state.introMessage)
   const isNewChatOpen = useChatStorage()(state => state.isNewChatOpen)
   const isOldChatOpen = useChatStorage()(state => state.isOldChatOpen)
   const langProgress = useChatStorage()(state => state.langProgress)
-  const languageToUse = useSiteDataLocalStore(state => state.chatLanguage)
+  const languageToUse = useSiteDataSessionStore(state => state.chatLanguage)
   const preferredLanguage = useUserStorage()(state => state.preferredLanguage)
   const previousUrl = useSiteStorage()(state => state.previousUrl)
   // const profileId = useUserStorage()(state => state.profileId)
@@ -152,8 +155,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const projectIdStore = useChatStorage()(state => state.projectId)
   const selectedType = useChatStorage()(state => state.selectedType)
   const sessionId = useChatStorage()(state => state.sessionId)
-  const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage)
-  const setHasSelectedLanguage = useSiteDataLocalStore(state => state.setHasSelectedLanguage)
+  const setChatLanguage = useSiteDataSessionStore(state => state.setChatLanguage)
+  const setHasSelectedLanguage = useSiteDataSessionStore(state => state.setHasSelectedLanguage)
   const setLangProgress = useChatStorage()(state => state.setLangProgress)
   const setStorageFlow = useChatStorage()(state => state.setFlow)
   const setStrandStep = useChatDataSessionStore(state => state.setStrandStep)
@@ -168,14 +171,39 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const ipState = useUserStorage()(state => state.ipState)
   const ipZipCode = useUserStorage()(state => state.ipZipCode)
   const ipFetched = useUserStorage()(state => state.ipFetched)
+  const showFileInput = useChatDataSessionStore(state => state.showFileInput)
 
   // chat data actions
   const { setShowHomepage, setBotName, setChatbotClickedOn, setDefaultBotName, setIntroMessage, setIsChatVisible, setIsNewChatOpen, setIsOldChatOpen, setSelectedType, setSessionId, setStateMachineLength } = useChatStorage().getState()
+  const { setShowFileInput } = useChatDataSessionStore.getState()
 
   // user data actions
   const { setAcceptedTnC, setCompanyName, setFirstName, setState } = useUserStorage().getState()
-  const { llmError, setLlmError } = useChatStorage().getState()
+  const { llmError, setLlmError, llmErrorType, setLlmErrorType } = useChatStorage().getState()        
   const { setProfileId: setProfileToUse } = useUserStorage().getState()
+
+  const endStoryMutation = useMutation({ mutationFn: (data) => endStoryApi(data) })
+
+  const { data: companyBotData } = useQuery({
+    queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, getSessionRoute(), languageToUse, accessToken],
+    queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: getSessionRoute(), target_language: languageToUse }),
+    enabled: !!(languageToUse && chatHistory?.length === 0 && shouldFetchIntro && isNewChatOpen && (profileToUse || isSpecialFlow)),
+  })
+
+  const { data: introMessageData, isLoading: isIntroMessageLoading } = useQuery({
+    queryKey: [API_ENDPOINTS.BOT_VERNACULAR, getSessionRoute(), languageToUse],
+    queryFn: () => getTranslatedIntroMessageApi({
+      language: languageToUse,
+      company_bot__route: getSessionRoute(),
+    }),
+    enabled: !!(companyBotData && languageToUse && companyBotData?.results?.length > 0),
+  })
+
+  const { data: chatSessionData } = useQuery({
+    queryKey: [API_ENDPOINTS.GET_COMPANY_CHAT, sessionId],
+    queryFn: () => getChatsFromDB(sessionId),
+    enabled: !!sessionId,
+  })
 
   const { recordings, HiddenRecorder } = useVoiceRecord()
 
@@ -467,65 +495,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   }
 
   /**
-   * Handles intro message customization and initialization
-   * Fetches translated message and personalizes with user's first name
-   */
-  const handleIntroMessage = async () => {
-    let data = await getTranslatedIntroMessageApi({
-      language: languageToUse,
-      company_bot__route: getSessionRoute(),
-    })
-    console.log("handleIntroMessage", data)
-    let message = data[0]?.introductory_message
-    if (data && data[0]) {
-      if (profileToUse && firstName && firstName !== "null" && firstName !== "") {
-        message = data[0]?.introductory_message
-      } else {
-        message = data[0]?.alt_introductory_message
-      }
-    }
-    const botName = data[0]?.name || "Bot"
-
-    setBotName(botName)
-    setDefaultBotName(data[0]?.default_name)
-    setBotNameToDisplay(botName)
-
-    if (isOldChatOpen) {
-      let sessionInfo = await getSessionInfo()
-      if (sessionInfo && sessionInfo.length > 0) {
-        setStrandStep(sessionInfo[0]?.current_step)
-        if (sessionInfo[0]?.session_type) {
-          setSelectedType(sessionInfo[0]?.session_type)
-        }
-      }
-    }
-    console.log("message: ", message)
-    console.log("firstName: ", firstName)
-    if (message && firstName) {
-      const words = message.split(" ")
-      words.splice(1, 0, firstName)
-      message = words.join(" ")
-    }
-    if (message && !!message?.trim() && chatHistory[chatHistory?.length - 1]?.msg !== message && !sentences.some(msg => msg.message === message)) {
-      setIntroMessage(message)
-      setSentences(prev => [
-        ...prev,
-        {
-          message: message,
-          isNarrated: false,
-          id: "intro_msg_id",
-        },
-      ])
-      if (isSpecialFlow) {
-        setHasOverRideId("intro_msg_id")
-        setNotMute(false)
-        setIsNextAllowed(true)
-      }
-    }
-    return message
-  }
-
-  /**
    * Transforms chat data from API into sentences and chat history format
    * @param {Object} chat - Chat object from API
    * @param {string} introMessage - The intro message to skip duplicates
@@ -595,59 +564,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   }
 
   /**
-   * Fetches bot configuration and intro message for current session
-   * Initializes bot name, state machine length, and intro message
-   */
-  const fetchBotInfo = async () => {
-    if (!languageToUse) return
-
-    setIsIntroLoading(true)
-    if (!isSpecialFlow) {
-      setIsLoading(true)
-    }
-
-    try {
-      companyBotSignalRef.current = new AbortController()
-      let storedRoute = getSessionRoute()
-      const response = await getCompanyBotApi({
-        company__slug: companySlug,
-        target_language: languageToUse,
-        route: storedRoute,
-      }, { signal:  companyBotSignalRef.current.signal })
-      const bots = response?.results
-
-      if (!bots || bots.length === 0) {
-        handleScrollToView()
-        return
-      }
-
-      // Set state machine length from selected bot
-      const selectedBot = bots.find(bot => bot.route === storedRoute) || bots[0] || { route: "/" }
-      if (selectedBot?.statemachine_length) {
-        setStateMachineLength(selectedBot.statemachine_length)
-      }
-
-      // Find the latest bot based on flow type
-      const latestBot = bots.find(bot => bot.route === storedRoute)
-      if (!latestBot) {
-        handleScrollToView()
-        return
-      }
-
-      // await handleIntroMessage()
-      const intro = await handleIntroMessage()
-      return intro
-    } catch (error) {
-      console.error({ error })
-      setIsLoading(false)
-    } finally {
-      setHasFetchIntro(true)
-      setShouldFetchIntro(false)
-      setIsLoading(false)
-    }
-  }
-
-  /**
    * Sends user message through WebSocket connection
    * Handles message submission, WebSocket connection, and UI updates
    */
@@ -693,10 +609,10 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     sendSocketMessage({
       text: textMessage,
       context: "",
-      asr_audio: asrAudio,
+      asr_audio: asrAudio && asrAudio.length > 0 ? asrAudio.join(',') : null
     })
+    setAsrAudio([])
 
-    setAsrAudio(null)
     handleScrollToView()
     setTextMessage("")
   }
@@ -710,7 +626,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    * Fetches company chat history for the current session
    * Transforms and batches chat messages to avoid duplicates
    */
-  const handleCompanyChatCall = useCallback(async (introOverride) => {
+  const handleCompanyChatCall = useCallback(async () => {
     try {
       const storedChatHistory = chatHistory
       if (storedChatHistory.length >= 1) {
@@ -721,10 +637,9 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
       try {
         companyChatSignalRef.current = new AbortController()
-        const resp = await getCompanyChatApi(sessionId, companyChatSignalRef.current.signal)
-        const sortedResult = quickSort(resp?.data?.results, compareById)
+        const sortedResult = quickSort(Array.isArray(chatSessionData?.results) ? chatSessionData.results : [], compareById)
 
-        const intro_message = introOverride ?? introMessage
+        const intro_message = introMessage
         
 
         // Collect all new sentences and chat history items
@@ -777,7 +692,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       } catch (error) {
         console.error("Error fetching company chat data:", error)
       } finally {
-        // setIsFetchingOldIntro(false)
         if (accessToken) {
           setIsLoading(false)
         }
@@ -790,7 +704,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         setIsLoading(false)
       }
     }
-  }, [introMessage, sessionId])
+  }, [introMessage, sessionId, chatSessionData])
 
   /**
    * Handles chat session button clicks from sidebar
@@ -813,18 +727,14 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         setChatHistory([])
         window.location.reload()
       } else {
-        currentSession = sessionId
         try {
-          // await fetchBotInfo(signal)
-          const intro = await fetchBotInfo()
-          await handleCompanyChatCall(intro)
+          await handleCompanyChatCall()
         } catch (error) {
           console.error(error)
-          // setIsIntroLoading(false)
         }
       }
     },
-    [sessionId]
+    [sessionId, introMessage, handleCompanyChatCall]
   )
 
   /**
@@ -872,7 +782,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // SECTION: Variable Definitions
   // ========================================================================
   // const { access_token } =  getStorageSlice(STORE_NAME_CONSTANTS.USER_DATA, 'localStorage').getState();
-  const { showFileInput, setShowFileInput } = useChatDataSessionStore.getState()
   const selectedLabel = {
     types: [
       { label: t("guidedReflection"), value: "normal" },
@@ -883,6 +792,86 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const fileSizeText = t("fileSizeText")
   let isMobile = useCustomMediaQuery("(max-width: 500px)")
   let chatToAddLength = isMobile ? 10 : 10
+
+  useEffect(() => {
+    if (!introMessageData || introMessageData?.length === 0) return
+
+    let message = introMessageData[0]?.introductory_message
+    if (profileToUse && firstName && firstName !== "null" && firstName !== "") {
+      message = introMessageData[0]?.introductory_message
+    } else {
+      message = introMessageData[0]?.alt_introductory_message
+    }
+    const botName = introMessageData[0]?.name || "Bot"
+
+    setBotName(botName)
+    setDefaultBotName(introMessageData[0]?.default_name)
+    setBotNameToDisplay(botName)
+
+    if (isOldChatOpen) {
+      getSessionInfo().then(sessionInfo => {
+        if (sessionInfo && sessionInfo.length > 0) {
+          setStrandStep(sessionInfo[0]?.current_step)
+          if (sessionInfo[0]?.session_type) {
+            setSelectedType(sessionInfo[0]?.session_type)
+          }
+        }
+      })
+    }
+    if (message && firstName) {
+      const words = message.split(" ")
+      words.splice(1, 0, firstName)
+      message = words.join(" ")
+    }
+    if (message && !!message?.trim() && chatHistory[chatHistory?.length - 1]?.msg !== message && !sentences.some(msg => msg.message === message)) {
+      setIntroMessage(message)
+      setSentences(prev => [
+        ...prev,
+        {
+          message: message,
+          isNarrated: false,
+          id: "intro_msg_id",
+        },
+      ])
+      if (isSpecialFlow) {
+        setHasOverRideId("intro_msg_id")
+        setNotMute(false)
+        setIsNextAllowed(true)
+      }
+    }
+
+    setShouldFetchIntro(false)
+    setIsLoading(false)
+  }, [introMessageData])
+
+
+  useEffect(() => {
+    if (!companyBotData) return
+
+    const bots = companyBotData?.results
+    let storedRoute = getSessionRoute()
+
+    if (!bots || bots.length === 0) {
+      handleScrollToView()
+      return
+    }
+
+    const selectedBot = bots.find(bot => bot.route === storedRoute) || bots[0] || { route: "/" }
+    if (selectedBot?.statemachine_length) {
+      setStateMachineLength(selectedBot.statemachine_length)
+    }
+
+    // Find the latest bot based on flow type
+    const latestBot = bots.find(bot => bot.route === storedRoute)
+    if (!latestBot) {
+      handleScrollToView()
+    }
+
+    if (!storageFlow || ![sessionFlowName.LoginMiStory].includes(storageFlow)) {
+      handleCompanyChatCall()
+    }
+
+  }, [companyBotData, introMessage, chatSessionData])
 
   // ========================================================================
   // SECTION: Lifecycle & Browser Events (Execution Order: 1 - On Mount)
@@ -1016,9 +1005,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   }, [botName])
 
   useEffect(() => {
-    if (!profileToUse) setCompanySlug("shikshalokamstaging")
-    const profile = getProfileUserApi(profileToUse, accessToken)
-    setCompanySlug(profile?.company?.slug)
+    if (!profileToUse) {
+      setCompanySlug("shikshalokamstaging")
+      return
+    }
+
+    getProfileUserApi(profileToUse, accessToken).then(profile => setCompanySlug(profile?.company?.slug))
   }, [profileToUse])
 
   /**
@@ -1181,33 +1173,11 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    * Loads existing conversation when user selects from history
    */
     useEffect(() => {
-      if (isOldChatOpen === true && !hasFetchIntro && isSpecialFlow && chatHistory?.length === 0 && sentences?.length === 0) {
+      if (isOldChatOpen === true && introMessage && isSpecialFlow && chatHistory?.length === 0 && sentences?.length === 0) {
         handleChatSessionButtonClick({ key: null })
       }
-    }, [isOldChatOpen, hasFetchIntro, chatHistory, sentences])
+    }, [isOldChatOpen, introMessage, chatHistory, sentences])
 
-
-    useEffect(() => {
-      if (chatHistory?.length === 0 && shouldFetchIntro && isNewChatOpen && (profileToUse || isSpecialFlow)) {
-        setIsIntroLoading(true)
-        console.log("state_tracker", "fetching bot info")
-        
-        fetchBotInfo()
-          .then(() => {
-            if (!storageFlow || ![sessionFlowName.LoginMiStory].includes(storageFlow)) {
-              handleCompanyChatCall()
-            }
-          })
-          .finally(() => {
-            setIsIntroLoading(false)
-          })
-      }
-
-      return () => {
-        companyBotSignalRef.current.abort()
-        companyChatSignalRef.current.abort()
-      }
-    }, [accessToken, shouldFetchIntro, profileToUse, languageToUse, isNewChatOpen, storageFlow, introMessage])
 
   // ========================================================================
   // SECTION: Language & Bot Setup (Execution Order: 5 - When Profile Ready)
@@ -1323,7 +1293,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       return
     }
     // if (sentences.filter(sent => !sent.isNarrated).length > 0) return
-    if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && noStoryFound && (!llmError || llmError === "") && acceptedTnc && acceptedTnc !== "ONGOING") {
+    if (!endStoryMutation.isPending  && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && noStoryFound && (!llmError || llmError === "") && acceptedTnc && acceptedTnc !== "ONGOING") {
       callEndStory()
     }
   }, [isStreamingComplete, accessToken, stateMachineLength, languageToUse, noStoryFound, storageFlow, sentences])
@@ -1359,7 +1329,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    */
   useEffect(() => {
     const currentFlow = storageFlow
-    if (profileToUse && !accessToken && !isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+    if (profileToUse && !accessToken && !endStoryMutation.isPending && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
       console.log("setting loading to true", "state_tracker")
       setIsLoading(true)
       const titleTime = setTimeout(() => {
@@ -1372,10 +1342,10 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         }
         clearTimeout(titleTime)
       }
-    } else if (!isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+    } else if (!endStoryMutation.isPending && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
       setIsLoading(false)
     }
-  }, [profileToUse, accessToken, isEndStoryLoading, noStoryFound])
+  }, [profileToUse, accessToken, endStoryMutation.isPending, noStoryFound])
 
   // ========================================================================
   // SECTION: UI State Management (Execution Order: 7 - Throughout Lifecycle)
@@ -1387,7 +1357,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    * Prevents background scrolling when modals or loaders are active
    */
   useEffect(() => {
-    if (isLoading || isEndStoryLoading || isModalOpen || acceptedTnc === "ONGOING") {
+    if (isLoading || endStoryMutation.isPending || isModalOpen || acceptedTnc === "ONGOING") {
       document.body.style.overflowY = "hidden"
     } else {
       document.body.style.overflowY = "auto"
@@ -1396,7 +1366,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     return () => {
       document.body.style.overflowY = "auto"
     }
-  }, [isLoading, isEndStoryLoading, isModalOpen])
+  }, [isLoading, endStoryMutation.isPending, isModalOpen])
 
   /**
    * Auto-dismiss file upload error messages after 5 seconds
@@ -1430,6 +1400,43 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     return () => clearInterval(intervalId)
   }, [hasStartedRecording])
 
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop()
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop())
+      mediaStreamRef.current = null
+    }
+    setHasStartedRecording(false)
+  }, [mediaRecorder])
+
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        if (hasStartedRecording) {
+          stopRecording()
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [hasStartedRecording, stopRecording])
+
+  useEffect(() => {
+    return () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop())
+        mediaStreamRef.current = null
+      }
+    }
+  }, [])
   /**
    * Dynamically adjust textarea height based on content
    * Provides better UX by expanding textarea as user types
@@ -1539,7 +1546,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     let shouldPlay = false
     if (showFileInput) {
       shouldPlay = true
-    } else if ((noStoryFound || noStoryFound === null) && !isIntroLoading && !isLoading && !isEndStoryLoading) {
+    } else if ((noStoryFound || noStoryFound === null) && !isIntroMessageLoading && !isLoading && !endStoryMutation.isPending) {
       const currentFlow = storageFlow
 
       if (currentFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
@@ -1552,11 +1559,11 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         } else {
           shouldPlay = true
         }
-      } else if (chatHistory && chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot" && !isIntroLoading && !isLoading && !isEndStoryLoading) {
+      } else if (chatHistory && chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot" && !isIntroMessageLoading && !isLoading && !endStoryMutation.isPending) {
         shouldPlay = true
       }
     }
-    if (isStreamingComplete && shouldPlay && !isEndStoryLoading && !isLoading && !isPdfDownloading && isMute && acceptedTnc && acceptedTnc !== "ONGOING" && !isIntroLoading && !isFetchingOldIntro) {
+    if (isStreamingComplete && shouldPlay && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && isMute && acceptedTnc && acceptedTnc !== "ONGOING" && !isIntroMessageLoading) {
       const speakerButtons = document.querySelectorAll(".button-11.button-3")
       const lastSpeakerButton = speakerButtons[speakerButtons.length - 1]
 
@@ -1564,7 +1571,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         lastSpeakerButton.click()
       }
     }
-  }, [isStreamingComplete, showFileInput, showHomepage, isEndStoryLoading, isLoading, isPdfDownloading, storyData, chatHistory, isMute, acceptedTnc, isIntroLoading, noStoryFound])
+  }, [isStreamingComplete, showFileInput, showHomepage, endStoryMutation.isPending, isLoading, isPdfDownloading, storyData, chatHistory, isMute, acceptedTnc, isIntroMessageLoading, noStoryFound])
 
   /**
    * Process TTS requests for unnarrated bot messages
@@ -1577,12 +1584,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     if (acceptedTnc === "ONGOING") {
       return () => {}
     }
-    if (isNextAllowed && hasUnnarratedMessages && !isLoading && !isEndStoryLoading) {
+    if (isNextAllowed && hasUnnarratedMessages && !isLoading && !endStoryMutation.isPending) {
       handleAI4BharatTTSRequest(unnarratedMessages[0].message, unnarratedMessages[0].id, sourceLanguage)
     }
 
     return () => {}
-  }, [isNextAllowed, sentences, languageToUse, isLoading, isEndStoryLoading, acceptedTnc])
+  }, [isNextAllowed, sentences, languageToUse, isLoading, endStoryMutation.isPending, acceptedTnc])
 
   /**
    * Debug log for tracking override ID changes
@@ -1934,44 +1941,39 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
   }
 
+function handleLlmError(errorMessage, errorType) {
+  setLlmError(errorMessage)
+  setLlmErrorType(errorType || "generic_error")
+}
+
   async function callEndStory(hasClickedOnRegenerate = false) {
     let endStoryResponse
     if ((isStreamingComplete && strandStep >= stateMachineLength) || hasClickedOnRegenerate) {
       try {
         setIsLoading(true)
-        setIsEndStoryLoading(true)
-
-        const end_story_api_url = `/api/end-story/`
-
         let sourceLanguage = preferredLanguage?.value || languageToUse
 
-        endStoryResponse = await axiosInstance({
-          url: end_story_api_url,
-          data: {
+        endStoryResponse = await endStoryMutation.mutateAsync({ data: {
             session: sessionId,
             profile_id: profileToUse,
             stage: "COMPLETED",
             access_token: accessToken,
             flow: storageFlow,
             language: sourceLanguage,
-          },
-          method: "POST",
-        })
+          }})
 
-        if (endStoryResponse?.data?.id) {
+        if (endStoryResponse?.id) {
           setFiles([])
           setShowFileInput(true)
           setLlmError("")
           window.location.reload()
         } else {
-          setLlmError(endStoryResponse?.data?.error_message)
-          setIsEndStoryLoading(false)
+          handleLlmError(endStoryResponse?.error_message, endStoryResponse?.error_type)
           setIsLoading(false)
         }
       } catch (error) {
         console.error("Error completing the story:", error)
-        setLlmError(error?.response?.data?.error_message)
-        setIsEndStoryLoading(false)
+        handleLlmError(error?.response?.data?.error_message, error?.response?.data?.error_type)
         setIsLoading(false)
       } finally {
         setNoStoryFound(false)
@@ -2163,12 +2165,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       e.preventDefault()
     }
     setIsLoading(true)
-    setIsIntroLoading(true)
     removeChatHistory()
     setIsOldChatOpen(false)
     setIsNewChatOpen(true)
     setShowFileInput(false)
     setLlmError("")
+    setLlmErrorType(null)
     setSessionId(null)
     setStrandStep(null)
     const session = await getSessionDetails()
@@ -2317,6 +2319,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     })
   }
 
+
   async function showChatTitle() {
     try {
       const currentSessionID = sessionId
@@ -2352,6 +2355,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   }
 
   const fetchMoreData = () => {
+  
     setTimeout(() => {
       if (visibleItemCount < sessionTitleDetail.length) {
         setVisibleItemCount(prevCount => prevCount + chatToAddLength)
@@ -2555,13 +2559,16 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     return rms < silenceThreshold
   }
 
+  const [isStartingRecording, setIsStartingRecording] = useState(false)
   const startRecording = () => {
+    if (isStartingRecording || hasStartedRecording) return
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       handleOnStopSpeaking()
-      setTextMessage("")
+      setIsStartingRecording(true)
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then(stream => {
+          mediaStreamRef.current = stream
           const options = {
             mimeType: "audio/webm;codecs=opus",
             audioBitsPerSecond: 16000,
@@ -2573,6 +2580,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
           recorder.start()
           setHasStartedRecording(true)
+          setIsStartingRecording(false)
 
           recorder.ondataavailable = event => {
             localAudioChunks.push(event.data)
@@ -2604,7 +2612,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               if (!s3Url || s3Url === "") {
                 transcriptResult = t("asrError")
               }
-              setAsrAudio(s3Url)
+              setAsrAudio(prev => [...prev, s3Url]) 
               let storedRoute = getSessionRoute()
               transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
               if (!transcriptResult || transcriptResult === "") {
@@ -2618,7 +2626,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                   },
                 })
               } else {
-                setTextMessage(transcriptResult)
+                setTextMessage(prev => {
+                  if (prev && prev.trim().length > 0) {
+                    return prev.trimEnd() + " " + transcriptResult
+                  }
+                  return transcriptResult
+                })
               }
               setIsFetchingData(false)
             } else {
@@ -2630,18 +2643,14 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         .catch(err => {
           console.error("Error accessing microphone:", err)
           setIsFetchingData(false)
+          setIsStartingRecording(false)
         })
     } else {
       console.warn("getUserMedia not supported on your browser!")
     }
   }
 
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop()
-      setHasStartedRecording(false)
-    }
-  }
+
 
   function downloadPdf() {
     let current_company = companyName ? companyName : null
@@ -2822,7 +2831,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           />
         </div>
       </div>
-      {(isInitialising || isLoading || isIntroLoading || isEndStoryLoading || isFetchingOldIntro) && (
+      {(isInitialising || isLoading || isIntroMessageLoading || endStoryMutation.isPending) && (
         <div className="loader-load-spinner">
           <div className="div67">
             <BiLoader className="loader-rotate-loader loader-icon" />
@@ -2831,7 +2840,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                 <label className="form-label label1">{t("downloadLoader")}</label>
               </div>
             )}
-            {isEndStoryLoading && (
+            {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
                   {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
@@ -2955,7 +2964,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               )}
             </>
           )}
-          {isStreamingComplete && showFileInput && !showHomepage && !isEndStoryLoading && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(storageFlow) && accessToken) && (
+          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(storageFlow) && accessToken) && (
             <>
               {![sessionFlowName.ListeningActivity, sessionFlowName.ParentPerceptionSurvey].includes(storageFlow) && (
                 <div className="div13">
@@ -3128,12 +3137,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           {llmError && llmError !== "" && (
             <>
               <p className="error-para">{llmError}</p>
+              {llmErrorType === "generic_error" && (
               <div className="div20">
                 <button
                   className="clickable-button"
                   onClick={async () => {
                     setIsLoading(true)
-                    setIsEndStoryLoading(true)
                     await callEndStory(true)
                   }}
                   disabled={isLoading || isPdfDownloading}
@@ -3148,22 +3157,38 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
                 {triggerDownload && isPdfDownloading && !isLoading && downloadPdf()}
               </div>
+              )}
             </>
           )}
           <div id="last-chat-boundary" className="div38" />
         </div>
         <Notification />
 
-        {(!showFileInput || showFileInput === null) && !isLoading && !isEndStoryLoading && (llmError === "" || !llmError) && Array.isArray(chatHistory) && chatHistory.some(item => item && Object.keys(item).length > 0) && (
+        {(!showFileInput || showFileInput === null) && !isLoading && !endStoryMutation.isPending && (llmError === "" || !llmError) && Array.isArray(chatHistory) && chatHistory.some(item => item && Object.keys(item).length > 0) && (
           <form
-            className="div39 form-1 sm:p-[10px_35px] p-[10px_25px]"
+            ref={inputWrapperRef}
+            className="form-1 chat-input-row"
             onSubmit={event => {
-              if (!hasStartedListening && !isFetchingData) {
+              event.preventDefault()
+              if (!hasStartedListening && !isFetchingData && !isStartingRecording) {
                 handleSendMessage(event)
               }
             }}
             autoComplete="off"
           >
+            {/* Mic button on the left */}
+            <button
+              type="button"
+              aria-label={hasStartedRecording ? t("stopRecording") : t("startRecording")}
+              aria-pressed={hasStartedRecording}
+              onClick={hasStartedRecording ? stopRecording : startRecording}
+              disabled={isFetchingData || isStartingRecording}
+              className={`mic-btn ${hasStartedRecording ? "mic-recording" : "mic-idle"}`}
+            >
+              {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
+            </button>
+
+            {/* Text area in the middle */}
             <div className="textarea-wrapper relative">
               <textarea
                 id="textBoxID"
@@ -3174,7 +3199,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                 name="message-box"
                 value={textMessage}
                 autoFocus={false}
-                disabled={hasStartedRecording || isFetchingData}
+                disabled={hasStartedRecording || isFetchingData || isStartingRecording}
                 ref={textAreaRef}
                 onInput={e => {
                   e.target.style.height = "auto"
@@ -3206,7 +3231,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                       setTimeout(() => {
                         e.target.value = ""
                       }, 0)
-                    } else {
                     }
                   }
                 }}
@@ -3218,19 +3242,15 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                 </div>
               )}
             </div>
-            {isTyping && !hasStartedListening && !isFetchingData ? (
-              <div className="button-container">
-                <button type="submit" disabled={hasStartedRecording || isFetchingData} className="button-6 sm:ml-[1.3rem] ml-[0.8rem]">
-                  <MdSend />
-                </button>
-              </div>
-            ) : (
-              <div className={`audio-recorder ${isFetchingData ? "button-container" : ""}`}>
-                <button type="button" onClick={hasStartedRecording ? stopRecording : startRecording} disabled={isFetchingData} className={`button-7 sm:ml-[1.3rem] ml-[0.8rem] ${hasStartedRecording ? "button-8" : "button-9"}`}>
-                  {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
-                </button>
-              </div>
-            )}
+
+            <button
+              type="submit"
+              aria-label={t("sendMessage")}
+              disabled={!textMessage.trim() || hasStartedRecording || isFetchingData || isStartingRecording}
+              className="send-btn"
+            >
+              <MdSend />
+            </button>
           </form>
         )}
       </div>

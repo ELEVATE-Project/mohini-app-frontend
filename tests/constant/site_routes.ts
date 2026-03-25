@@ -6,4 +6,6 @@ export const SITE_ROUTES = {
   YLC_START: '/mohini/ylc/start',
   YLC_CHAT: '/mohini/ylc/chat',
   HOME: '/mohini/home',
+  MITRA_CHAT: '/mohini/mitra-chat',
+  IMPROVEMENT_PLAN: '/mohini/improvement-plan',
 }

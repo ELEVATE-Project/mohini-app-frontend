@@ -160,29 +160,21 @@ const CommonFlow = ({ flowType, handleScrollIntoView }) => {
         const lastMessage = prevChatHistory[lastIndex];
 
         if (lastIndex >= 0 && lastMessage?.source === 'bot') {
+          let updatedLastMessage = { ...lastMessage };
+
           if (message?.msg) {
-            let updatedLastMessage = { ...lastMessage, msg: lastMessage.msg + message.msg };
-
-            if (Array.isArray(message?.extra_content?.sources) && message?.extra_content?.sources.length) {
-              updatedLastMessage["sources"] = message?.extra_content?.sources;
-            }
-
-            if(message?.extra_content?.file_url) {
-              updatedLastMessage["file_url"] = message?.extra_content?.file_url;
-            }
-            setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
+            updatedLastMessage.msg = lastMessage.msg + message.msg;
           }
-          
+
           if (Array.isArray(message?.extra_content?.sources) && message?.extra_content?.sources.length) {
-            let updatedLastMessage = { ...lastMessage };
-            updatedLastMessage["sources"] = message?.extra_content?.sources;
-            setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
+            updatedLastMessage.sources = message.extra_content.sources;
           }
 
-          if(message?.extra_content?.file_url) {
-            let updatedLastMessage = { ...lastMessage, file_url: message?.extra_content?.file_url };
-            setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
+          if (message?.extra_content?.file_url) {
+            updatedLastMessage.file_url = message.extra_content.file_url;
           }
+
+          setCommonFlowChatHistory([...prevChatHistory.slice(0, lastIndex), updatedLastMessage]);
         } else {
           const updatedMessage = {
             msg: message?.msg || '',

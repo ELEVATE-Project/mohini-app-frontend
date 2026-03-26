@@ -71,8 +71,34 @@ function SelectObjective({
 
   const [hasClickedOnAddmore, setHasClickedOnAddmore] = useState(false);
   const [fetchError, setFetchError] = useState("");
-  const [selectedIndices, setSelectedIndices] = useState([]);
-  const [selectedObjectives, setSelectedObjectives] = useState([]);
+
+  const [{ initialIndices, initialObjectives, initialVisibleCount }] = useState(() => {
+    const defaultValueToShow = 3;
+
+    const objectiveList = getObjective() || [];
+    const storedSelectedObjectives = getSelectedObjective();
+
+    // Handle both single string (legacy) and array of strings
+    const selectedObjectivesArray = Array.isArray(storedSelectedObjectives)
+      ? storedSelectedObjectives
+      : (storedSelectedObjectives ? [storedSelectedObjectives] : []);
+
+    const indices = selectedObjectivesArray
+      .map(obj => objectiveList.findIndex(o => o?.text === obj || o === obj))
+      .filter(idx => idx !== -1);
+
+    const objectives = indices.map(idx => objectiveList[idx]);
+
+    const maxSelectedIndex = Math.max(...indices, -1);
+    const visibleCount = maxSelectedIndex !== -1 && maxSelectedIndex > defaultValueToShow - 1
+      ? maxSelectedIndex + 1
+      : defaultValueToShow;
+
+    return { initialIndices: indices, initialObjectives: objectives, initialVisibleCount: visibleCount };
+  });
+
+  const [selectedIndices, setSelectedIndices] = useState(initialIndices);
+  const [selectedObjectives, setSelectedObjectives] = useState(initialObjectives);
   const [objectiveSource, setObjectiveSource] = useState([]);
 
   const [objectiveListLoading, setObjectiveListLoading] = useState(false)
@@ -84,31 +110,7 @@ function SelectObjective({
     else return false;
   })
 
-  const [visibleCount, setVisibleCount] = useState(() => {
-    const defaultValueToShow = 3;
-
-    const objectiveList = getObjective() || [];
-    const storedSelectedObjectives = getSelectedObjective();
-    
-    // Handle both single string (legacy) and array of strings
-    const selectedObjectivesArray = Array.isArray(storedSelectedObjectives) 
-      ? storedSelectedObjectives 
-      : (storedSelectedObjectives ? [storedSelectedObjectives] : []);
-
-    // Find indices of all selected objectives
-    const indices = selectedObjectivesArray
-      .map(obj => objectiveList.findIndex(o => o?.text === obj || o === obj))
-      .filter(idx => idx !== -1);
-    
-    setSelectedIndices(indices);
-    setSelectedObjectives(indices.map(idx => objectiveList[idx]));
-    
-    const maxSelectedIndex = Math.max(...indices, -1);
-    return maxSelectedIndex !== -1 && maxSelectedIndex > defaultValueToShow - 1
-      ? maxSelectedIndex + 1
-      : defaultValueToShow;
-
-  });
+  const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
 
   const language = preferredLanguage.value || "en";
 

@@ -326,7 +326,7 @@ export class MIPFlowPage extends BasePage {
    * Check if the Create MIP button is enabled
    */
   async isCreateMIPButtonEnabled(): Promise<boolean> {
-    return await this.isElementVisible(this.createMIPButton)
+    return await this.createMIPButton.isEnabled()
   }
 
   // ==================== IMPROVEMENT PLAN PAGE ====================

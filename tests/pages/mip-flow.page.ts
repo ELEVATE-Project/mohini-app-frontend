@@ -56,7 +56,7 @@ export class MIPFlowPage extends BasePage {
     this.loadingIndicator = page.locator(".login-load-spinner")
 
     // Chat messages (both user and bot messages in the chat window)
-    this.chatMessageContainer = page.locator("li.div34")
+    this.chatMessageContainer = page.locator("div.div35")
 
     // SelectObjective
     this.objectiveCards = page.locator("div.secondpage-obj-bttn-div, div.secondpage-obj-selected-button-div")
@@ -139,7 +139,7 @@ export class MIPFlowPage extends BasePage {
       ({ selector, count }) => {
         return document.querySelectorAll(selector).length >= count
       },
-      { selector: "li.div34", count: expectedCount },
+      { selector: "div.div35", count: expectedCount },
       { timeout }
     )
   }

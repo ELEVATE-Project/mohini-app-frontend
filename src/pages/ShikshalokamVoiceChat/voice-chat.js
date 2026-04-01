@@ -1360,7 +1360,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    */
   useEffect(() => {
     const currentFlow = storageFlow
-    if (profileToUse && !accessToken && !isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+    if (profileToUse && !accessToken && !isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(currentFlow)) {
       console.log("setting loading to true", "state_tracker")
       setIsLoading(true)
       const titleTime = setTimeout(() => {
@@ -1373,7 +1373,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         }
         clearTimeout(titleTime)
       }
-    } else if (!isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+    } else if (!isEndStoryLoading && ![sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(currentFlow)) {
       setIsLoading(false)
     }
   }, [profileToUse, accessToken, isEndStoryLoading, noStoryFound])
@@ -1543,7 +1543,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     } else if ((noStoryFound || noStoryFound === null) && !isIntroLoading && !isLoading && !isEndStoryLoading) {
       const currentFlow = storageFlow
 
-      if (currentFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+      if (currentFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(currentFlow)) {
         if (chatHistory.length > 0) {
           if (isStreamingComplete && chatHistory[chatHistory.length - 1]?.source === "bot") {
             shouldPlay = true
@@ -2960,7 +2960,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           )}
           {isStreamingComplete && showFileInput && !showHomepage && !isEndStoryLoading && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(storageFlow) && accessToken) && (
             <>
-              {![sessionFlowName.ListeningActivity, sessionFlowName.ParentPerceptionSurvey].includes(storageFlow) && (
+              {![sessionFlowName.ListeningActivity, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(storageFlow) && (
                 <div className="div13">
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
@@ -3049,7 +3049,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                 </div>
               )}
 
-              {![sessionFlowName.ParentPerceptionSurvey].includes(storageFlow) && (
+              {![sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(storageFlow) && (
                 <div className="div19">
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}

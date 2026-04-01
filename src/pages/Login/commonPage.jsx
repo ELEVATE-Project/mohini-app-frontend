@@ -105,6 +105,7 @@ function CommonHomePage({ usecaseType }) {
       [sessionFlowName.GuestDiscussion]: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT,
       [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
       [sessionFlowName.ParentPerceptionSurvey]: ROUTES.SHIKSHALOKAM_PPPI_VOICE_CHAT,
+      [sessionFlowName.StudyTeacherInterview]: ROUTES.SHIKSHALOKAM_STUDY_TEACHER_INTERVIEW_CHAT,
     }
 
     const route = flowRoutes[urlFlow]

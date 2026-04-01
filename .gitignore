@@ -28,3 +28,5 @@ yarn-error.log*
 downloads/
 test-results/
 playwright-report/
+
+.claude/worktrees/

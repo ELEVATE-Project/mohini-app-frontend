@@ -16,19 +16,6 @@ export const LANGUAGE_ENUMS = {
   TELUGU: "te",
 }
 
-export const languageList = [
-  { label: "English", value: "en", excludeFor: [] },
-  { label: "हिंदी", value: "hi", excludeFor: [SESSION_USECASE_TYPE.MEGA_PTM, SESSION_USECASE_TYPE.YLC] },
-  { label: "ಕನ್ನಡ", value: "kn", excludeFor: [
-      SESSION_USECASE_TYPE.MEGA_PTM,  SESSION_USECASE_TYPE.ListeningActivity, SESSION_USECASE_TYPE.ParentPerceptionSurvey
-    ] 
-  },
-  { label: "తెలుగు", value: "te", excludeFor: [
-      SESSION_USECASE_TYPE.ListeningActivity, SESSION_USECASE_TYPE.YLC, SESSION_USECASE_TYPE.ParentPerceptionSurvey
-    ] 
-  },
-];
-
 export const sessionFlowName = {
   GuestDiscussion: "guest-discussion",
   LoginDiscussion: "login-discussion",
@@ -42,6 +29,20 @@ export const sessionFlowName = {
   ParentPerceptionSurvey: "parent_perception_survey",
   StudyTeacherInterview: "study_teacher_interview",
 };
+
+export const languageList = [
+  { label: "English", value: "en", excludeFor: [] },
+  { label: "हिंदी", value: "hi", excludeFor: [SESSION_USECASE_TYPE.MEGA_PTM, SESSION_USECASE_TYPE.YLC] },
+  { label: "ಕನ್ನಡ", value: "kn", excludeFor: [
+      SESSION_USECASE_TYPE.MEGA_PTM,  SESSION_USECASE_TYPE.ListeningActivity, SESSION_USECASE_TYPE.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview
+    ] 
+  },
+  { label: "తెలుగు", value: "te", excludeFor: [
+      SESSION_USECASE_TYPE.ListeningActivity, SESSION_USECASE_TYPE.YLC, SESSION_USECASE_TYPE.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview
+    ] 
+  },
+];
+
 
 export const PTM_CONVERSATION_STATUS_TYPE = {
   COMPLETED: "COMPLETED",

@@ -40,6 +40,7 @@ export const sessionFlowName = {
   YLC: "YLC",
   ListeningActivity: "listening-activity",
   ParentPerceptionSurvey: "parent_perception_survey",
+  StudyTeacherInterview: "study_teacher_interview",
 };
 
 export const PTM_CONVERSATION_STATUS_TYPE = {

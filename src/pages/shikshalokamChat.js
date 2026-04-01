@@ -12,7 +12,7 @@ import ShikshalokamVoiceBasedChat from "./ShikshalokamVoiceChat/voice-chat"
 import useSmartChatStorage from "hooks/useSmartChatStorage"
 import useUserDataLocalStore from "store/slices/userData/userDataLocal"
 
-function ShikshalokamChat({ type, variant }) {
+function ShikshalokamChat({ type }) {
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)

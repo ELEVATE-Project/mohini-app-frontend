@@ -326,7 +326,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   const isSpecialFlow = useMemo(() => {
     if (!storageFlow) return false
-    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(storageFlow)
+    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(storageFlow)
   }, [storageFlow])
 
   const shouldFetchChatSession = useMemo(() => {
@@ -498,8 +498,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         }
       }
     }
-    console.log("message: ", message)
-    console.log("firstName: ", firstName)
     if (message && firstName) {
       const words = message.split(" ")
       words.splice(1, 0, firstName)
@@ -955,7 +953,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       console.log("History length:", window.history.length)
       console.log("Can go back 1?", window.history.length > 1)
       console.log("Can go back 3?", window.history.length > 3)
-      if ((acceptedTnc || acceptedTnc === "ONGOING") && currentFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.SsoFlow, sessionFlowName.ParentPerceptionSurvey].includes(currentFlow)) {
+      if ((acceptedTnc || acceptedTnc === "ONGOING") && currentFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.SsoFlow, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(currentFlow)) {
         if (ssoNavigationTriggered && accessToken) {
           console.log("isnide navigate happens")
           navigate(-2)
@@ -1299,7 +1297,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    * Calls end-story API when all state machine steps complete
    */
   useEffect(() => {
-    if (storageFlow && [sessionFlowName.ParentPerceptionSurvey].includes(storageFlow)) {
+    if (storageFlow && [sessionFlowName.ParentPerceptionSurvey, sessionFlowName.StudyTeacherInterview].includes(storageFlow)) {
       return
     }
     // if (sentences.filter(sent => !sent.isNarrated).length > 0) return
@@ -1320,6 +1318,29 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         allowOutsideClick: false,
         imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
         imageHeight: "100",
+      }).then(result => {
+        if (result.isConfirmed) {
+          clearFromStorage()
+          setLanguage(LANGUAGE_ENUMS.ENGLISH)
+          setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
+          setHasSelectedLanguage(false)
+          stopAllAudio()
+          navigate(-2)
+        }
+      })
+    }
+
+
+    if (storageFlow && [sessionFlowName.StudyTeacherInterview].includes(storageFlow) && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && isLastMessageFromBot) {
+      Swal.fire({
+        title: t("ptmCompletionMessage"),
+        showCancelButton: false,
+        confirmButtonText: t("ptmCompletionCTA"),
+        showCloseButton: false,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+        imageHeight: "100"
       }).then(result => {
         if (result.isConfirmed) {
           clearFromStorage()
@@ -1555,13 +1576,11 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     let hasUnnarratedMessages = !!unnarratedMessages?.length
     let sourceLanguage = languageToUse
     if (acceptedTnc === "ONGOING") {
-      return () => {}
+      return
     }
     if (isNextAllowed && hasUnnarratedMessages && !isLoading && !isEndStoryLoading) {
       handleAI4BharatTTSRequest(unnarratedMessages[0].message, unnarratedMessages[0].id, sourceLanguage)
     }
-
-    return () => {}
   }, [isNextAllowed, sentences, languageToUse, isLoading, isEndStoryLoading, acceptedTnc])
 
   /**
@@ -2192,6 +2211,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       [sessionFlowName.LoginDiscussion]: bot_routes.shikshalokam_chaupal,
       [sessionFlowName.ListeningActivity]: bot_routes.listening_activity,
       [sessionFlowName.ParentPerceptionSurvey]: bot_routes.parent_perception_survey,
+      [sessionFlowName.StudyTeacherInterview]: bot_routes.study_teacher_interview,
     }
 
     const typeBasedRouteMap = {
@@ -2889,6 +2909,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                   const prefixMap = {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
+                    [sessionFlowName.StudyTeacherInterview]: "study_teacher_",
                   }
 
                   const prefix = prefixMap[storageFlow] || ""

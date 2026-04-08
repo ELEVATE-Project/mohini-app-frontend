@@ -16,7 +16,7 @@ function PrivacyPage() {
         JSON.parse(localStorage.getItem("local_route")) || languageList[0].value
     );
     
-    const { t } = useTranslation();
+    const { t } = useTranslation("terms_condition");
     
     const handleLanguageChange = (e) => {
         setUserLanguage(e?.target?.value);
@@ -45,7 +45,7 @@ function PrivacyPage() {
       <div className="px-5 hidden sm:block">
           <div className="flex">
             <img
-              src={t('pageLogo')}
+              src={t('terms_condition:pageLogo')}
               className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0"
               alt="shikshalokam_logo"
             />
@@ -61,7 +61,7 @@ function PrivacyPage() {
       <div className="">
       <div className="flex justify-between w-full sm:hidden items-center p-2">
   <img
-    src={t('pageLogo')}
+    src={t('terms_condition:pageLogo')}
     className="h-[80px] w-[100px] object-contain"
     alt="shikshalokam_logo"
   />
@@ -86,7 +86,7 @@ function PrivacyPage() {
             <>
                 <div className="text-center sm:text-2xl mt-[100px] text-md text-slate-700">
                     <div className="container max-w-full md mx-auto py-6">
-                        <PrivacyPolicyPage tncText={t('tncText')} shouldShowAcceptDecline={false} 
+                        <PrivacyPolicyPage tncText={t('terms_condition:tncText')} shouldShowAcceptDecline={false} 
                         onAccept={()=>{}} onDecline={()=>{}} />
                     </div>
                 </div>

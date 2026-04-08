@@ -134,7 +134,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // ========== Other Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory, getChatHistory] = useSmartChatStorage()
   const [searchParams] = useSearchParams()
-  const { t } = useTranslation()
+  const { t } = useTranslation("voice_old")
 
   const accessToken = useUserDataLocalStore(state => state.access_token)
 

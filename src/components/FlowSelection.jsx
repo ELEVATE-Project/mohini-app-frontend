@@ -4,22 +4,24 @@ import { sessionFlowName } from "../constants/session"
 import { useChatStorage } from "hooks/useStorage"
 import { useTranslation } from "react-i18next"
 import ShowPageButton from "./ShowPageButton"
+import { loadI18nForFlow } from "../i18n"
 
 const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, onFlowContinue, setIsLoading }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation("flow_selection")
 
   const selectedFlow = useChatStorage()(state => state.flow)
   const setSelectedFlow = useChatStorage().getState().setFlow
 
   const handleContinueClick = async () => {
     setIsLoading(true)
+    await loadI18nForFlow(selectedFlow);
     await onFlowContinue()
   }
 
   return (
     <>
       <div className="text-center text-lg md:text-xl sm:text-md mt-0 sm:mt-[100px] text-slate-700">
-        <b>{t("commonPageSelectionText")}</b>
+        <b>{t("flow_selection:commonPageSelectionText")}</b>
       </div>
       <div className="py-2 px-0 text-center">
         <div className="flex flex-col items-center gap-8 py-2 px-0 font-inter">
@@ -29,7 +31,7 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
               flowName={sessionFlowName.GuestDiscussion}
               // selectedFlow={selectedFlow}
               onSelect={setSelectedFlow}
-              buttonText={t("commonPageButtonText2")}
+              buttonText={t("flow_selection:commonPageButtonText2")}
               buttonId="capture-discussion"
               // userLanguage={userLanguage}
               audioRef={audioRef}
@@ -41,7 +43,7 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
               flowName={sessionFlowName.GuestMiStory}
               // selectedFlow={selectedFlow}
               onSelect={setSelectedFlow}
-              buttonText={t("commonPageButtonText1")}
+              buttonText={t("flow_selection:commonPageButtonText1")}
               buttonId="capture-mi-story"
               // userLanguage={userLanguage}
               audioRef={audioRef}
@@ -53,7 +55,7 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
 
           {/* Continue Button */}
           <button className={`mt-0 px-16 py-2 rounded-xl text-white text-lg font-medium flex items-center ${selectedFlow ? "bg-[#572E91] cursor-pointer" : "bg-[#8d888857] cursor-not-allowed"}`} disabled={!selectedFlow} onClick={handleContinueClick}>
-            {t("continueBtnText")} <FaArrowRightLong className="ml-2 text-xl" />
+            {t("flow_selection:continueBtnText")} <FaArrowRightLong className="ml-2 text-xl" />
           </button>
         </div>
       </div>

@@ -69,7 +69,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
   const [isTalking, setTalking] = useState(0)
 
   // Other hooks
-  const { t } = useTranslation()
+  const { t } = useTranslation("voice_old")
   const navigate = useNavigate()
   const audioRef = useRef()
   const textAreaRef = useRef(null)

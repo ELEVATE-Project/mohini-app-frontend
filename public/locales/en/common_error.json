@@ -1,0 +1,6 @@
+{
+    "networkWarning": "Slow network detected. Please check your connection and try again",
+    "offlineNetwork": "You are offline. Please check your internet connection.",
+    "onlineNetwork": "You are back online.",
+    "asrError": "Oops! We couldn't capture your speech. Try again."
+}

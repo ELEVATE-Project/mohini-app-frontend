@@ -1,0 +1,15 @@
+{
+    "uploadImagesStory": "Add media",
+    "addImage": "Add image",
+    "somethingWentWrong": "Upload failed",
+    "photosLimitMsg": "You can upload upto 10 images.",
+    "uploadedFiles": "Uploaded Files",
+    "filesUploadedMessage": "files uploaded",
+    "upload": "Add Photos",
+    "uploadLoadMsg": "Please wait, your images are loading...",
+    "fileExceedTextDyn": "You cannot upload more than {{number}} files",
+    "fileSizeTextDyn": "File size cannot exceed {{number}}MB",
+    "fileExceedText": "You cannot upload more than 10 files",
+    "fileSizeText": "File size cannot exceed 50MB",
+    "fileTypeErrorText": "Only JPEG, JPG, PNG, SVG, and WEBP formats are supported."
+}

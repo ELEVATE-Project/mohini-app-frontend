@@ -2,14 +2,14 @@ import { useTranslation } from "react-i18next"
 import Swal from "sweetalert2"
 
 export const useConfirmationPopup = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation("popup")
 
   const showGuestPopup = async (yesButtonAction, noButtonAction) => {
     const result = await Swal.fire({
-      title: t("guestPopUpChanges"),
+      title: t("popup:guestPopUpChanges"),
       showCancelButton: true,
-      confirmButtonText: t("confirmChanges"),
-      cancelButtonText: t("denyButton"),
+      confirmButtonText: t("popup:confirmChanges"),
+      cancelButtonText: t("popup:denyButton"),
     })
 
     if (result.isConfirmed && yesButtonAction) {
@@ -21,10 +21,10 @@ export const useConfirmationPopup = () => {
 
   const showConfirmationPopup = async (yesButtonAction, noButtonAction) => {
     const result = await Swal.fire({
-      title: t("popUpChanges"),
+      title: t("popup:popUpChanges"),
       showCancelButton: true,
-      confirmButtonText: t("confirmChanges"),
-      cancelButtonText: t("denyButton"),
+      confirmButtonText: t("popup:confirmChanges"),
+      cancelButtonText: t("popup:denyButton"),
     })
 
     if (result.isConfirmed && yesButtonAction) {
@@ -36,10 +36,10 @@ export const useConfirmationPopup = () => {
 
   const commonsNetworkReconnectionPopup = async (yesButtonAction, noButtonAction) => {
     const result = await Swal.fire({
-      title: t("popUpChanges"),
+      title: t("popup:popUpChanges"),
       showCancelButton: true,
-      confirmButtonText: t("confirmChanges"),
-      cancelButtonText: t("denyButton"),
+      confirmButtonText: t("popup:confirmChanges"),
+      cancelButtonText: t("popup:denyButton"),
       buttonsStyling: true,
       customClass: {
         confirmButton: "bg-[var(--primary-color)]",

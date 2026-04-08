@@ -192,7 +192,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   // ========== Other Hooks ==========
   const [searchParams] = useSearchParams()
-  const { t } = useTranslation()
+  const { t } = useTranslation(["terms_condition", "dynamic_chat", "common", "media", "popup", "editor", "common_error"])
 
 
   const { recordings, HiddenRecorder } = useVoiceRecord()
@@ -765,12 +765,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const { showFileInput, setShowFileInput } = useChatDataSessionStore.getState()
   const selectedLabel = {
     types: [
-      { label: t("guidedReflection"), value: "normal" },
-      { label: t("oneStepReflection"), value: "oneshot" },
+      { label: t("dynamic_chat:guidedReflection"), value: "normal" },
+      { label: t("dynamic_chat:oneStepReflection"), value: "oneshot" },
     ],
   }
-  const fileExceedText = t("fileExceedText")
-  const fileSizeText = t("fileSizeText")
+  const fileExceedText = t("media:fileExceedText")
+  const fileSizeText = t("media:fileSizeText")
   let isMobile = useCustomMediaQuery("(max-width: 500px)")
 
   useEffect(() => {
@@ -872,7 +872,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           if (toastId) {
             toast.dismiss(toastId)
           }
-          const message = t("networkWarning")
+          const message = t("common_error:networkWarning")
           toastId = showNotification({
             message: message,
             type: "warning",
@@ -889,7 +889,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       if (toastId) {
         toast.dismiss(toastId)
       }
-      toastId = toast.error(t("offlineNetwork"), {
+      toastId = toast.error(t("common_error:offlineNetwork"), {
         position: "top-center",
         style: { fontWeight: "bold", color: "#fff" },
       })
@@ -899,7 +899,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       if (toastId) {
         toast.dismiss(toastId)
       }
-      toastId = toast.success(t("onlineNetwork"), {
+      toastId = toast.success(t("common_error:onlineNetwork"), {
         position: "top-center",
         style: { fontWeight: "bold", color: "#1D1616" },
       })
@@ -1262,9 +1262,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
     const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot"
     if (storageFlow && flowInfo?.create_story === "none" && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && isLastMessageFromBot) {
       Swal.fire({
-        title: t("PPsCompletionMessage"),
+        title: t("popup:PPsCompletionMessage"),
         showCancelButton: false,
-        confirmButtonText: t("PPsCompletionCTA"),
+        confirmButtonText: t("popup:PPsCompletionCTA"),
         showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad].includes(storageFlow),
         showCloseButton: false,
         allowEscapeKey: false,
@@ -1497,7 +1497,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
       const _editor = new EditorJS({
         holder: "editorjs",
-        placeholder: t("editorPlaceholder"),
+        placeholder: t("editor:editorPlaceholder"),
         autofocus: true,
         hideToolbar: true,
         tools: {
@@ -1601,7 +1601,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               if (headerEl) {
                 const text = headerEl.innerText.trim().toLowerCase()
 
-                if (text === t("challengesHeader").toLowerCase() || text === t("solutionsHeader").toLowerCase() || (text.startsWith("q") && text.includes(":"))) {
+                if (text === t("editor:challengesHeader").toLowerCase() || text === t("editor:solutionsHeader").toLowerCase() || (text.startsWith("q") && text.includes(":"))) {
                   headerEl.setAttribute("contenteditable", "false")
                   headerEl.style.pointerEvents = "none"
                   headerEl.style.color = "#374151"
@@ -2094,7 +2094,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
               if (!audioBlob || isSilent) {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -2109,14 +2109,14 @@ const DynamicVoiceChat = ({ type = "" }) => {
               let transcriptResult = ""
               let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`, storyData)
               if (!s3Url || s3Url === "") {
-                transcriptResult = t("asrError")
+                transcriptResult = t("common_error:asrError")
               }
               setAsrAudio(s3Url)
               let storedRoute = flowInfo.bot_route
               transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -2170,9 +2170,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   return (
     <>
-      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession && <PrivacyPolicyPopup tncText={t("tncText")} onAccept={handleAcceptTnC} />}
+      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession && <PrivacyPolicyPopup tncText={t("terms_condition:tncText")} onAccept={handleAcceptTnC} />}
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && storageFlow && <PrivacyPolicyPopup tncText={t("tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && storageFlow && <PrivacyPolicyPopup tncText={t("terms_condition:tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
       <div className={`div27`}>
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
@@ -2205,15 +2205,15 @@ const DynamicVoiceChat = ({ type = "" }) => {
             <BiLoader className="loader-rotate-loader loader-icon" />
             {isPdfDownloading && (
               <div className="div68">
-                <label className="form-label label1">{t("downloadLoader")}</label>
+                <label className="form-label label1">{t("common:downloadLoader")}</label>
               </div>
             )}
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
+                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("common:storyGuestLoaderHeading") : t("common:storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportLoader") : t("common:storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2237,7 +2237,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
             }}
             className="button-13"
           >
-            <div>{t("doLater")}</div>
+            <div>{t("common:doLater")}</div>
           </button>
         )}
         <HiddenRecorder />
@@ -2252,7 +2252,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         botNameToDisplay={botNameToDisplay}
                         userType={chat?.source}
                         message={`${chat?.msg}`}
-                        name={t("userName")}
+                        name={t("common:userName")}
                         recording={chat?.recording}
                         hasAppendix={chat?.recording}
                         appendixURL={chat?.appendixURL}
@@ -2271,7 +2271,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     {!hasStartedListening && chatHistory[chatHistory?.length - 1].source === "user" && i === chatHistory?.length - 1 ? (
                       <div className="div57">
                         <div className="div58">
-                          <div>{t("replyMsg")}</div>
+                          <div>{t("common:replyMsg")}</div>
                         </div>
                       </div>
                     ) : (
@@ -2297,15 +2297,15 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     <>
                       <div className="div10">
                         <h3 className="h3-1">
-                          {t(`${prefix}homepageHeading`)}
+                          {t(`common:${prefix}homepageHeading`)}
                           <br />
-                          {t(`${prefix}homepageHeading1`)}
+                          {t(`common:${prefix}homepageHeading1`)}
                         </h3>
                       </div>
                       <ul className="div11">
-                        <li>{t(`${prefix}homepageList`)}</li>
-                        <li>{t(`${prefix}homepageList1`)}</li>
-                        <li>{t(`${prefix}homepageList2`)}</li>
+                        <li>{t(`common:${prefix}homepageList`)}</li>
+                        <li>{t(`common:${prefix}homepageList1`)}</li>
+                        <li>{t(`common:${prefix}homepageList2`)}</li>
                       </ul>
                     </>
                   )
@@ -2318,7 +2318,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       botNameToDisplay={botNameToDisplay}
                       userType={chatHistory[0]?.source}
                       message={`${chatHistory[0]?.msg}`}
-                      name={t("userName")}
+                      name={t("common:userName")}
                       recording={chatHistory[0]?.recording}
                       hasAppendix={chatHistory[0]?.recording}
                       appendixURL={chatHistory[0]?.appendixURL}
@@ -2347,13 +2347,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     userType="bot"
                     message={(() => {
                       const flow = storageFlow
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("common:evidenceStory") : t("common:evidence")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = storageFlow
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("common:evidenceStory") : t("common:evidence")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2366,7 +2366,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <div className="div14">
                     <label className="clickable-label" htmlFor="file-upload">
                       <GrGallery className="icon-1" />
-                      <span className="div16">{t("upload")}</span>
+                      <span className="div16">{t("media:upload")}</span>
                       <input
                         id="file-upload"
                         type="file"
@@ -2385,7 +2385,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                             })
                             .catch(error => {
                               console.error(error)
-                              setFileErrorText(t("somethingWentWrong") || "Upload failed")
+                              setFileErrorText(t("media:somethingWentWrong") || "Upload failed")
                             })
                             .finally(() => {
                               setIsLoading(false)
@@ -2404,17 +2404,17 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     </label>
                   </div>
                   <div className="div18">
-                    <p className="li-message">{t("photosLimitMsgDyn", { image_limit: flowInfo.image_config.max_images })}</p>
+                    <p className="li-message">{t("media:photosLimitMsgDyn", { image_limit: flowInfo.image_config.max_images })}</p>
                   </div>
                   {isImageUploading && (
                     <div className="div18">
-                      <p className="li-3">{t("uploadLoadMsg")}</p>
+                      <p className="li-3">{t("media:uploadLoadMsg")}</p>
                     </div>
                   )}
 
                   {files?.length > 0 ? (
                     <div className="div18">
-                      <h4 className="h4-1">{t("uploadedFiles")}:</h4>
+                      <h4 className="h4-1">{t("media:uploadedFiles")}:</h4>
                       <ul>
                         {fileErrorText && <li className="li-1">{fileErrorText}</li>}
                         {files.map((file, index) => (
@@ -2447,11 +2447,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")}
+                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:reportFeedbackText") : t("dynamic_chat:storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:reportFeedbackText") : t("dynamic_chat:storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2476,7 +2476,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("downloadReportText") : t("downloadStoryText")}
+                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:downloadReportText") : t("dynamic_chat:downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2489,7 +2489,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("editReportText") : t("editStoryText")}
+                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:editReportText") : t("dynamic_chat:editStoryText")}
                         </span>
                       </div>
                     </button>
@@ -2511,7 +2511,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <AiOutlineEye className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {t("viewStoryText")}
+                            {t("common:viewStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2536,7 +2536,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <div className="download-story-div">
                     <TbReload className="icon-1" />
                     <span className="div16" ref={endPageToScrollRef}>
-                      {FLOW_CONFIG[storageFlow] ? t(FLOW_CONFIG[storageFlow].storyActions?.downloadReportText) : t("reDownloadStoryText")}
+                      {FLOW_CONFIG[storageFlow] ? t(FLOW_CONFIG[storageFlow].storyActions?.downloadReportText) : t("dynamic_chat:reDownloadStoryText")}
                     </span>
                   </div>
                 </button>
@@ -2565,7 +2565,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
                 style={{ alignContent: isFetchingData ? "normal" : "center" }}
                 onChange={handleOnInputText}
-                placeholder={hasStartedRecording ? t("placeholder1") : isFetchingData ? t("placeholder2") : t("placeholder3")}
+                placeholder={hasStartedRecording ? t("common:placeholder1") : isFetchingData ? t("common:placeholder2") : t("common:placeholder3")}
                 name="message-box"
                 value={textMessage}
                 autoFocus={false}

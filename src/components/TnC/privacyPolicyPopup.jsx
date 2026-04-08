@@ -19,7 +19,7 @@ const PrivacyPolicyPopup = ({ tncText, onAccept, onDecline, useStaticText=false,
     };
   }, []);
   
-  const { t } = useTranslation();
+  const { t } = useTranslation("terms_condition");
 
   return (
     <>
@@ -33,10 +33,10 @@ const PrivacyPolicyPopup = ({ tncText, onAccept, onDecline, useStaticText=false,
             </div>
             <div className="tnc-buttons">
                 {(onAccept)&& <button className={`tnc-button accept ${!isGuestChat && '!bg-blue-600'}`} onClick={onAccept}>
-                  {useStaticText? 'स्वीकार करें' : t('tncConfirm')}
+                  {useStaticText? 'स्वीकार करें' : t('terms_condition:tncConfirm')}
                 </button>}
                 {(onDecline)&& <button className="tnc-button decline" onClick={onDecline}>
-                  {t('tncDecline')}
+                  {t('terms_condition:tncDecline')}
                 </button>}
             </div>
             </div>

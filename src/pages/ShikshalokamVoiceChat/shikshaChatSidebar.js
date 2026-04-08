@@ -13,7 +13,7 @@ import { useSiteStorage, useChatStorage } from "hooks/useStorage"
 
 const Sidebar = ({ isOpen, toggle, isMobileFirst = false, showLogout = true, showScrollbarContent, resetChat, setIsResetCalled, showGuestPopup, stopAllAudio }) => {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t } = useTranslation("sidebar")
 
   const ssoRerouteURL = useSiteStorage()(state => state.ssoRerouteURL)
   const storageFlow = useChatStorage()(state => state.flow)
@@ -56,7 +56,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst = false, showLogout = true, sho
           {!!isOpen && (
             <div className="div23">
               <div className="div65 div24">
-                <p>{t("allMicroImprovement")}</p>
+                <p>{t("sidebar:allMicroImprovement")}</p>
               </div>
               <div className="div65">
                 <button
@@ -70,7 +70,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst = false, showLogout = true, sho
                     }
                   }}
                 >
-                  <FiPlus className="icon-2" /> {t("newChat")}
+                  <FiPlus className="icon-2" /> {t("sidebar:newChat")}
                 </button>
               </div>
             </div>
@@ -83,7 +83,7 @@ const Sidebar = ({ isOpen, toggle, isMobileFirst = false, showLogout = true, sho
         {!!isOpen && showLogout && (
           <div className="div66">
             <button className="button-5" onClick={handleLogout}>
-              <FaPowerOff className="icon-6 icon-2" /> {t("logout")}
+              <FaPowerOff className="icon-6 icon-2" /> {t("sidebar:logout")}
             </button>
           </div>
         )}

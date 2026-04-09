@@ -88,7 +88,7 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
           isFlowLanguagesLoading && (
             <>
               {
-                Array.from({ length: 4 }).map((_, index) => (
+                Array.from({ length: 2 }).map((_, index) => (
                   <div key={index} className="div14-lang animate-skeleton w-full text-center vertical-center m-0 h-[100px] flex items-center justify-center"></div>
                 ))
               }

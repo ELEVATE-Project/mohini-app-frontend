@@ -70,10 +70,19 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
 
   return (
     <>
-      <div className="text-center text-lg md:text-2xl sm:text-md mt-0 sm:mt-[100px] text-slate-700">
-        <b>{t("welcome_text")}</b>
-      </div>
-      <p className="sm:text-xl text-md font-semibold text-center">{t("languageQuestion")}</p>
+      {isFlowLanguagesLoading ? (
+        <>
+          <div className="animate-skeleton h-6 w-52 mx-auto rounded mt-0 sm:mt-[100px] mb-2"></div>
+          <div className="animate-skeleton h-5 w-40 mx-auto rounded"></div>
+        </>
+      ) : (
+        <>
+          <div className="text-center text-lg md:text-2xl sm:text-md mt-0 sm:mt-[100px] text-slate-700">
+            <b>{t("welcome_text")}</b>
+          </div>
+          <p className="sm:text-xl text-md font-semibold text-center">{t("languageQuestion")}</p>
+        </>
+      )}
       <div className="mt-4 mb-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 md:justify-items-center lg:px-[80px] md:px-[20px] sm:px-[20px] px-[10px]">
         {
           isFlowLanguagesLoading && (

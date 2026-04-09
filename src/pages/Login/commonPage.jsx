@@ -3,7 +3,10 @@ import "../../index.css"
 import "./commonPageStyle.css"
 import { LANGUAGE_ENUMS } from "pages/ShikshalokamVoiceChat/enum"
 import { sessionFlowName } from "../../constants/session"
-import { URL_PARAMS } from "../../constants/urls"
+import { API_ENDPOINTS, URL_PARAMS } from "../../constants/urls"
+import { clearFromStorage } from "../../services/storage_service"
+import { getFlowLanguagesApi } from "../../api/endpoints/flow"
+import { useQuery } from "@tanstack/react-query"
 import { useAudio } from "../../hooks/useAudio"
 import { useEffect, useMemo } from "react"
 import { useFlow } from "../../hooks/useFlow"
@@ -31,10 +34,27 @@ function CommonHomePage({ usecaseType }) {
   const ylc_case = sessionFlowName.YLC === usecaseType
 
   const navigate = useNavigate()
-
   const [searchParams] = useSearchParams()
   const { flow: urlFlow } = useUrlFlow()
   const urlLanguage = useMemo(() => searchParams.get("language"), [searchParams])
+  const { isLoading: isFlowLanguagesLoading, data: flowLanguages, isError: isFlowLanguagesError, error: flowLanguagesError } = useQuery({
+    queryKey: [API_ENDPOINTS.FLOW_LANGUAGES, urlFlow],
+    queryFn: () => getFlowLanguagesApi(urlFlow),
+    retry: false,
+    enabled: !!urlFlow && ![sessionFlowName.ParentPerceptionSurvey, sessionFlowName.ListeningActivity].includes(urlFlow),
+  })
+  
+
+
+
+  useEffect(() => {
+    if (!isFlowLanguagesError) return
+    if (flowLanguagesError?.response?.status === 404) {
+      console.error("Flow not found or inactivate, navigating to home page")
+      clearFromStorage()
+      navigate(ROUTES.SHIKSHALOKAM_HOME_PAGE, { replace: true })
+    }
+  }, [flowLanguagesError, isFlowLanguagesError])
 
   // Initialize language and flow processing
   useEffect(() => {
@@ -64,7 +84,7 @@ function CommonHomePage({ usecaseType }) {
   useEffect(() => {
     // Don't process if user hasn't selected a language (and no URL language) or if no flow is specified
     console.log({ urlLanguage, hasSelectedLanguage, urlFlow })
-    if (!urlLanguage && !hasSelectedLanguage) {
+    if (!urlLanguage && !hasSelectedLanguage ) {
       setIsLoading(false)
       return
     }
@@ -113,12 +133,12 @@ function CommonHomePage({ usecaseType }) {
   return (
     <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 px-0">
       {/* Desktop Header */}
-      <Header languageButtonSelect={languageButtonSelect} isDesktop={true} />
+      <Header languageButtonSelect={languageButtonSelect} isDesktop={true}  isLoading={isFlowLanguagesLoading} />
 
       {/* Main Content */}
       <div className="w-full px-0">
         {/* Mobile Header */}
-        <Header languageButtonSelect={languageButtonSelect} isDesktop={false} />
+        <Header languageButtonSelect={languageButtonSelect} isDesktop={false} isLoading={isFlowLanguagesLoading} />
 
         <div className="bg-slate-50 sm:pt-6 sm:h-[100%] flex flex-col justify-center mt-0 w-full">
           <div className="flex justify-end mr-6 relative block sm:hidden"></div>

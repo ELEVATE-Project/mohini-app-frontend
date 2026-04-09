@@ -8,6 +8,7 @@ const Header = ({
   languageButtonSelect,
   // onLanguageChange,
   isDesktop = false,
+  isLoading = false,
 }) => {
   const { t } = useTranslation()
 
@@ -26,15 +27,31 @@ const Header = ({
 
         {/* Desktop Header */}
         <div className="px-5 hidden sm:block">
-          <div className="flex">
-            <img src={t("pageLogo")} className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0" alt="shikshalokam_logo" />
-          </div>
-          <div className="mt-[40px]">
-            <div className="text-center sm:text-md text-xl mb-2 text-slate-700">
-              <b>{t("welcome_heading1")}</b>
-            </div>
-          </div>
-          <img src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png" width="360" height="300" className="center-img custom-login-image" alt="" />
+          {isLoading ? (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="animate-skeleton h-12 w-12 rounded-full"></div>
+                <div className="animate-skeleton h-5 w-40 rounded"></div>
+              </div>
+              <div className="mt-[40px] flex flex-col items-center gap-2">
+                <div className="animate-skeleton h-5 w-48 rounded"></div>
+                <div className="animate-skeleton h-5 w-36 rounded"></div>
+              </div>
+              <div className="animate-skeleton mt-6 w-[360px] h-[300px] rounded-xl center-img"></div>
+            </>
+          ) : (
+            <>
+              <div className="flex">
+                <img src={t("pageLogo")} className="h-[100px] w-[200px] object-contain aspect-auto align-top object-[center_center] relative ml-0" alt="shikshalokam_logo" />
+              </div>
+              <div className="mt-[40px]">
+                <div className="text-center sm:text-md text-xl mb-2 text-slate-700">
+                  <b>{t("welcome_heading1")}</b>
+                </div>
+              </div>
+              <img src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png" width="360" height="300" className="center-img custom-login-image" alt="" />
+            </>
+          )}
         </div>
       </>
     )

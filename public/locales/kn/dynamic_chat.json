@@ -1,1 +1,15 @@
-{}
+{
+    "guidedReflection": "Guided Reflection",
+    "oneStepReflection": "One-Step Reflection",
+    "storyText": "Here is your improvement story",
+    "downloadStoryText": "Download Story",
+    "reDownloadStoryText": "Regenerate Story",
+    "editStoryText": "Edit Story",
+    "reportText": "Here is a report of your discussion",
+    "reportFeedbackText": "Here is the feedback that you shared.",
+    "downloadReportText": "Download report",
+    "viewStoryText": "View Story",
+    "reDownloadReportText": "Regenerate report",
+    "editReportText": "Edit report",
+    "download_report": "Download your report"
+}

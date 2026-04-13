@@ -1,1 +1,12 @@
-{}
+{
+    "guestPopUpChanges": "<div class='text-class'>\n   क्या आप वाकई इस बातचीत को छोड़ना चाहते हैं?\n    आपकी सारी प्रगति खो जाएगी\n</div>",
+    "popUpChanges": "<div class='text-class'>\n    आप कुछ समय से निष्क्रिय हैं।  \n    क्या आप जारी रखना चाहते हैं?\n</div>",
+    "confirmChanges": "हाँ",
+    "denyButton": "नहीं",
+    "PPsCompletionMessage": "<div class='text-class'>धन्यवाद! आपका उत्तर सफलतापूर्वक दर्ज कर दिया गया है।</div>",
+    "PPsCompletionCTA": "एक और प्रतिक्रिया भेजें",
+    "comfirmButton": "हाँ",
+    "cancel": "रद्द करें",
+    "ptmCompletionMessage": "<div class='text-class'>धन्यवाद! आपका जवाब सफलतापूर्वक दर्ज कर दिया गया है।</div>",
+    "ptmCompletionCTA": "एक और प्रतिक्रिया भेजें"
+}

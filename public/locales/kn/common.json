@@ -1,1 +1,13 @@
-{}
+{
+    "doLater": "I will do it later",
+    "placeholder1": "Listening... Speak now",
+    "placeholder2": "Processing speech... Please wait",
+    "placeholder3": "Type your message",
+    "replyMsg": "Replying..",
+    "completedStatusText": "Completed",
+    "inProgressStatusText": "In Progress",
+    "userName": "You",
+    "captureStoryText": "Capture MI story",
+    "captureDiscussionText": "Capture Discussion",
+    "botName": "MItra"
+}

@@ -1,1 +1,13 @@
-{}
+{
+    "doLater": "मैं इसे बाद में करूंगा",
+    "placeholder1": "सुन रही हूँ... अब बोलो",
+    "placeholder2": "भाषण संसाधित हो रहा है... कृपया प्रतीक्षा करें",
+    "placeholder3": "अपना संदेश लिखें",
+    "replyMsg": "प्रसंस्करण..",
+    "completedStatusText": "पूर्ण है",
+    "inProgressStatusText": "प्रगति पर है",
+    "userName": "आप",
+    "captureStoryText": "एमआई कहानी संजोएं",
+    "captureDiscussionText": "चर्चा संजोएं",
+    "botName": "मित्रा"
+}

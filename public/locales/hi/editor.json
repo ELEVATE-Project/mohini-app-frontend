@@ -1,1 +1,10 @@
-{}
+{
+    "saveChanges": "परिवर्तन सहेजें",
+    "editorHeading": "अंतिम चरण! अपनी कहानी की समीक्षा करें और संपादित करें।",
+    "EditorConfirm": "कहानी बनाएं",
+    "editorPlaceholder": "यहां लिखना शुरू करें...",
+    "challengesHeader": "चुनौतियां",
+    "solutionsHeader": "समाधान",
+    "EditorFirstTab": "कहानी",
+    "EditorSecondTab": "गैलरी"
+}

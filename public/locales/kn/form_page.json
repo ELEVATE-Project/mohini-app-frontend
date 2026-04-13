@@ -1,14 +1,14 @@
 {
-    "welcome_paragraph1": "MItra is a multilingual, AI-powered, voice-enabled chatbot that empowers education leaders—teachers, school leaders, community members, parents, and youth leaders—to reflect on and share their school improvement journey.",
-    "firstNameText": "First Name",
-    "phoneNumberText": "Phone Number",
-    "languageText": "language",
-    "stateText": "State",
-    "districtText": "District Name",
-    "blockText": "Block Name",
-    "tncText1": "By signing up, you accept our",
-    "tncText2": "Terms and Conditions",
-    "tncText3": "",
-    "LetGetStartedBtn": "Let's Get Started",
-    "chooseAnOption": "Choose an option"
+    "welcome_paragraph1": "ಮಿತ್ರಾ ಒಂದು ಬಹುಭಾಷಾ, AI-ಚಾಲಿತ, ಧ್ವನಿ-ಸಕ್ರಿಯಗೊಳಿಸಿದ ಚಾಟ್‌ಬಾಟ್ ಆಗಿದ್ದು, ಇದು ಶಿಕ್ಷಣ ನಾಯಕರು - ಶಿಕ್ಷಕರು, ಶಾಲಾ ನಾಯಕರು, ಸಮುದಾಯ ಸದಸ್ಯರು, ಪೋಷಕರು ಮತ್ತು ಯುವ ನಾಯಕರು - ತಮ್ಮ ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಪ್ರಯಾಣವನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲು ಮತ್ತು ಹಂಚಿಕೊಳ್ಳಲು ಅಧಿಕಾರ ನೀಡುತ್ತದೆ.",
+    "firstNameText": "ಮೊದಲ ಹೆಸರು",
+    "phoneNumberText": "ಫೋನ್ ಸಂಖ್ಯೆ",
+    "languageText": "ಭಾಷೆ",
+    "stateText": "ರಾಜ್ಯ",
+    "districtText": "ಜಿಲ್ಲೆಯ ಹೆಸರು",
+    "blockText": "ಬ್ಲಾಕ್ ಹೆಸರು",
+    "tncText1": "ಸೈನ್ ಅಪ್ ಮಾಡುವ ಮೂಲಕ, ನೀವು ನಮ್ಮ",
+    "tncText2": "ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳನ್ನು",
+    "tncText3": "ಸ್ವೀಕರಿಸುತ್ತೀರಿ",
+    "LetGetStartedBtn": "ಆರಂಭಿಸೋಣ",
+    "chooseAnOption": "ಒಂದು ಆಯ್ಕೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"
 }

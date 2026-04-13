@@ -1,9 +1,8 @@
 {
-    "storyLoaderHeading": "Thank you for sharing your experiences with this Improvement Journey.",
-    "storyGuestLoaderHeading": "Thank you! I'm now creating your story of improvement based on what you shared.",
-    "reportLoaderHeading": "Thank you for sharing the details of your discussion.",
-    "feedbackLoaderHeading": "Thank you for your time. Your responses have been recorded. We truly appreciate your efforts in improving your school and are grateful you shared your experience with us. Wishing you all the best ahead!",
-    "storyLoader": "Creating your story, this may take a moment. Please wait...",
-    "reportLoader": "Creating your report, this may take a moment. Please wait...",
-    "downloadLoader": "Downloading please wait..."
+    "storyLoaderHeading": "ಈ ಸುಧಾರಣಾ ಪ್ರಯಾಣದಲ್ಲಿ ನಿಮ್ಮ ಅನುಭವಗಳನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.",
+    "storyGuestLoaderHeading": "ಧನ್ಯವಾದಗಳು! ನೀವು ಹಂಚಿಕೊಂಡ ವಿಷಯಗಳ ಆಧಾರದ ಮೇಲೆ ಸುಧಾರಣೆಯ ಕಥೆಯನ್ನು ತಯಾರಿಸಲಾಗುತ್ತಿದೆ.",
+    "reportLoaderHeading": "ನಿಮ್ಮ ಚರ್ಚೆಯ ವಿವರಗಳನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.",
+    "storyLoader": "ನಿಮ್ಮ ಕಥೆಯನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ, ಇದು ಸ್ವಲ್ಪ ಸಮಯ ತೆಗೆದುಕೊಳ್ಳಬಹುದು. ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ...",
+    "reportLoader": "ನಿಮ್ಮ ವರದಿಯನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ, ಇದು ಸ್ವಲ್ಪ ಸಮಯ ತೆಗೆದುಕೊಳ್ಳಬಹುದು. ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ...",
+    "downloadLoader": "ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ..."
 }

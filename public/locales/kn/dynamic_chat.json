@@ -1,15 +1,15 @@
 {
-    "guidedReflection": "Guided Reflection",
-    "oneStepReflection": "One-Step Reflection",
-    "storyText": "Here is your improvement story",
-    "downloadStoryText": "Download Story",
-    "reDownloadStoryText": "Regenerate Story",
-    "editStoryText": "Edit Story",
-    "reportText": "Here is a report of your discussion",
-    "reportFeedbackText": "Here is the feedback that you shared.",
-    "downloadReportText": "Download report",
-    "viewStoryText": "View Story",
-    "reDownloadReportText": "Regenerate report",
-    "editReportText": "Edit report",
-    "download_report": "Download your report"
+    "guidedReflection": "ಮಾರ್ಗದರ್ಶನ ಪ್ರತಿಬಿಂಬ",
+    "oneStepReflection": "ಒಂದು ಹಂತದ ಪ್ರತಿಬಿಂಬ",
+    "storyText": "ನಿಮ್ಮ ಸುಧಾರಣೆಯ ಕಥೆ ಇಲ್ಲಿದೆ",
+    "downloadStoryText": "ಕಥೆಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    "reDownloadStoryText": "ಕಥೆಯನ್ನು ಮರುನಿರ್ಮಿಸು",
+    "editStoryText": "ಕಥೆಯನ್ನು ತಿದ್ದೀರಿ",
+    "reportText": "ನಿಮ್ಮ ಚರ್ಚೆಯ ವರದಿ ಇಲ್ಲಿದೆ",
+    "reportFeedbackText": "ನೀವು ಹಂಚಿಕೊಂಡ ಪ್ರತಿಕ್ರಿಯೆ ಇಲ್ಲಿದೆ.",
+    "downloadReportText": "ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    "viewStoryText": "ಕಥೆ ವೀಕ್ಷಿಸಿ",
+    "reDownloadReportText": "ವರದಿಯನ್ನು ಪುನರುತ್ಪಾದಿಸಿ",
+    "editReportText": "ವರದಿಯನ್ನು ತಿದ್ದೀರಿ",
+    "download_report": "ನಿಮ್ಮ ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"
 }

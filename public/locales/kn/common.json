@@ -1,13 +1,13 @@
 {
-    "doLater": "I will do it later",
-    "placeholder1": "Listening... Speak now",
-    "placeholder2": "Processing speech... Please wait",
-    "placeholder3": "Type your message",
-    "replyMsg": "Replying..",
-    "completedStatusText": "Completed",
-    "inProgressStatusText": "In Progress",
-    "userName": "You",
-    "captureStoryText": "Capture MI story",
-    "captureDiscussionText": "Capture Discussion",
-    "botName": "MItra"
+    "doLater": "ನಾನು ಅದನ್ನು ನಂತರ ಮಾಡುತ್ತೇನೆ.",
+    "placeholder1": "ಆಲಿಸುತ್ತಿದ್ದೇನೆ... ಈಗ ಮಾತನಾಡಿ",
+    "placeholder2": "ಭಾಷಣವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ... ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ",
+    "placeholder3": "ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಟೈಪ್ ಮಾಡಿ",
+    "replyMsg": "ಉತ್ತರ ನೀಡಲಾಗುತ್ತಿದೆ..",
+    "completedStatusText": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "inProgressStatusText": "ಪ್ರಗತಿಯಲ್ಲಿದೆ",
+    "userName": "ನೀವು",
+    "captureStoryText": "MI ಕಥೆಯನ್ನು ದಾಖಲಿಸಿ",
+    "captureDiscussionText": "ಚರ್ಚೆಯನ್ನು ದಾಖಲಿಸಿ",
+    "botName": "ಮಿತ್ರ"
 }

@@ -5,7 +5,7 @@ import "../index.css"
 import ROUTES from "../url";
 import { useEffect, useState } from "react";
 import FormData from "./Form/FormData";
-import { setLanguage } from "../i18n";
+import { loadI18nForFlow, setLanguage } from "../i18n";
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 import { useTranslation } from "react-i18next";
 import { clearFromStorage } from "../services/storage_service";

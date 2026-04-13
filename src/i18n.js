@@ -100,33 +100,27 @@ export const resetI18n = () => {
 };
 
 export const loadI18nForFlow = async (flow, language = "en") => {
+  let config = {};
   try {
 
-    const cached = getCachedI18nConfig(flow, language);
-
-    let config;
-    if (cached) {
-      config = cached;
-    } else {
-      config = await getI18nConfigApi(flow, language);
-    }
-
-    setI18nConfig(config, flow, language);
-
-    resetI18n();
-
-    await i18n.changeLanguage(language);
-
-    const usedNamespaces =
-      i18n.reportNamespaces?.getUsedNamespaces?.() || ["common"];
-
-
-    await i18n.loadNamespaces(usedNamespaces);
+    config =
+      getCachedI18nConfig(flow, language) ??
+      (await getI18nConfigApi(flow, language)) ??
+      {};
 
   } catch (error) {
-    console.error("i18n config API failed, using fallback");
-    setI18nConfig({}, flow, language);
+    console.error("i18n config API failed", {
+      message: error?.message,
+    });
   }
+  setI18nConfig(config, flow, language);
+  resetI18n();
+  await i18n.changeLanguage(language);
+
+  const configuredNamespaces = Object.keys(config);
+  await i18n.loadNamespaces(
+    configuredNamespaces.length > 0 ? configuredNamespaces : ["common"]
+  );
 };
 
 export default i18n

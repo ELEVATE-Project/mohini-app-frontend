@@ -38,20 +38,21 @@ function FormData({
   if (isMultiple === "true") multipleValue = true
 
   const { t } = useTranslation("form_page")
-  let defaultText = "Choose an option"
 
-  if (t("form_page:chooseAnOption") && !showDefaultDropdownText) {
-    defaultText = t("form_page:chooseAnOption")
-  }
+  const defaultText = t("form_page:chooseAnOption") || "Choose an option"
 
   function ShowDropDown() {
     if (optionArr === undefined || optionArr === null) optionArr = []
     return (
       <>
         <select className={selectClassName} name={selectName} onChange={selectOnChange} id={selectID} value={selectValue} multiple={multipleValue} {...(isRequired && { required: true })}>
-          <option value="" disabled hidden>
-            {t("form_page:chooseAnOption")}
-          </option>
+          {showDefaultDropdownText && (
+            <option value="" disabled hidden>
+              {defaultText}
+            </option>
+          )}
+
+
           {optionArr.map(option => {
             return (
               <option key={option.value} value={option.value}>

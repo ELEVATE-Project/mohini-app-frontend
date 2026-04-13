@@ -6,7 +6,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 
 function I18nLoader({ children }) {
   const [ready, setReady] = useState(false);
-  const [currentKey, setCurrentKey] = useState("");
+  const [loadedKey, setLoadedKey] = useState("");
 
   const location = useLocation();
 
@@ -22,25 +22,33 @@ function I18nLoader({ children }) {
   const newKey = `${flow}-${lang}`;
 
   useEffect(() => {
-    async function init() {
-      setReady(false);
+    let cancelled = false;
+    setReady(false);
 
-      await loadI18nForFlow(flow, lang);
+    (async () => {
+      try {
+        await loadI18nForFlow(flow, lang);
+        if (!cancelled) {
+          setLoadedKey(newKey);
+          setReady(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setReady(true); // avoid infinite spinner; fallback language can render
+        }
+      }
+    })();
 
-      setReady(true);
-    }
+    return () => {
+      cancelled = true;
+    };
+  }, [flow, lang]);
 
-    if (currentKey !== newKey) {
-      setCurrentKey(newKey);
-      init();
-    }
-  }, [newKey]);
-
-  if (!ready || currentKey !== newKey) {
-    return <div>
-      <LoadingSpinner isVisible={true} />
-    </div>;
-  }
+  if (!ready || loadedKey !== newKey) {
+     return <div>
+       <LoadingSpinner isVisible={true} />
+     </div>;
+   }
 
   return children;
 }

@@ -14,7 +14,10 @@ export const getI18nConfigApi = async (flow_route, language = "en") => {
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching i18n config:", error);
+    console.error("Error fetching i18n config", {
+      status: error?.response?.status,
+      message: error?.message,
+    });
     throw error;
   }
 };

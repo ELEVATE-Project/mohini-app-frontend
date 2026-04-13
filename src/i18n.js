@@ -15,6 +15,7 @@ i18n
   .use(initReactI18next)
   .init({
     lng: languageToUse,
+    fallbackLng: "en",
     debug: true,
     returnNull: false,
   returnEmptyString: false,
@@ -27,25 +28,30 @@ i18n
     },
     backend: {
       loadPath: (lng, ns) => {
-        const config = getI18nConfigStore();
-        const url = config?.[ns]?.[lng];
-        
-        if (url) return url; 
-
-        if (!url) {
-          const basePath = env.ROOT_PATH()
-            ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
-            : "";
-
-          return `${basePath}/locales/${lng}/${ns}.json`;
+        if (!lng || !ns) {
+          console.warn("Invalid i18n params:", { lng, ns });
+          return null;
         }
 
+        const config = getI18nConfigStore();
+        const url = config?.[ns]?.[lng];
+
+        if (url) return url;
+
+        const basePath = env.ROOT_PATH()
+          ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
+          : "";
+
+        return `${basePath}/locales/${lng}/${ns}.json`;
       },
 
       request: (options, url, payload, callback) => {
         fetch(url)
           .then(res => {
-            if (!res.ok) throw new Error("Primary fetch failed");
+            const contentType = res.headers.get("content-type");
+            if (!res.ok || !contentType?.includes("application/json")) {
+              throw new Error("Primary fetch not JSON");
+            }
             return res.json();
           })
           .then(data => callback(null, { data, status: 200 }))
@@ -54,10 +60,17 @@ i18n
               ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
               : "";
             
+            if (!options?.lng || !options?.ns) {
+              return callback(new Error("Invalid fallback params"), null);
+            }
+
             const fallbackUrl = `${basePath}/locales/${options.lng}/${options.ns}.json`;
             fetch(fallbackUrl)
               .then(res => {
-                if (!res.ok) throw new Error("Fallback fetch failed");
+                const contentType = res.headers.get("content-type");
+                if (!res.ok || !contentType?.includes("application/json")) {
+                  throw new Error("Fallback not JSON");
+                }
                 return res.json();
               })
               .then(data => {

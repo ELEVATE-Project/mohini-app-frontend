@@ -1,11 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { sessionFlowName } from "./constants/session"
-import { useRoutes, Navigate } from "react-router-dom"
+import { useRoutes, Navigate, useLocation } from "react-router-dom"
 import { UserProvider } from "./context/user"
 import CommonHomePage from "./pages/Login/commonPage"
 import NotFound from "./pages/shikshagraha-repository/not-found"
 import PrivacyPage from "./pages/privacyPage"
-import { useEffect, useState } from "react"
 import ROUTES from "./url"
 import ShikshagrahaRepository from "./pages/shikshagraha-repository/listing"
 import ShikshagrahaRepositoryDetail from "./pages/shikshagraha-repository/details"
@@ -15,10 +14,7 @@ import UnifiedChat from "./pages/UnifiedChat/UnifiedChat"
 import ChatContainer from "./pages/ShikshalokamVoiceChat/chat-container"
 import MainPage from "pages/ai-creation/pages/shikshalokam-mitra/MainPage"
 import ImprovementPlan from "pages/ai-creation/pages/improvement-plan"
-import { getI18nConfigApi } from "./api/endpoints/i18n"
-import { useSiteDataSessionStore } from "./store"
-import { setI18nConfig } from "./store/i18nStore"
-import i18n, { loadI18nForFlow } from "./i18n"
+import I18nLoader from "./i18nLoader"
 
 const queryClient = new QueryClient()
 
@@ -27,7 +23,11 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UserProvider>{elements}</UserProvider>
+      <UserProvider>
+        <I18nLoader>
+          {elements}
+        </I18nLoader>
+      </UserProvider>
     </QueryClientProvider>
   )
 }
@@ -91,26 +91,4 @@ const clean_routes = unpure_collection =>
   }))
 /* eslint-disable react-hooks/exhaustive-deps */
 
-
-function AppWrapper() {
-  const [ready, setReady] = useState(false);
-  const flow = useSiteDataSessionStore(state => state?.chatData?.flow);
-
-  useEffect(() => {
-      async function init() {
-        const flowToUse = flow || "common_flow";
-
-        await loadI18nForFlow(flowToUse, "en");
-
-        setReady(true);
-      }
-
-      init();
-    }, [flow]);
-
-  if (!ready) return <div>Loading translations...</div>;
-
-  return <App />;
-}
-
-export default AppWrapper
+export default App

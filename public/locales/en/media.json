@@ -11,5 +11,12 @@
     "fileSizeTextDyn": "File size cannot exceed {{number}}MB",
     "fileExceedText": "You cannot upload more than 10 files",
     "fileSizeText": "File size cannot exceed 50MB",
-    "fileTypeErrorText": "Only JPEG, JPG, PNG, SVG, and WEBP formats are supported."
+    "fileTypeErrorText": "Only JPEG, JPG, PNG, SVG, and WEBP formats are supported.",
+    "UploadErrorMsg": "Opps, It seems you have already uploaded this file!",
+    "evidence": "Would you like to share (upload) any photos related to the discussion?",
+    "evidenceStory": "Would you like to upload any photos related to the work you've done?",
+    "removeImage": "Remove",
+    "chooseFile": "Choose File",
+    "photosLimitMsgDyn": "You can upload upto {{image_limit}} images.",
+    "add_photos": "Add photos to your report"
 }

@@ -1,4 +1,3 @@
-import { loadI18nForFlow } from "../i18n"
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum"
 import FormData from "./Form/FormData"
 import { useSiteDataSessionStore } from "store"
@@ -16,7 +15,6 @@ const LanguageSelector = ({
     setChatLanguage(lang)
 
     const flowToUse = flow || "common_flow"
-    await loadI18nForFlow(flowToUse, lang)
   }
 
   if (!isVisible) return null

@@ -4,5 +4,9 @@
     "confirmChanges": "Yes",
     "denyButton": "No",
     "PPsCompletionMessage": "<div class='text-class'>Thank you! Your answer has been successfully recorded.</div>",
-    "PPsCompletionCTA": "Submit another response"
+    "PPsCompletionCTA": "Submit another response",
+    "comfirmButton": "Yes",
+    "cancel": "Cancel",
+    "ptmCompletionMessage": "<div class='text-class'>Thank you! Your response has been successfully submitted.</div>",
+    "ptmCompletionCTA": "Submit another response"
 }

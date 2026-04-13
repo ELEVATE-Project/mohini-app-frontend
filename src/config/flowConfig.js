@@ -14,11 +14,11 @@ export const FLOW_CONFIG = {
     chatRoute: ROUTES.SHIKSHALOKAM_PTM_CHAT_PAGE,
     profileId: env.MEGA_PTM_PROFILE_ID(),
     apiRoute: "/mega_ptm",
-    completionMessageKey: "ptmCompletionMessage",
-    completionCTAKey: "ptmCompletionCTA",
-    introHeadingKey: "ptmIntroductionHeading",
-    uploadPhotoKey: "evidence'",
-    introLines: ["ptmIntroductionDescriptionLine1", "ptmIntroductionDescriptionLine2", "ptmIntroductionDescriptionLine3"],
+    completionMessageKey: "popup:ptmCompletionMessage",
+    completionCTAKey: "popup:ptmCompletionCTA",
+    introHeadingKey: "homepage:ptmIntroductionHeading",
+    uploadPhotoKey: "media:evidence'",
+    introLines: ["homepage:ptmIntroductionDescriptionLine1", "homepage:ptmIntroductionDescriptionLine2", "homepage:ptmIntroductionDescriptionLine3"],
     showCompletionPopup: true,
     storyActions: {
       showPhotoUpload: false,
@@ -33,12 +33,12 @@ export const FLOW_CONFIG = {
     chatRoute: ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE,
     profileId: env.YLC_PROFILE_ID(),
     apiRoute: "/ylc",
-    completionMessageKey: "ptmCompletionMessage",
-    completionCTAKey: "ptmCompletionCTA",
-    introHeadingKey: "homepageHeading",
-    introHeadingKey1: "homepageHeading1",
-    introLines: ["homepageList", "homepageList1", "homepageList2"],
-    uploadPhotoKey: "evidenceStory",
+    completionMessageKey: "popup:ptmCompletionMessage",
+    completionCTAKey: "popup:ptmCompletionCTA",
+    introHeadingKey: "homepage:homepageHeading",
+    introHeadingKey1: "homepage:homepageHeading1",
+    introLines: ["homepage:homepageList", "homepage:homepageList1", "homepage:homepageList2"],
+    uploadPhotoKey: "media:evidenceStory",
     showCompletionPopup: false,
     storyActions: {
       showPhotoUpload: true,
@@ -50,19 +50,19 @@ export const FLOW_CONFIG = {
   [sessionFlowName.GuestDiscussion]: {
     flowName: sessionFlowName.GuestDiscussion,
     storyActions: {
-      downloadReportText: "reDownloadReportText",
+      downloadReportText: "dynamic_chat:reDownloadReportText",
     },
   },
   [sessionFlowName.ListeningActivity]: {
     flowName: sessionFlowName.ListeningActivity,
     storyActions: {
-      downloadReportText: "reDownloadReportText",
+      downloadReportText: "dynamic_chat:reDownloadReportText",
     },
   },
   [sessionFlowName.LoginDiscussion]: {
     flowName: sessionFlowName.LoginDiscussion,
     storyActions: {
-      downloadReportText: "reDownloadReportText",
+      downloadReportText: "dynamic_chat:reDownloadReportText",
     },
   },
 }

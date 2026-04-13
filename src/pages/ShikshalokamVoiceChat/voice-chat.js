@@ -134,7 +134,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // ========== Other Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory, getChatHistory] = useSmartChatStorage()
   const [searchParams] = useSearchParams()
-  const { t } = useTranslation("voice_old")
+  const { t } = useTranslation(["dynamic_chat", "common", "editor", "media", "homepage", "common_error", "terms_condition", "popup", "loader", "flow_selection"])
 
   const accessToken = useUserDataLocalStore(state => state.access_token)
 
@@ -422,8 +422,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
       if (flow && [sessionFlowName.LoginDiscussion, sessionFlowName.GuestDiscussion].includes(flow)) {
         const blocks = outputData?.blocks || []
-        const challenges = getListAfterHeaderText(t("challengesHeader"), blocks)
-        const solutions = getListAfterHeaderText(t("solutionsHeader"), blocks)
+        const challenges = getListAfterHeaderText(t("editor:challengesHeader"), blocks)
+        const solutions = getListAfterHeaderText(t("editor:solutionsHeader"), blocks)
 
         updatePayload = {
           ...updatePayload,
@@ -784,12 +784,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // const { access_token } =  getStorageSlice(STORE_NAME_CONSTANTS.USER_DATA, 'localStorage').getState();
   const selectedLabel = {
     types: [
-      { label: t("guidedReflection"), value: "normal" },
-      { label: t("oneStepReflection"), value: "oneshot" },
+      { label: t("dynamic_chat:guidedReflection"), value: "normal" },
+      { label: t("dynamic_chat:oneStepReflection"), value: "oneshot" },
     ],
   }
-  const fileExceedText = t("fileExceedText")
-  const fileSizeText = t("fileSizeText")
+  const fileExceedText = t("media:fileExceedText")
+  const fileSizeText = t("media:fileSizeText")
   let isMobile = useCustomMediaQuery("(max-width: 500px)")
   let chatToAddLength = isMobile ? 10 : 10
 
@@ -893,7 +893,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           if (toastId) {
             toast.dismiss(toastId)
           }
-          const message = t("networkWarning")
+          const message = t("common_error:networkWarning")
           toastId = showNotification({
             message: message,
             type: "warning",
@@ -910,7 +910,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       if (toastId) {
         toast.dismiss(toastId)
       }
-      toastId = toast.error(t("offlineNetwork"), {
+      toastId = toast.error(t("common_error:offlineNetwork"), {
         position: "top-center",
         style: { fontWeight: "bold", color: "#fff" },
       })
@@ -920,7 +920,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       if (toastId) {
         toast.dismiss(toastId)
       }
-      toastId = toast.success(t("onlineNetwork"), {
+      toastId = toast.success(t("common_error:onlineNetwork"), {
         position: "top-center",
         style: { fontWeight: "bold", color: "#1D1616" },
       })
@@ -1302,9 +1302,9 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot"
     if (storageFlow && [sessionFlowName.ParentPerceptionSurvey].includes(storageFlow) && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && isLastMessageFromBot) {
       Swal.fire({
-        title: t("PPsCompletionMessage"),
+        title: t("popup:PPsCompletionMessage"),
         showCancelButton: false,
-        confirmButtonText: t("PPsCompletionCTA"),
+        confirmButtonText: t("popup:PPsCompletionCTA"),
         showCloseButton: false,
         allowEscapeKey: false,
         allowOutsideClick: false,
@@ -1621,7 +1621,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
             {
               type: "header",
               data: {
-                text: t("challengesHeader"),
+                text: t("editor:challengesHeader"),
                 level: 2,
                 customId: "challenges",
               },
@@ -1636,7 +1636,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
             {
               type: "header",
               data: {
-                text: t("solutionsHeader"),
+                text: t("editor:solutionsHeader"),
                 level: 2,
                 customId: "solutions",
               },
@@ -1699,7 +1699,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
       const _editor = new EditorJS({
         holder: "editorjs",
-        placeholder: t("editorPlaceholder"),
+        placeholder: t("editor:editorPlaceholder"),
         autofocus: true,
         hideToolbar: true,
         tools: {
@@ -1803,7 +1803,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               if (headerEl) {
                 const text = headerEl.innerText.trim().toLowerCase()
 
-                if (text === t("challengesHeader").toLowerCase() || text === t("solutionsHeader").toLowerCase() || (text.startsWith("q") && text.includes(":"))) {
+                if (text === t("editor:challengesHeader").toLowerCase() || text === t("editor:solutionsHeader").toLowerCase() || (text.startsWith("q") && text.includes(":"))) {
                   headerEl.setAttribute("contenteditable", "false")
                   headerEl.style.pointerEvents = "none"
                   headerEl.style.color = "#374151"
@@ -2061,7 +2061,7 @@ function handleLlmError(errorMessage, errorType) {
           <div className="bg-gray-100 rounded-lg shadow-lg w-full h-full max-w-2xl p-[30px_0_0] relative" onClick={e => e.stopPropagation()}>
             <div className="overflow-y-auto h-full w-full">
               <div className="px-[73px] max-sm:px-[23px]">
-                <h2 className="text-lg font-semibold text-black-700">{t("editorHeading")}</h2>
+                <h2 className="text-lg font-semibold text-black-700">{t("editor:editorHeading")}</h2>
 
                 <div className="mt-4">
                   <h3 className="text-md font-semibold">{title}</h3>
@@ -2134,7 +2134,7 @@ function handleLlmError(errorMessage, errorType) {
                   disabled={isLoading || isSaving}
                   className="w-full bg-[#212121] text-white py-2 rounded-md hover:bg-black disabled:opacity-50"
                 >
-                  {t("EditorConfirm")}
+                  {t("editor:EditorConfirm")}
                 </button>
               </div>
             </div>
@@ -2334,7 +2334,7 @@ function handleLlmError(errorMessage, errorType) {
       if (response) {
         let sortedResult = quickSort(response?.data?.results, compareByIdDesc)
         sortedResult.forEach((sessionObj, index) => {
-          const status = sessionObj.session_status?.toLowerCase() === "completed" ? t("completedStatusText") : t("inProgressStatusText")
+          const status = sessionObj.session_status?.toLowerCase() === "completed" ? t("common:completedStatusText") : t("common:inProgressStatusText")
           TitleAndSession.push({
             session: sessionObj.session,
             title: sessionObj.title,
@@ -2389,10 +2389,10 @@ function handleLlmError(errorMessage, errorType) {
                 }}
               >
                 <span className="span1">{item?.title}</span>
-                <span className={`span2 ${item?.sessionStatus === t("completedStatusText") ? "span3" : "span4"}`}>{item?.sessionStatus}</span>
+                <span className={`span2 ${item?.sessionStatus === t("common:completedStatusText") ? "span3" : "span4"}`}>{item?.sessionStatus}</span>
               </div>
 
-              {item?.sessionStatus === t("completedStatusText") && (
+              {item?.sessionStatus === t("common:completedStatusText") && (
                 <button
                   className="span5"
                   onClick={() => {
@@ -2402,7 +2402,7 @@ function handleLlmError(errorMessage, errorType) {
                   <FiDownload />
                 </button>
               )}
-              {item?.sessionStatus !== t("completedStatusText") && <button className="span5"></button>}
+              {item?.sessionStatus !== t("common:completedStatusText") && <button className="span5"></button>}
             </div>
           ))}
         </InfiniteScroll>
@@ -2595,7 +2595,7 @@ function handleLlmError(errorMessage, errorType) {
 
               if (!audioBlob || isSilent) {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -2610,14 +2610,14 @@ function handleLlmError(errorMessage, errorType) {
               let transcriptResult = ""
               let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`, storyData)
               if (!s3Url || s3Url === "") {
-                transcriptResult = t("asrError")
+                transcriptResult = t("common_error:asrError")
               }
               setAsrAudio(prev => [...prev, s3Url]) 
               let storedRoute = getSessionRoute()
               transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -2734,7 +2734,7 @@ function handleLlmError(errorMessage, errorType) {
       console.log("In promise for file:", fileName)
 
       if (!allowedExtensions.includes(fileExtension)) {
-        setFileErrorText(t("fileTypeErrorText"))
+        setFileErrorText(t("media:fileTypeErrorText"))
         setIsLoading(false)
         throw new Error("Invalid file type")
       }
@@ -2797,9 +2797,9 @@ function handleLlmError(errorMessage, errorType) {
 
   return (
     <>
-      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession && <PrivacyPolicyPopup tncText={t("tncText")} onAccept={handleAcceptTnC} />}
+      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession && <PrivacyPolicyPopup tncText={t("terms_condition:tncText")} onAccept={handleAcceptTnC} />}
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && storageFlow && isSpecialFlow && <PrivacyPolicyPopup tncText={t("tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && storageFlow && isSpecialFlow && <PrivacyPolicyPopup tncText={t("terms_condition:tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
       <div className={`div27 ${isOpen && " div70"}`}>
         <div className={`div28 ${isOpen ? "div29" : ""}`}>{isShikshalokamPublicType && storageFlow && !isSpecialFlow && <Sidebar isOpen={isOpen} toggle={setIsOpen} isMobileFirst={true} showScrollbarContent={accessToken && showScrollbarContent} resetChat={resetChat} setIsResetCalled={setIsResetCalled} languageToUse={languageToUse} stopAllAudio={stopAllAudio} />}</div>
         {isOpen && <div className="div7" onClick={() => setIsOpen(false)}></div>}
@@ -2837,15 +2837,15 @@ function handleLlmError(errorMessage, errorType) {
             <BiLoader className="loader-rotate-loader loader-icon" />
             {isPdfDownloading && (
               <div className="div68">
-                <label className="form-label label1">{t("downloadLoader")}</label>
+                <label className="form-label label1">{t("loader:downloadLoader")}</label>
               </div>
             )}
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
+                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("loader:feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("loader:reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("loader:storyGuestLoaderHeading") : t("loader:storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("loader:reportLoader") : t("loader:storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2864,7 +2864,7 @@ function handleLlmError(errorMessage, errorType) {
               }}
               className="button-13"
             >
-              <div>{t("doLater")}</div>
+              <div>{t("common:doLater")}</div>
             </button>
           </>
         )}
@@ -2880,7 +2880,7 @@ function handleLlmError(errorMessage, errorType) {
                         botNameToDisplay={botNameToDisplay}
                         userType={chat?.source}
                         message={`${chat?.msg}`}
-                        name={t("userName")}
+                        name={t("common:userName")}
                         recording={chat?.recording}
                         hasAppendix={chat?.recording}
                         appendixURL={chat?.appendixURL}
@@ -2899,7 +2899,7 @@ function handleLlmError(errorMessage, errorType) {
                     {!hasStartedListening && chatHistory[chatHistory?.length - 1].source === "user" && i === chatHistory?.length - 1 ? (
                       <div className="div57">
                         <div className="div58">
-                          <div>{t("replyMsg")}</div>
+                          <div>{t("common:replyMsg")}</div>
                         </div>
                       </div>
                     ) : (
@@ -2923,15 +2923,15 @@ function handleLlmError(errorMessage, errorType) {
                     <>
                       <div className="div10">
                         <h3 className="h3-1">
-                          {t(`${prefix}homepageHeading`)}
+                          {t(`homepage:${prefix}homepageHeading`)}
                           <br />
-                          {t(`${prefix}homepageHeading1`)}
+                          {t(`homepage:${prefix}homepageHeading1`)}
                         </h3>
                       </div>
                       <ul className="div11">
-                        <li>{t(`${prefix}homepageList`)}</li>
-                        <li>{t(`${prefix}homepageList1`)}</li>
-                        <li>{t(`${prefix}homepageList2`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList1`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList2`)}</li>
                       </ul>
                     </>
                   )
@@ -2944,7 +2944,7 @@ function handleLlmError(errorMessage, errorType) {
                       botNameToDisplay={botNameToDisplay}
                       userType={chatHistory[0]?.source}
                       message={`${chatHistory[0]?.msg}`}
-                      name={t("userName")}
+                      name={t("common:userName")}
                       recording={chatHistory[0]?.recording}
                       hasAppendix={chatHistory[0]?.recording}
                       appendixURL={chatHistory[0]?.appendixURL}
@@ -2973,13 +2973,13 @@ function handleLlmError(errorMessage, errorType) {
                     userType="bot"
                     message={(() => {
                       const flow = storageFlow
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("media:evidenceStory") : t("media:evidence")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = storageFlow
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("media:evidenceStory") : t("media:evidence")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2992,7 +2992,7 @@ function handleLlmError(errorMessage, errorType) {
                   <div className="div14">
                     <label className="clickable-label" htmlFor="file-upload">
                       <GrGallery className="icon-1" />
-                      <span className="div16">{t("upload")}</span>
+                      <span className="div16">{t("media:upload")}</span>
                       <input
                         id="file-upload"
                         type="file"
@@ -3016,18 +3016,18 @@ function handleLlmError(errorMessage, errorType) {
                   </div>
 
                   <div className="div18">
-                    <p className="li-message">{t("photosLimitMsg")}</p>
+                    <p className="li-message">{t("media:photosLimitMsg")}</p>
                   </div>
                   <>
                     {isImageUploading && (
                       <div className="div18">
-                        <p className="li-3">{t("uploadLoadMsg")}</p>
+                        <p className="li-3">{t("media:uploadLoadMsg")}</p>
                       </div>
                     )}
                   </>
                   {files?.length > 0 ? (
                     <div className="div18">
-                      <h4 className="h4-1">{t("uploadedFiles")}:</h4>
+                      <h4 className="h4-1">{t("media:uploadedFiles")}:</h4>
                       <ul>
                         {fileErrorText && <li className="li-1">{fileErrorText}</li>}
                         {files.map((file, index) => (
@@ -3060,11 +3060,11 @@ function handleLlmError(errorMessage, errorType) {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")}
+                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("dynamic_chat:reportFeedbackText") : t("dynamic_chat:storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={(message, updatedAt, staticMessage) => {
-                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("dynamic_chat:reportFeedbackText") : t("dynamic_chat:storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -3089,7 +3089,7 @@ function handleLlmError(errorMessage, errorType) {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("downloadReportText") : t("downloadStoryText")}
+                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:downloadReportText") : t("dynamic_chat:downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -3102,7 +3102,7 @@ function handleLlmError(errorMessage, errorType) {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("editReportText") : t("editStoryText")}
+                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:editReportText") : t("dynamic_chat:editStoryText")}
                         </span>
                       </div>
                     </button>
@@ -3124,7 +3124,7 @@ function handleLlmError(errorMessage, errorType) {
                         <div className="download-story-div">
                           <AiOutlineEye className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {t("viewStoryText")}
+                            {t("dynamic_chat:viewStoryText")}
                           </span>
                         </div>
                       </button>
@@ -3150,7 +3150,7 @@ function handleLlmError(errorMessage, errorType) {
                   <div className="download-story-div">
                     <TbReload className="icon-1" />
                     <span className="div16" ref={endPageToScrollRef}>
-                      {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reDownloadReportText") : t("reDownloadStoryText")}
+                      {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:reDownloadReportText") : t("dynamic_chat:reDownloadStoryText")}
                     </span>
                   </div>
                 </button>
@@ -3179,7 +3179,7 @@ function handleLlmError(errorMessage, errorType) {
             {/* Mic button on the left */}
             <button
               type="button"
-              aria-label={hasStartedRecording ? t("stopRecording") : t("startRecording")}
+              aria-label={hasStartedRecording ? t("common:stopRecording") : t("common:startRecording")}
               aria-pressed={hasStartedRecording}
               onClick={hasStartedRecording ? stopRecording : startRecording}
               disabled={isFetchingData || isStartingRecording}
@@ -3195,7 +3195,7 @@ function handleLlmError(errorMessage, errorType) {
                 className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
                 style={{ alignContent: isFetchingData ? "normal" : "center" }}
                 onChange={handleOnInputText}
-                placeholder={hasStartedRecording ? t("placeholder1") : isFetchingData ? t("placeholder2") : t("placeholder3")}
+                placeholder={hasStartedRecording ? t("common:placeholder1") : isFetchingData ? t("common:placeholder2") : t("common:placeholder3")}
                 name="message-box"
                 value={textMessage}
                 autoFocus={false}
@@ -3245,7 +3245,7 @@ function handleLlmError(errorMessage, errorType) {
 
             <button
               type="submit"
-              aria-label={t("sendMessage")}
+              aria-label={t("common:sendMessage")}
               disabled={!textMessage.trim() || hasStartedRecording || isFetchingData || isStartingRecording}
               className="send-btn"
             >

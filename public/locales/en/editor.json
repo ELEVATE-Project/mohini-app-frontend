@@ -4,5 +4,7 @@
     "EditorConfirm": "Create story",
     "editorPlaceholder": "Start writing here...",
     "challengesHeader": "Challenges",
-    "solutionsHeader": "Solutions"
+    "solutionsHeader": "Solutions",
+    "EditorFirstTab": "Story",
+    "EditorSecondTab": "Gallery"
 }

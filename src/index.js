@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client"
 import "./index.css"
 import { BrowserRouter } from "react-router-dom"
 import env from "./utils/env"
-import AppWrapper from "./App"
+import App from "./App"
 
 const rootPath = env.ROOT_PATH() ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}` : ""
 
@@ -12,6 +12,6 @@ const root = ReactDOM.createRoot(el)
 
 root.render(
   <BrowserRouter basename={rootPath}>
-    <AppWrapper />
+    <App />
   </BrowserRouter>
 )

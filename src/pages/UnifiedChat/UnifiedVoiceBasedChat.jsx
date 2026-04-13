@@ -69,7 +69,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
   const [isTalking, setTalking] = useState(0)
 
   // Other hooks
-  const { t } = useTranslation("voice_old")
+  const { t } = useTranslation(["dynamic_chat", "common_error", "popup", "terms_condition", "common", "loader", "homepage", "media"])
   const navigate = useNavigate()
   const audioRef = useRef()
   const textAreaRef = useRef(null)
@@ -102,7 +102,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
   const FLOW_ROUTE = flowConfig.apiRoute
   const storyActionsConfig = flowConfig.storyActions || {}
   const showCompletionPopup = flowConfig.showCompletionPopup !== false
-  const botNameToDisplay = t("botName")
+  const botNameToDisplay = t("common:botName")
   let chatToAddLength = isMobile ? 10 : 10
 
   const isReplying = !hasStartedListening && chatHistory[chatHistory?.length - 1]?.source === "user" && !(chatHistory[chatHistory.length - 1].sequence >= Object.keys(questions).length)
@@ -431,7 +431,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
     } catch (error) {
       console.error("Error sending question to user:", error)
       showNotification({
-        message: t("errorSendingQuestion"),
+        message: t("common_error:errorSendingQuestion"),
         type: "error",
         options: {
           position: "top-center",
@@ -459,10 +459,10 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
 
   function showInterruptionPopup(wantToNavigateBack, executeCustomFunction) {
     Swal.fire({
-      title: t("guestPopUpChanges"),
+      title: t("popup:guestPopUpChanges"),
       showCancelButton: true,
-      confirmButtonText: t("confirmChanges"),
-      cancelButtonText: t("denyButton"),
+      confirmButtonText: t("popup:confirmChanges"),
+      cancelButtonText: t("popup:denyButton"),
     }).then(result => {
       if (result.isConfirmed) {
         if (executeCustomFunction) {
@@ -578,11 +578,11 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
           setNoStoryFound(false)
         }
       } else {
-        setLlmError(endStoryResponse?.data?.error_message || t("storyGenerationError"))
+        setLlmError(endStoryResponse?.data?.error_message || t("common_error:storyGenerationError"))
       }
     } catch (error) {
       console.error("Error completing the story:", error)
-      setLlmError(error?.response?.data?.error_message || t("storyGenerationError"))
+      setLlmError(error?.response?.data?.error_message || t("common_error:storyGenerationError"))
     } finally {
       setIsEndStoryLoading(false)
       setIsLoading(false)
@@ -768,7 +768,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
 
               if (!audioBlob || isSilent) {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -783,13 +783,13 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
               let transcriptResult = ""
               let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`, null)
               if (!s3Url || s3Url === "") {
-                transcriptResult = t("asrError")
+                transcriptResult = t("common_error:asrError")
               }
               setAsrAudio(s3Url)
               transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, FLOW_ROUTE)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
-                  message: t("asrError"),
+                  message: t("common_error:asrError"),
                   type: "error",
                   options: {
                     position: "top-center",
@@ -865,7 +865,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
   return (
     <>
       <SpeedNotification />
-      {languageToUse && !isLoading && !acceptedTnc && <PrivacyPolicyPopup tncText={t("tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {languageToUse && !isLoading && !acceptedTnc && <PrivacyPolicyPopup tncText={t("terms_condition:tncText")} onAccept={handleAcceptTnC} useStaticText={false} />}
       <div className={isMobile ? "div30_a" : "div30"}>
         <Header
           isMobileFirst={isMobile}
@@ -883,8 +883,8 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
             <BiLoader className="loader-rotate-loader loader-icon" />
             {isEndStoryLoading && (
               <div className="div69 text-center">
-                <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">{t("storyLoaderHeading")}</h2>
-                <label className="form-label label1 text-center">{t("storyLoader")}</label>
+                <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">{t("loader:storyLoaderHeading")}</h2>
+                <label className="form-label label1 text-center">{t("loader:storyLoader")}</label>
               </div>
             )}
           </div>
@@ -918,7 +918,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                       botNameToDisplay={botNameToDisplay}
                       userType={chat?.source}
                       message={`${chat?.msg}`}
-                      name={t("userName")}
+                      name={t("common:userName")}
                       recording={chat?.recording}
                       hasAppendix={chat?.recording}
                       appendixURL={chat?.appendixURL}
@@ -937,7 +937,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                   {isReplying && i === chatHistory.length - 1 ? (
                     <div className="div57">
                       <div className="div58">
-                        <div>{t("replyMsg")}</div>
+                        <div>{t("common:replyMsg")}</div>
                       </div>
                     </div>
                   ) : (
@@ -965,7 +965,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                   <div className="download-story-div">
                     <TbReload className="icon-1" />
                     <span className="div16" ref={endPageToScrollRef}>
-                      {t("reDownloadStoryText")}
+                      {t("dynamic_chat:reDownloadStoryText")}
                     </span>
                   </div>
                 </button>
@@ -1094,7 +1094,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                 className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
                 style={{ alignContent: isFetchingData ? "normal" : "center" }}
                 onChange={handleOnInputText}
-                placeholder={hasStartedRecording ? t("placeholder1") : isFetchingData ? t("placeholder2") : t("placeholder3")}
+                placeholder={hasStartedRecording ? t("common:placeholder1") : isFetchingData ? t("common:placeholder2") : t("common:placeholder3")}
                 name="message-box"
                 value={textMessage}
                 autoFocus={false}

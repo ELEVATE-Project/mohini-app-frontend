@@ -1,10 +1,8 @@
-// components/FlowSelection.js
 import { FaArrowRightLong } from "react-icons/fa6"
 import { sessionFlowName } from "../constants/session"
 import { useChatStorage } from "hooks/useStorage"
 import { useTranslation } from "react-i18next"
 import ShowPageButton from "./ShowPageButton"
-import { loadI18nForFlow } from "../i18n"
 
 const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, onFlowContinue, setIsLoading }) => {
   const { t } = useTranslation("flow_selection")
@@ -14,7 +12,6 @@ const FlowSelection = ({ audioRef, stopAudioTriggered, setStopAudioTriggered, on
 
   const handleContinueClick = async () => {
     setIsLoading(true)
-    await loadI18nForFlow(selectedFlow);
     await onFlowContinue()
   }
 

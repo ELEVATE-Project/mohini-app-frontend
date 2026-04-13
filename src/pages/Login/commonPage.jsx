@@ -17,6 +17,8 @@ import LanguageSelectionGrid from "../../components/LanguageSelectionGrid"
 import LoadingSpinner from "../../components/LoadingSpinner"
 import ROUTES from "../../url"
 import useUrlFlow from "hooks/useUrlFlow"
+import { useTranslation } from "react-i18next"
+import { useChatStorage } from "../../hooks/useStorage"
 
 function CommonHomePage({ usecaseType }) {
   const { audioRef, stopAudioTriggered, setStopAudioTriggered, stopAllAudio } = useAudio()
@@ -35,6 +37,8 @@ function CommonHomePage({ usecaseType }) {
   const [searchParams] = useSearchParams()
   const { flow: urlFlow } = useUrlFlow()
   const urlLanguage = useMemo(() => searchParams.get("language"), [searchParams])
+  const setFlow = useChatStorage().getState().setFlow
+  const { t } = useTranslation("flow_selection")
 
   // Initialize language and flow processing
   useEffect(() => {
@@ -47,6 +51,10 @@ function CommonHomePage({ usecaseType }) {
 
   useEffect(() => {
     if (!urlFlow) return
+
+    if (urlFlow) {
+      setFlow(urlFlow);
+    }
 
     stopAllAudio()
   }, [urlFlow])

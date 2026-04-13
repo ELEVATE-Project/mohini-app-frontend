@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 function SpeedNotification(){
-  const { t } = useTranslation();
+  const { t } = useTranslation("common_error");
 
   useEffect(() => {
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -17,7 +17,7 @@ function SpeedNotification(){
           if (toastId) {
             toast.dismiss(toastId);
           }
-          const message = t("networkWarning");
+          const message = t("common_error:networkWarning");
           toastId = showNotification({
             message: message,
             type: "warning",
@@ -31,14 +31,14 @@ function SpeedNotification(){
       if (toastId) {
         toast.dismiss(toastId);
       }
-      toastId = toast.error(t('offlineNetwork'), { position: "top-center", style: { fontWeight: "bold", color: "#fff" } });
+      toastId = toast.error(t('common_error:offlineNetwork'), { position: "top-center", style: { fontWeight: "bold", color: "#fff" } });
     };
 
     const handleOnline = () => {
       if (toastId) {
         toast.dismiss(toastId);
       }
-      toastId = toast.success(t('onlineNetwork'), { position: "top-center", style: { fontWeight: "bold", color: "#1D1616" } });
+      toastId = toast.success(t('common_error:onlineNetwork'), { position: "top-center", style: { fontWeight: "bold", color: "#1D1616" } });
       checkNetworkSpeed(); 
     };
 

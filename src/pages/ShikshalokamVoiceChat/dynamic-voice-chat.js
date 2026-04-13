@@ -167,6 +167,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
     refetchOnReconnect: false,
   })
 
+  const uiConfig = flowInfo?.ui_config || {}
+
   const { data: companyBotData } = useQuery({
     queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, flowInfo?.bot_route, languageToUse, accessToken],
     queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: flowInfo.bot_route, target_language: languageToUse }),
@@ -192,7 +194,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   // ========== Other Hooks ==========
   const [searchParams] = useSearchParams()
-  const { t } = useTranslation(["terms_condition", "dynamic_chat", "common", "media", "popup", "editor", "common_error"])
+  const { t } = useTranslation(["terms_condition", "dynamic_chat", "common", "media", "popup", "editor", "common_error", "loader", "homepage", "flow_selection"])
 
 
   const { recordings, HiddenRecorder } = useVoiceRecord()
@@ -1265,12 +1267,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
         title: t("popup:PPsCompletionMessage"),
         showCancelButton: false,
         confirmButtonText: t("popup:PPsCompletionCTA"),
-        showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad].includes(storageFlow),
-        showCloseButton: false,
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
-        imageHeight: "100",
+        showConfirmButton: uiConfig?.popup?.show_completion_confirmation_button ?? true,
+        showCloseButton: uiConfig?.popup?.show_completion_close_button ?? false,
+        allowEscapeKey: uiConfig?.popup?.allow_completion_escape ?? false,
+        allowOutsideClick: uiConfig?.popup?.allow_completion_outside_click ?? false,
+        imageUrl: uiConfig?.popup?.completion_confirmation_image_url ?? "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+        imageHeight: uiConfig?.popup?.completion_confirmation_image_height ?? "100",
       }).then(result => {
         if (result.isConfirmed) {
           clearFromStorage()
@@ -2177,7 +2179,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
             isMobileFirst={isMobile}
-            displayNewSessionButton={!([sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad].includes(storageFlow))}
+            displayNewSessionButton={
+              uiConfig?.header?.new_chat_button ?? true
+            }
             showTheDots={false}
             content={
               <button
@@ -2205,15 +2209,15 @@ const DynamicVoiceChat = ({ type = "" }) => {
             <BiLoader className="loader-rotate-loader loader-icon" />
             {isPdfDownloading && (
               <div className="div68">
-                <label className="form-label label1">{t("common:downloadLoader")}</label>
+                <label className="form-label label1">{t("loader:downloadLoader")}</label>
               </div>
             )}
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("common:storyGuestLoaderHeading") : t("common:storyLoaderHeading")}
+                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("loader:feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("loader:reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("loader:storyGuestLoaderHeading") : t("loader:storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportLoader") : t("common:storyLoader")}</label>
+                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("loader:reportLoader") : t("loader:storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2297,15 +2301,15 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     <>
                       <div className="div10">
                         <h3 className="h3-1">
-                          {t(`common:${prefix}homepageHeading`)}
+                          {t(`homepage:${prefix}homepageHeading`)}
                           <br />
-                          {t(`common:${prefix}homepageHeading1`)}
+                          {t(`homepage:${prefix}homepageHeading1`)}
                         </h3>
                       </div>
                       <ul className="div11">
-                        <li>{t(`common:${prefix}homepageList`)}</li>
-                        <li>{t(`common:${prefix}homepageList1`)}</li>
-                        <li>{t(`common:${prefix}homepageList2`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList1`)}</li>
+                        <li>{t(`homepage:${prefix}homepageList2`)}</li>
                       </ul>
                     </>
                   )
@@ -2347,13 +2351,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     userType="bot"
                     message={(() => {
                       const flow = storageFlow
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("common:evidenceStory") : t("common:evidence")
+                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("media:evidenceStory") : t("media:evidence")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = storageFlow
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("common:evidenceStory") : t("common:evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("media:evidenceStory") : t("media:evidence")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2447,11 +2451,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:reportFeedbackText") : t("dynamic_chat:storyText")}
+                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("dynamic_chat:reportFeedbackText") : t("dynamic_chat:storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("common:reportFeedbackText") : t("dynamic_chat:storyText")
+                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("dynamic_chat:reportFeedbackText") : t("dynamic_chat:storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2476,7 +2480,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:downloadReportText") : t("dynamic_chat:downloadStoryText")}
+                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:downloadReportText") : t("dynamic_chat:downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2489,7 +2493,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("common:editReportText") : t("dynamic_chat:editStoryText")}
+                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("dynamic_chat:editReportText") : t("dynamic_chat:editStoryText")}
                         </span>
                       </div>
                     </button>
@@ -2511,7 +2515,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <AiOutlineEye className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {t("common:viewStoryText")}
+                            {t("dynamic_chat:viewStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2536,7 +2540,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <div className="download-story-div">
                     <TbReload className="icon-1" />
                     <span className="div16" ref={endPageToScrollRef}>
-                      {FLOW_CONFIG[storageFlow] ? t(FLOW_CONFIG[storageFlow].storyActions?.downloadReportText) : t("dynamic_chat:reDownloadStoryText")}
+                      {FLOW_CONFIG[storageFlow] ? t("dynamic_chat:" + FLOW_CONFIG[storageFlow].storyActions?.downloadReportText) : t("dynamic_chat:reDownloadStoryText")}
                     </span>
                   </div>
                 </button>

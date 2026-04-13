@@ -45,6 +45,7 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
   }, [flowLanguagesError, isFlowLanguagesError])
 
   const handleLanguageClick = langValue => {
+    setStorageFlow(urlFlow);
     setChatLanguage(langValue)
     setHasSelectedLanguage(true)
 

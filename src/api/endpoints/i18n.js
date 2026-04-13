@@ -9,6 +9,7 @@ export const getI18nConfigApi = async (flow_route, language = "en") => {
         flow_route,
         language,
       },
+      timeout: 10000,
     });
 
     return response.data;

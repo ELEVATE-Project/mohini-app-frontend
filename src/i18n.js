@@ -16,13 +16,21 @@ i18n
   .init({
     lng: languageToUse,
     debug: true,
+    returnNull: false,
+  returnEmptyString: false,
+  parseMissingKeyHandler: () => "",
     interpolation: {
       escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
     },
     backend: {
       loadPath: (lng, ns) => {
         const config = getI18nConfigStore();
         const url = config?.[ns]?.[lng];
+        
+        if (url) return url; 
 
         if (!url) {
           const basePath = env.ROOT_PATH()
@@ -32,7 +40,6 @@ i18n
           return `${basePath}/locales/${lng}/${ns}.json`;
         }
 
-        return url;
       },
 
       request: (options, url, payload, callback) => {
@@ -46,16 +53,14 @@ i18n
             const basePath = env.ROOT_PATH()
               ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
               : "";
-
+            
             const fallbackUrl = `${basePath}/locales/${options.lng}/${options.ns}.json`;
-
             fetch(fallbackUrl)
               .then(res => {
                 if (!res.ok) throw new Error("Fallback fetch failed");
                 return res.json();
               })
               .then(data => {
-                console.warn("Using local fallback for:", options.ns, options.lng);
                 callback(null, { data, status: 200 });
               })
               .catch(err => {
@@ -70,29 +75,45 @@ i18n
 export const setLanguage = languageProp => {
   const route = JSON.parse(sessionStorage.getItem("route")) || JSON.parse(localStorage.getItem("route"))
   const languageToUse = languageProp || route || "en"
-  console.log("Language set to: ", languageToUse)
   i18n.changeLanguage(languageToUse)
 }
 
+export const resetI18n = () => {
+  i18n.store.data = {};
+
+  if (i18n.services?.backendConnector?.backend?.options) {
+    i18n.services.backendConnector.state = {};
+  }
+};
+
 export const loadI18nForFlow = async (flow, language = "en") => {
   try {
+
     const cached = getCachedI18nConfig(flow, language);
 
+    let config;
     if (cached) {
-      setI18nConfig(cached, flow, language);
+      config = cached;
     } else {
-      const config = await getI18nConfigApi(flow, language);
-      setI18nConfig(config, flow, language);
+      config = await getI18nConfigApi(flow, language);
     }
+
+    setI18nConfig(config, flow, language);
+
+    resetI18n();
+
+    await i18n.changeLanguage(language);
+
+    const usedNamespaces =
+      i18n.reportNamespaces?.getUsedNamespaces?.() || ["common"];
+
+
+    await i18n.loadNamespaces(usedNamespaces);
+
   } catch (error) {
     console.error("i18n config API failed, using fallback");
-
     setI18nConfig({}, flow, language);
   }
-
-  // reload anyway
-  await i18n.reloadResources(language);
-  await i18n.changeLanguage(language);
 };
 
 export default i18n

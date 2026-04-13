@@ -1,15 +1,14 @@
 {
-    "guidedReflection": "Guided Reflection",
-    "oneStepReflection": "One-Step Reflection",
-    "storyText": "Here is your improvement story",
-    "downloadStoryText": "Download Story",
-    "reDownloadStoryText": "Regenerate Story",
-    "editStoryText": "Edit Story",
-    "reportText": "Here is a report of your discussion",
-    "reportFeedbackText": "Here is the feedback that you shared.",
-    "downloadReportText": "Download report",
-    "viewStoryText": "View Story",
-    "reDownloadReportText": "Regenerate report",
-    "editReportText": "Edit report",
-    "download_report": "Download your report"
+    "guidedReflection": "గైడెడ్ రిఫ్లెక్షన్",
+    "oneStepReflection": "వన్ స్టెప్ రిఫ్లెక్షన్స్",
+    "storyText": "ఇది మీ ఇంప్రూవ్మెంట్ కథ",
+    "downloadStoryText": "కథను డౌన్‌లోడ్ చేయండి",
+    "reDownloadStoryText": "కథను మళ్లీ రూపొందించండి",
+    "editStoryText": "కథను సవరించండి",
+    "reportText": "మీ చర్చ యొక్క నివేదిక ఇక్కడ ఉంది",
+    "downloadReportText": "నివేదికను డౌన్‌లోడ్ చేయండి",
+    "viewStoryText": "కథను చూడండి",
+    "reDownloadReportText": "నివేదికను మళ్లీ రూపొందించండి",
+    "editReportText": "నివేదికను సవరించండి",
+    "download_report": "మీ నివేదికను డౌన్‌లోడ్ చేయండి"
 }

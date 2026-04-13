@@ -1,12 +1,10 @@
 {
-    "guestPopUpChanges": "<div class='text-class'>\n   Are you sure you want to leave this conversation?\n    All your progress will be lost\n</div>",
-    "popUpChanges": "<div class='text-class'>\n    You've been inactive for a while.\n    Do you want to continue?\n</div>",
-    "confirmChanges": "Yes",
-    "denyButton": "No",
-    "PPsCompletionMessage": "<div class='text-class'>Thank you! Your answer has been successfully recorded.</div>",
-    "PPsCompletionCTA": "Submit another response",
-    "comfirmButton": "Yes",
-    "cancel": "Cancel",
-    "ptmCompletionMessage": "<div class='text-class'>Thank you! Your response has been successfully submitted.</div>",
-    "ptmCompletionCTA": "Submit another response"
+    "guestPopUpChanges": "<div class='text-class'>\n   మీరు ఈ సంభాషణను విడిచిపెట్టాలనుకుంటున్నారా?\n   మీరు ఇప్పటివరకు చేసిన సంభాషణ పోతుంది\n</div>",
+    "popUpChanges": "<div class='text-class'>\n    మీరు కొంతకాలంగా ఇన్‌యాక్టివ్‌గా ఉన్నారు\n    మీరు కొనసాగించాలనుకుంటున్నారా?\n</div>",
+    "confirmChanges": "అవును",
+    "denyButton": "లేదు",
+    "comfirmButton": "అవును",
+    "cancel": "రద్దు చేయండి",
+    "ptmCompletionMessage": "<div class='text-class'>ధన్యవాదాలు! మీ ప్రతిస్పందన విజయవంతంగా సమర్పించబడింది.</div>",
+    "ptmCompletionCTA": "మరొక ప్రతిస్పందనను సమర్పించండి"
 }

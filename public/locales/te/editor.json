@@ -1,10 +1,10 @@
 {
-    "saveChanges": "Save Changes",
-    "editorHeading": "Last step! Review and edit your story.",
-    "EditorConfirm": "Create story",
-    "editorPlaceholder": "Start writing here...",
-    "challengesHeader": "Challenges",
-    "solutionsHeader": "Solutions",
-    "EditorFirstTab": "Story",
-    "EditorSecondTab": "Gallery"
+    "saveChanges": "మార్పులను భద్రపరచండి",
+    "editorHeading": "చివరి దశ! మీ కథనాన్ని సమీక్షించి, సవరించండి.",
+    "EditorConfirm": "కథను రూపొందించండి",
+    "editorPlaceholder": "ఇక్కడ నుంచి వ్రాయడం ప్రారంభించండి...",
+    "challengesHeader": "సవాళ్లు",
+    "solutionsHeader": "పరిష్కారాలు",
+    "EditorFirstTab": "కథ",
+    "EditorSecondTab": "గ్యాలరీ"
 }

@@ -280,7 +280,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
        
         </div>
       </div>
-      <div className="flex gap-0 md:!gap-6 items-stretch ">
+      <div className="flex gap-0 md:!gap-6 items-stretch justify-center">
         <div
           className={`flex flex-col md:grid gap-6 w-full lg:!w-[calc(80%-1.5rem)]  ${
             viewMode === "grid"
@@ -297,11 +297,12 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
               />
             </React.Fragment>
           ))}
-        </div>
-        <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl">
+        </div>  
+      </div>
+       <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl">
           <MitraAiAssistantAside />
         </div>
-      </div>
+        
     </section>
   );
 }

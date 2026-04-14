@@ -68,6 +68,21 @@ export default function Filters() {
   //   [search]
   // )
 
+  const [isSticky, setIsSticky] = useState(false)
+  const filtersRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!filtersRef.current) return
+
+      const { top } = filtersRef.current.getBoundingClientRect()
+      setIsSticky(top <= 0)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   function handleSendMessage(event) {
     if (event) {
       event.preventDefault()
@@ -396,15 +411,15 @@ export default function Filters() {
       `}</style>
       <HiddenRecorder />
       <Notification />
-      <div id="filters-boundary" className="md:sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
+      <div ref={filtersRef} id="filters-boundary" className="md:sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
         <div className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap">
 
           {!!dropdown_meta?.length
             ? dropdown_meta?.map(({ label, options, key }, index) => (
-                <React.Fragment key={`label-${label}-${index}`}>
-                  <DropdownSelect key={label} label={label} options={options} selected={filters[key] || "Select a " + label} onChange={value => handleChange(key, value)} />
-                </React.Fragment>
-              ))
+              <React.Fragment key={`label-${label}-${index}`}>
+                <DropdownSelect key={label} label={label} options={options} selected={filters[key] || "Select a " + label} onChange={value => handleChange(key, value)} />
+              </React.Fragment>
+            ))
             : null}
 
           {!!Object.keys(filters).some(key => !!filters[key]?.length) && (
@@ -414,9 +429,17 @@ export default function Filters() {
           )}
         </div>
 
-        <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
+        {/* <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
           <div className="flex flex-col items-start w-full h-[53px]">{searchInput}</div>
-        </div>
+        </div> */}
+
+        {isSticky && (
+          <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
+            <div className="flex flex-col items-start w-full h-[53px]">
+              {searchInput}
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
@@ -461,62 +484,62 @@ const DropdownSelect = ({ label, options, selected, onChange }) => {
   const selectedCount = Array.isArray(selected) ? selected.length : 0
 
   return (
-  <div className="relative mr-4 flex-shrink-0">
+    <div className="relative mr-4 flex-shrink-0">
       {selectedCount > 0 && (
         <div className="absolute -top-1 -right-2 z-10 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-blue-500 rounded-full">
           {selectedCount}
         </div>
       )}
-    <Select
-      options={options.map(x => ({ value: x.value, label: x.display }))}
-      value={selected}
-      onChange={onChange}
-      isMulti
-      placeholder={label}
-      closeMenuOnSelect={false}
-      hideSelectedOptions={false}
-      menuPortalTarget={document.body}
-      menuPosition="fixed"
-      controlShouldRenderValue={false}
-      components={{
-        Option: CheckboxOption,
-        MenuList: MenuList,
-      }}
-      styles={{
-        control: base => ({
-          ...base,
-          border: "none",
-          background: "rgb(82 82 91 / 1%)",
-          boxShadow: "none",
-          minHeight: "36px",
-          "&:hover": { border: "none" },
-        }),
-        placeholder: base => ({ ...base, color: "#49454F", gridArea: "1/1/2/3" }),
-        valueContainer: base => ({
-          ...base,
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          padding: "0px 8px",
-          overflow: "hidden",
-        }),
-        input: base => ({
-          ...base,
-          gridArea: "1/1/2/3",
-          margin: 0,
-          padding: 0,
-        }),
-        menu: base => ({
-          ...base,
-          zIndex: 9999,
-        }),
-        menuPortal: base => ({
-          ...base,
-          zIndex: 9999,
-        }),
-      }}
-      className="max-w-[200px] min-w-[128px] bg-gray-100 rounded-[12px] text-zinc-600 text-sm"
-    />
-  </div>
-)
+      <Select
+        options={options.map(x => ({ value: x.value, label: x.display }))}
+        value={selected}
+        onChange={onChange}
+        isMulti
+        placeholder={label}
+        closeMenuOnSelect={false}
+        hideSelectedOptions={false}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        controlShouldRenderValue={false}
+        components={{
+          Option: CheckboxOption,
+          MenuList: MenuList,
+        }}
+        styles={{
+          control: base => ({
+            ...base,
+            border: "none",
+            background: "rgb(82 82 91 / 1%)",
+            boxShadow: "none",
+            minHeight: "36px",
+            "&:hover": { border: "none" },
+          }),
+          placeholder: base => ({ ...base, color: "#49454F", gridArea: "1/1/2/3" }),
+          valueContainer: base => ({
+            ...base,
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            alignItems: "center",
+            padding: "0px 8px",
+            overflow: "hidden",
+          }),
+          input: base => ({
+            ...base,
+            gridArea: "1/1/2/3",
+            margin: 0,
+            padding: 0,
+          }),
+          menu: base => ({
+            ...base,
+            zIndex: 9999,
+          }),
+          menuPortal: base => ({
+            ...base,
+            zIndex: 9999,
+          }),
+        }}
+        className="max-w-[200px] min-w-[128px] bg-gray-100 rounded-[12px] text-zinc-600 text-sm"
+      />
+    </div>
+  )
 }

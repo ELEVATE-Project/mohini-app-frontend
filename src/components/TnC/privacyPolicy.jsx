@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 const PrivacyPolicyPage = ({ tncText, onAccept, onDecline, shouldShowAcceptDecline=true}) => {
 
-  const { t } = useTranslation();
+  const { t } = useTranslation("terms_condition");
 
   return (
     <>
@@ -23,10 +23,10 @@ const PrivacyPolicyPage = ({ tncText, onAccept, onDecline, shouldShowAcceptDecli
             </div>
             {(shouldShowAcceptDecline)&& <div className="tnc-buttons">
                 <button className="tnc-button accept" onClick={onAccept}>
-                  {t('tncConfirm')}
+                  {t('terms_condition:tncConfirm')}
                 </button>
                 <button className="tnc-button decline" onClick={onDecline}>
-                  {t('tncDecline')}
+                  {t('terms_condition:tncDecline')}
                 </button>
             </div>}
             </div>

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 
 const ReportEditor = ({ onClose, onSave, disabled }) => {
   const editorContainerRef = useRef(null)
-  const { t } = useTranslation()
+  const { t } = useTranslation("editor")
   return (
     <div className="voice-chat-editor-overlay" onClick={onClose}>
       <div
@@ -24,7 +24,7 @@ const ReportEditor = ({ onClose, onSave, disabled }) => {
         </div>
         <div className="editor-button-div">
           <PrimaryButton onClick={onSave} disabled={disabled}>
-            {t("saveChanges")}
+            {t("editor:saveChanges")}
           </PrimaryButton>
         </div>
       </div>

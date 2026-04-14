@@ -26,7 +26,7 @@ import { useUserDataLocalStore } from "store"
 // Reusable uploadImage function
 // Photo Upload Component
 export const PhotoUploadSection = ({ storyData, files, setFiles, isLoading, setIsLoading, botNameToDisplay, handleOnSpeaking, handleOnStopSpeaking, hasOverRideId, isTalking, isStreamingComplete, setNotMute, navigate, flowConfig }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation(["common", "media", "editor", "dynamic_chat"])
   const [fileErrorText, setFileErrorText] = useState("")
   const [isImageUploading, setIsImageUploading] = useState(false)
   const sessionId = useChatStorage()(state => state.sessionId)
@@ -34,8 +34,8 @@ export const PhotoUploadSection = ({ storyData, files, setFiles, isLoading, setI
   const chatLanguage = useSiteDataSessionStore(state => state.chatLanguage)
   const accessToken = useUserDataLocalStore(state => state.access_token)
 
-  const fileExceedText = t("fileExceedText")
-  const fileSizeText = t("fileSizeText")
+  const fileExceedText = t("media:fileExceedText")
+  const fileSizeText = t("media:fileSizeText")
 
   const uploadImage = async (formData, setFiles) => {
     try {
@@ -132,7 +132,7 @@ export const PhotoUploadSection = ({ storyData, files, setFiles, isLoading, setI
       const fileExtension = fileName.split(".").pop().toLowerCase()
 
       if (!allowedExtensions.includes(fileExtension)) {
-        setFileErrorText(t("fileTypeErrorText"))
+        setFileErrorText(t("media:fileTypeErrorText"))
         setIsLoading(false)
         throw new Error("Invalid file type")
       }
@@ -209,7 +209,7 @@ export const PhotoUploadSection = ({ storyData, files, setFiles, isLoading, setI
       <div className="div14">
         <label className="clickable-label" htmlFor="file-upload">
           <GrGallery className="icon-1" />
-          <span className="div16">{t("upload")}</span>
+          <span className="div16">{t("media:upload")}</span>
           <input
             id="file-upload"
             type="file"
@@ -233,18 +233,18 @@ export const PhotoUploadSection = ({ storyData, files, setFiles, isLoading, setI
       </div>
 
       <div className="div18">
-        <p className="li-message">{t("photosLimitMsg")}</p>
+        <p className="li-message">{t("media:photosLimitMsg")}</p>
       </div>
 
       {isImageUploading && (
         <div className="div18">
-          <p className="li-3">{t("uploadLoadMsg")}</p>
+          <p className="li-3">{t("media:uploadLoadMsg")}</p>
         </div>
       )}
 
       {files?.length > 0 ? (
         <div className="div18">
-          <h4 className="h4-1">{t("uploadedFiles")}:</h4>
+          <h4 className="h4-1">{t("media:uploadedFiles")}:</h4>
           <ul>
             {fileErrorText && <li className="li-1">{fileErrorText}</li>}
             {files.map((file, index) => (
@@ -306,7 +306,7 @@ export const EditStoryModal = ({ isModalOpen, closeModal, storyData, editorCopyC
             {
               type: "header",
               data: {
-                text: t("challengesHeader"),
+                text: t("editor:challengesHeader"),
                 level: 2,
                 customId: "challenges",
               },
@@ -321,7 +321,7 @@ export const EditStoryModal = ({ isModalOpen, closeModal, storyData, editorCopyC
             {
               type: "header",
               data: {
-                text: t("solutionsHeader"),
+                text: t("editor:solutionsHeader"),
                 level: 2,
                 customId: "solutions",
               },
@@ -383,7 +383,7 @@ export const EditStoryModal = ({ isModalOpen, closeModal, storyData, editorCopyC
 
       const _editor = new EditorJS({
         holder: "editorjs",
-        placeholder: t("editorPlaceholder"),
+        placeholder: t("editor:editorPlaceholder"),
         autofocus: true,
         hideToolbar: true,
         tools: {
@@ -500,8 +500,8 @@ export const EditStoryModal = ({ isModalOpen, closeModal, storyData, editorCopyC
 
                 if (flow && [sessionFlowName.LoginDiscussion, sessionFlowName.GuestDiscussion].includes(flow)) {
                   const blocks = outputData?.blocks || []
-                  const challenges = getListAfterHeaderText(t("challengesHeader"), blocks)
-                  const solutions = getListAfterHeaderText(t("solutionsHeader"), blocks)
+                  const challenges = getListAfterHeaderText(t("editor:challengesHeader"), blocks)
+                  const solutions = getListAfterHeaderText(t("editor:solutionsHeader"), blocks)
 
                   updatePayload = {
                     ...updatePayload,
@@ -549,7 +549,7 @@ export const EditStoryModal = ({ isModalOpen, closeModal, storyData, editorCopyC
             }}
             disabled={isLoading || isSaving}
           >
-            {t("saveChanges")}
+            {t("editor:saveChanges")}
           </PrimaryButton>
         </div>
       </div>
@@ -640,7 +640,7 @@ export const DownloadStoryButton = ({ sessionid, isLoading: parentIsLoading, isP
         >
           <div className="download-story-div">
             <FiDownload className="icon-1" />
-            <span className="div16">{t("downloadStoryText")}</span>
+            <span className="div16">{t("dynamic_chat:downloadStoryText")}</span>
           </div>
         </button>
       </div>
@@ -656,7 +656,7 @@ export const EditStoryButton = ({ openModal, isLoading, isPdfDownloading, t }) =
       <button className="clickable-button" onClick={openModal} disabled={isLoading || isPdfDownloading}>
         <div className="download-story-div">
           <MdEdit className="icon-1" />
-          <span className="div16">{t("editStoryText")}</span>
+          <span className="div16">{t("dynamic_chat:editStoryText")}</span>
         </div>
       </button>
     </div>
@@ -691,13 +691,13 @@ export const StoryActionsContainer = ({
       <ChatMessage
         botNameToDisplay={botNameToDisplay}
         userType="bot"
-        message={t("storyText")}
+        message={t("dynamic_chat:storyText")}
         isTalking={false}
         handleOnStopSpeaking={() => handleOnStopSpeaking()}
         handleOnSpeaking={() => {
           const lang = chatLanguage || LANGUAGE_ENUMS.ENGLISH
           console.log("lang", lang)
-          const message_to_use = t("storyText")
+          const message_to_use = t("dynamic_chat:storyText")
           handleOnSpeaking(flowConfig?.storyTextAudio[lang].storyReportAudio, "download-story-id", {
             msg: message_to_use,
             updated_at: "download-story-id",

@@ -56,7 +56,7 @@ function Login({ type, variant }) {
   const [districtLabelArray, setDistrictLabelArray] = useState([])
   const [blockLabelArray, setBlockLabelArray] = useState([])
 
-  const { t } = useTranslation()
+  const { t } = useTranslation(["header", "form_page", "language_selection"])
 
   useEffect(() => {
     clearFromStorage()

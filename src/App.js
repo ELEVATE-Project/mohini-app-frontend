@@ -1,11 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { sessionFlowName } from "./constants/session"
-import { useRoutes, Navigate } from "react-router-dom"
+import { useRoutes, Navigate, useLocation } from "react-router-dom"
 import { UserProvider } from "./context/user"
 import CommonHomePage from "./pages/Login/commonPage"
 import NotFound from "./pages/shikshagraha-repository/not-found"
 import PrivacyPage from "./pages/privacyPage"
-import React from "react"
 import ROUTES from "./url"
 import ShikshagrahaRepository from "./pages/shikshagraha-repository/listing"
 import ShikshagrahaRepositoryDetail from "./pages/shikshagraha-repository/details"
@@ -15,6 +14,7 @@ import UnifiedChat from "./pages/UnifiedChat/UnifiedChat"
 import ChatContainer from "./pages/ShikshalokamVoiceChat/chat-container"
 import MainPage from "pages/ai-creation/pages/shikshalokam-mitra/MainPage"
 import ImprovementPlan from "pages/ai-creation/pages/improvement-plan"
+import I18nLoader from "./i18nLoader"
 
 const queryClient = new QueryClient()
 
@@ -23,12 +23,15 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UserProvider>{elements}</UserProvider>
+      <UserProvider>
+        <I18nLoader>
+          {elements}
+        </I18nLoader>
+      </UserProvider>
     </QueryClientProvider>
   )
 }
 
-export default App
 
 const ProtectedComponent = ({ component, isAccessible }) => {
   if (!isAccessible) {
@@ -87,3 +90,5 @@ const clean_routes = unpure_collection =>
     caseSensitive: x?.caseSensitive,
   }))
 /* eslint-disable react-hooks/exhaustive-deps */
+
+export default App

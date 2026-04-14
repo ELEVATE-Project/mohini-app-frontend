@@ -1,0 +1,10 @@
+{
+    "guestPopUpChanges": "<div class='text-class'>\n   ನೀವು ಈ ಸಂಭಾಷಣೆಯನ್ನು ತ್ಯಜಿಸಲು ಖಚಿತವಾಗಿ ಬಯಸುತ್ತೀರಾ?\n    ನಿಮ್ಮ ಎಲ್ಲಾ ಪ್ರಗತಿ ಕಳೆದುಹೋಗುತ್ತದೆ\n</div>",
+    "popUpChanges": "<div class='text-class'>\n    ನೀವು ಸ್ವಲ್ಪ ಸಮಯದಿಂದ ನಿಷ್ಕ್ರಿಯರಾಗಿದ್ದೀರಿ.\n    ನೀವು ಮುಂದುವರಿಸಲು ಬಯಸುತ್ತೀರಾ?\n</div>",
+    "confirmChanges": "ಹೌದು",
+    "denyButton": "ಇಲ್ಲ",
+    "comfirmButton": "ಹೌದು",
+    "cancel": "ರದ್ದುಗೊಳಿಸು",
+    "ptmCompletionMessage": "<div class='text-class'>ಧನ್ಯವಾದಗಳು! ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಸಲಾಗಿದೆ.</div>",
+    "ptmCompletionCTA": "ಇನ್ನೊಂದು ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಸಲ್ಲಿಸಿ"
+}

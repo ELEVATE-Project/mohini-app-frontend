@@ -1,0 +1,13 @@
+{
+    "doLater": "తర్వాత చేస్తాను",
+    "placeholder1": "వింటోంది... ఇప్పుడు మాట్లాడండి",
+    "placeholder2": "మాటల ప్రక్రియలో ఉంది... దయచేసి వేచిచూడండి",
+    "placeholder3": "మీ సందేశాన్ని టైప్ చేయండి",
+    "replyMsg": "స్పందిస్తోంది..",
+    "completedStatusText": "పూర్తయింది",
+    "inProgressStatusText": "ప్రోగ్రెస్లో ఉంది",
+    "userName": "మీరు",
+    "captureStoryText": "మైక్రో ఇంప్రూవ్మెంట్ కథను నమోదు చేయండి",
+    "captureDiscussionText": "చర్చను నమోదు చేయండి",
+    "botName": "మిత్రా"
+}

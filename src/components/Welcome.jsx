@@ -5,10 +5,11 @@ import "../index.css"
 import ROUTES from "../url";
 import { useEffect, useState } from "react";
 import FormData from "./Form/FormData";
-import { setLanguage } from "../i18n";
+import { loadI18nForFlow, setLanguage } from "../i18n";
 import { languageList } from "../pages/ShikshalokamVoiceChat/enum";
 import { useTranslation } from "react-i18next";
 import { clearFromStorage } from "../services/storage_service";
+import { useSiteDataSessionStore } from "../store";
 
 function WelcomePage() {
   const navigate = useNavigate();
@@ -16,8 +17,9 @@ function WelcomePage() {
     JSON.parse(localStorage.getItem("local_route")) || languageList[0].value
   );
   
-  const { t } = useTranslation();
-  
+  const { t } = useTranslation(["header", "form_page", "language_selection", "welcome"]);
+  const flow = useSiteDataSessionStore(state => state?.chatData?.flow);
+
   useEffect(() => {
     if (!localStorage.getItem("local_route")) {
       localStorage.setItem("local_route", JSON.stringify(languageList[0].value));
@@ -28,6 +30,9 @@ function WelcomePage() {
   const handleLanguageChange = (e) => {
     setUserLanguage(e?.target?.value);
     setLanguage(e?.target?.value);
+    const flowToUse = flow || "common_flow";
+    loadI18nForFlow(flowToUse, e?.target?.value);
+    
     localStorage.setItem('local_route', JSON.stringify(e?.target?.value));
   };
 

@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useUserDataLocalStore } from "store"
 
 const UploadImages = ({ storyData, access_token, isLoading, setIsLoading, showImages = false, fileErrorText, setFileErrorText }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation("media")
   const fileExceedText = t("fileExceedText")
 
   const [files, setFiles] = useState([])
@@ -49,14 +49,14 @@ const UploadImages = ({ storyData, access_token, isLoading, setIsLoading, showIm
 
   return (
     <div className="mt-4">
-      <div className="text-md font-bold text-black-500 mb-2">{t("uploadImagesStory")}</div>
+      <div className="text-md font-bold text-black-500 mb-2">{t("media:uploadImagesStory")}</div>
       <div className="flex items-center gap-2 mb-4">
         <label className="cursor-pointer flex flex-col gap-2 text-purple-600 hover:text-purple-800">
           <span className="flex items-center">
             <span className="text-lg font-bold">
               <GoPlusCircle />
             </span>
-            <span className="text-md font-bold pl-[2px]">{t("addImage")}</span>
+            <span className="text-md font-bold pl-[2px]">{t("media:addImage")}</span>
           </span>
           {fileErrorText && <span className="text-red-500 block px-2">{fileErrorText}</span>}
           <input
@@ -81,7 +81,7 @@ const UploadImages = ({ storyData, access_token, isLoading, setIsLoading, showIm
                 }
               } catch (err) {
                 console.error(err)
-                setFileErrorText(t("somethingWentWrong") || "Upload failed")
+                setFileErrorText(t("media:somethingWentWrong") || "Upload failed")
               } finally {
                 setIsLoading(false)
                 // Reset input value so user can pick the same file again
@@ -101,7 +101,7 @@ const UploadImages = ({ storyData, access_token, isLoading, setIsLoading, showIm
       </div>
 
       <div className="mb-2">
-        <p className="text-sm text-gray-600">{t("photosLimitMsg")}</p>
+        <p className="text-sm text-gray-600">{t("media:photosLimitMsg")}</p>
       </div>
 
       {/* Conditional rendering based on showImages prop */}
@@ -133,9 +133,9 @@ const UploadImages = ({ storyData, access_token, isLoading, setIsLoading, showIm
 
       {files?.length > 0 && (
         <div className="mt-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("uploadedFiles")}:</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("media:uploadedFiles")}:</h4>
           <div className="text-sm text-gray-600">
-            {files.length}/10 {t("filesUploadedMessage")}
+            {files.length}/10 {t("media:filesUploadedMessage")}
           </div>
         </div>
       )}

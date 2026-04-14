@@ -40,6 +40,14 @@ body .landing {
   font-family: var(--tertiary-font-family);
 }
 
+.repository-detail-page a {
+  color: var(--listing-secondary) !important;
+}
+
+.repository-detail-page a:hover {
+  color: var(--listing-secondary-hover) !important;
+}
+
 .background-img-wrap {
   display: -webkit-box;
   display: -ms-flexbox;

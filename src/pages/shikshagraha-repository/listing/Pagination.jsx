@@ -18,7 +18,7 @@ function Pagination({
   const label_class = "flex flex-col items-center justify-center border p-1 rounded bg-white text-sm  " + defined_dimension_class  
   const activePageClass =
     defined_dimension_class +
-    " bg-[var(--listing-primary)] text-white p-1 border-0 rounded flex items-center justify-center"
+    " bg-[var(--listing-secondary)] text-white p-1 border-0 rounded flex items-center justify-center"
   return (
     <div className="flex justify-center">
       <ReactPaginate

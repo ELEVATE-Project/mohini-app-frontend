@@ -20,7 +20,7 @@ export default function MitraAiAssistantAside() {
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 bg-[var(--listing-primary)] text-white 
+        className="fixed bottom-32 right-32 z-50 bg-[var(--listing-primary)] text-white 
                    w-14 h-14 rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)]  flex items-center 
                    justify-center hover:scale-105 transition-all"
       >
@@ -33,7 +33,7 @@ export default function MitraAiAssistantAside() {
 
       {/* Floating Card */}
       {open && (
-        <aside className="fixed bottom-24 right-6 z-50 w-72 bg-white px-3 py-3 md:px-4 md:py-6 
+        <aside className="fixed bottom-48 right-32 z-50 w-72 bg-white px-3 py-3 md:px-4 md:py-6 
                           rounded-lg shadow-2xl transition-all duration-300">
           <div className="flex items-center justify-between">
             <h3 className="text-base md:text-lg font-bold leading-[28px]">

@@ -151,7 +151,7 @@ const DefaultDropdownItem = ({ option, isSelected, onSelect }) => {
       type="button"
       className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between ${
         isSelected
-          ? "bg-[var(--listing-surface)] text-[var(--listing-primary)]"
+          ? "bg-[var(--listing-surface)] text-[var(--listing-secondary)]"
           : "text-[var(--listing-strong-text)] hover:bg-[var(--listing-surface-soft)]"
       }`}
       onClick={(e) => {
@@ -247,7 +247,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
               onClick={() => setViewMode("grid")}
               className={`p-2 ${
                 viewMode === "grid"
-                  ? "bg-[var(--listing-primary)] text-white"
+                  ? "bg-[var(--listing-secondary)] text-white"
                   : "text-[var(--listing-muted-text)] hover:bg-[var(--listing-surface-soft)]"
               }`}
             >
@@ -257,7 +257,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
               onClick={() => setViewMode("list")}
               className={`p-2 ${
                 viewMode === "list"
-                  ? "bg-[var(--listing-primary)] text-white"
+                  ? "bg-[var(--listing-secondary)] text-white"
                   : "text-[var(--listing-muted-text)] hover:bg-[var(--listing-surface-soft)]"
               }`}
             >

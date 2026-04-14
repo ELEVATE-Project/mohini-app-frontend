@@ -33,21 +33,12 @@ const getWithoutAuth = async endpoint => {
     })
 }
 
-export const getProfileDetails = async (body = {}) => {
+export const getProfileDetails = async body => {
   const headers = {
     "Content-Type": "application/json",
   }
-
-  const updatedBody = {
-    ...body,
-    password:
-      body?.password && body.password.trim() !== ""
-        ? body.password
-        : "grit@123",
-  }
-
   return await axiosInstance
-    .post(`/api/profile/`, updatedBody, { headers })
+    .post(`/api/profile/`, body, { headers })
     .then(response => {
       if (response && response.data) {
         return response.data

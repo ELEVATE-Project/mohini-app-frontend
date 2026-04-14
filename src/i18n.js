@@ -15,9 +15,12 @@ i18n
   .use(initReactI18next)
   .init({
     lng: languageToUse,
-    fallbackLng: "en",
+    fallbackLng: false,
+    load: "currentOnly",
     debug: true,
     returnNull: false,
+    ns: [],
+    defaultNS: false,
   returnEmptyString: false,
   parseMissingKeyHandler: () => "",
     interpolation: {
@@ -28,13 +31,15 @@ i18n
     },
     backend: {
       loadPath: (lng, ns) => {
-        if (!lng || !ns) {
-          console.warn("Invalid i18n params:", { lng, ns });
+        const config = getI18nConfigStore();
+        const namespace = Array.isArray(ns) ? ns[0] : ns;
+        const language = Array.isArray(lng) ? lng[0] : lng;
+
+        if (!language || language === "dev") {
           return null;
         }
 
-        const config = getI18nConfigStore();
-        const url = config?.[ns]?.[lng];
+        const url = config?.[namespace]?.[language];
 
         if (url) return url;
 
@@ -42,7 +47,7 @@ i18n
           ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
           : "";
 
-        return `${basePath}/locales/${lng}/${ns}.json`;
+        return `${basePath}/locales/${language}/${namespace}.json`;
       },
 
       request: (options, url, payload, callback) => {
@@ -55,31 +60,9 @@ i18n
             return res.json();
           })
           .then(data => callback(null, { data, status: 200 }))
-          .catch(() => {
-            const basePath = env.ROOT_PATH()
-              ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}`
-              : "";
-            
-            if (!options?.lng || !options?.ns) {
-              return callback(new Error("Invalid fallback params"), null);
-            }
-
-            const fallbackUrl = `${basePath}/locales/${options.lng}/${options.ns}.json`;
-            fetch(fallbackUrl)
-              .then(res => {
-                const contentType = res.headers.get("content-type");
-                if (!res.ok || !contentType?.includes("application/json")) {
-                  throw new Error("Fallback not JSON");
-                }
-                return res.json();
-              })
-              .then(data => {
-                callback(null, { data, status: 200 });
-              })
-              .catch(err => {
-                console.error("Both primary and fallback failed:", err);
-                callback(err, null);
-              });
+          .catch(err => {
+            console.error("i18n load failed:", url, err);
+            callback(err, null);
           });
       }
     }

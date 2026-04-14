@@ -93,8 +93,8 @@ const Dropdown = ({
           type="button"
           className={`min-w-[120px] inline-flex items-center gap-1 text-sm focus:outline-none ${
             disabled
-              ? "text-gray-400 cursor-not-allowed"
-              : "text-gray-700 hover:text-gray-900"
+              ? "text-[var(--listing-disabled-text)] cursor-not-allowed"
+              : "text-[var(--listing-strong-text)] hover:text-[var(--listing-muted-text)]"
           }`}
           onClick={handleButtonClick}
           aria-haspopup="listbox"
@@ -110,7 +110,7 @@ const Dropdown = ({
         </button>
       </div>
       {showTooltip && tooltipText && (
-        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
+        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-[var(--listing-strong-text)] text-white text-xs rounded whitespace-nowrap z-50">
           {tooltipText}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
             <div className="border-4 border-transparent border-t-gray-900"></div>
@@ -151,8 +151,8 @@ const DefaultDropdownItem = ({ option, isSelected, onSelect }) => {
       type="button"
       className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between ${
         isSelected
-          ? "bg-blue-50 text-blue-700"
-          : "text-gray-700 hover:bg-gray-50"
+          ? "bg-[var(--listing-surface)] text-[var(--listing-primary)]"
+          : "text-[var(--listing-strong-text)] hover:bg-[var(--listing-surface-soft)]"
       }`}
       onClick={(e) => {
         e.stopPropagation();
@@ -212,17 +212,17 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
     <section className="px-1 md:px-4 pb-4 pt-1 max-w-[1670px]">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6">
         <div className="w-full mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          <h2 className="text-lg font-semibold text-[var(--listing-strong-text)] mb-1">
             Browse Resources
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--listing-muted-text)]">
             Discover high quality resources for your project
           </p>
         </div>
         <div className="flex flex-col md:flex-row  items-center gap-6 w-full">
 
           <div className="flex items-center justify-between lg:justify-end w-full lg:gap-6">
-          <div className="text-sm text-gray-600 font-bold">
+          <div className="text-sm text-[var(--listing-muted-text)] font-bold">
             {mediaCount} results
           </div>
 
@@ -242,13 +242,13 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
        
 
           <div className="flex items-center justify-between flex-row-reverse lg:flex-row lg:justify-start lg:gap-6 w-full lg:w-auto">
-          <div className="flex items-center gap-1 border border-gray-300 rounded">
+          <div className="flex items-center gap-1 border border-[var(--listing-border)] rounded">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 ${
                 viewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-[var(--listing-primary)] text-white"
+                  : "text-[var(--listing-muted-text)] hover:bg-[var(--listing-surface-soft)]"
               }`}
             >
               <Grid className="w-4 h-4" />
@@ -257,8 +257,8 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
               onClick={() => setViewMode("list")}
               className={`p-2 ${
                 viewMode === "list"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-[var(--listing-primary)] text-white"
+                  : "text-[var(--listing-muted-text)] hover:bg-[var(--listing-surface-soft)]"
               }`}
             >
               <List className="w-4 h-4" />
@@ -299,7 +299,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
           ))}
         </div>  
       </div>
-       <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl">
+      <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl">
           <MitraAiAssistantAside />
         </div>
         

@@ -9,6 +9,7 @@ import { useRepositoryStore } from "../repository-hooks/useRepositoryStore.js";
 import { GrResources } from "react-icons/gr";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { listingTheme } from "./listingTheme";
 
 export default function RepositoryPage() {
   const [viewMode, setViewMode] = useState("grid");
@@ -38,7 +39,7 @@ export default function RepositoryPage() {
   }, [mediaList]);
 
   return (
-    <div className="bg-gray-50 relative listing-pages" ref={containerRef}>
+    <div className="bg-[var(--listing-white)] relative listing-pages" ref={containerRef} style={listingTheme.vars}>
       <div className="container max-w-[1500px] h-full mx-auto">
         <div className="min-h-screen  py-3 flex flex-col  align-items-center gap-4 ">
           <Header />
@@ -94,10 +95,10 @@ export default function RepositoryPage() {
         onClick={() => setIsMitraPopupOpen(!isMitraPopupOpen)}
         className="fixed lg:!hidden bottom-8 right-8 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-[60]"
         style={{ 
-          backgroundColor: '#1E3360',
+          backgroundColor: 'var(--listing-page-shell)',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152847'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3360'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--listing-page-shell-hover)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--listing-page-shell)'}
         aria-label={isMitraPopupOpen ? "Close Mitra AI Assistant" : "Open Mitra AI Assistant"}
       >
         {isMitraPopupOpen ? (

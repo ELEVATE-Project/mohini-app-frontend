@@ -81,17 +81,17 @@ export default function HeroSection() {
 
         <form
           onSubmit={handleSendMessage}
-          className="flex items-center bg-[#F3F4F6] rounded-2xl px-4 py-3 w-full max-w-2xl shadow-sm"
+          className="flex items-center bg-[var(--listing-surface)] rounded-2xl px-4 py-3 w-full max-w-2xl shadow-sm"
         >
           {/* Search Icon */}
-          <Search className="w-5 h-5 text-gray-400" />
+          <Search className="w-5 h-5 text-[var(--listing-subdued-text)]" />
 
           {/* Input */}
           <input
             value={search}
             onChange={e => handleOnInputText(e.target.value)}
             placeholder="Search with AI"
-            className="flex-1 bg-transparent px-4 py-2 outline-none text-gray-700 placeholder-gray-400"
+            className="flex-1 bg-transparent px-4 py-2 outline-none text-[var(--listing-muted-text)] placeholder-[var(--listing-subdued-text)]"
           />
 
           {/* MIC */}
@@ -101,9 +101,9 @@ export default function HeroSection() {
             className="mr-2"
           >
             {hasStartedRecording ? (
-              <FaRegStopCircle className="w-5 h-5 text-red-500" />
+              <FaRegStopCircle className="w-5 h-5 text-[var(--listing-danger)]" />
             ) : (
-              <IoMicOutline className="w-5 h-5 text-gray-500" />
+              <IoMicOutline className="w-5 h-5 text-[var(--listing-icon-mid)]" />
             )}
           </button>
 
@@ -113,8 +113,8 @@ export default function HeroSection() {
             disabled={disableSendButton}
             className={`flex items-center justify-center w-10 h-10 rounded-xl transition
       ${disableSendButton
-                ? "bg-gray-300"
-                : "bg-[#4F2DA3] hover:bg-[#43258c]"
+                ? "bg-[var(--listing-disabled)]"
+                : "bg-[var(--listing-secondary)] hover:bg-[var(--listing-secondary-hover)]"
               }
     `}
           >

@@ -16,6 +16,9 @@ function Pagination({
   };
   const defined_dimension_class = isMobile ? "w-[34px] h-[34px]" : "w-[54px] h-[54px]"
   const label_class = "flex flex-col items-center justify-center border p-1 rounded bg-white text-sm  " + defined_dimension_class  
+  const activePageClass =
+    defined_dimension_class +
+    " bg-[var(--listing-primary)] text-white p-1 border-0 rounded flex items-center justify-center"
   return (
     <div className="flex justify-center">
       <ReactPaginate
@@ -40,10 +43,10 @@ function Pagination({
         pageRangeDisplayed={isMobile ? 1 : 5}
         onPageChange={handlePageClick}
         containerClassName="flex items-center gap-2"
-        previousLinkClassName="text-zinc-500"
-        nextLinkClassName="text-zinc-500"
-        activeLinkClassName={defined_dimension_class + " bg-blue-700 text-white p-1 border-0 rounded bg-blue-600  flex items-center justify-center"}
-        activeClassName={defined_dimension_class + " bg-blue-700 text-white p-1 border-0 rounded bg-blue-600  flex items-center justify-center"}
+        previousLinkClassName="text-[var(--listing-muted-text)]"
+        nextLinkClassName="text-[var(--listing-muted-text)]"
+        activeLinkClassName={activePageClass}
+        activeClassName={activePageClass}
         pageLinkClassName={defined_dimension_class + " flex items-center justify-center border rounded"}
       />
     </div>

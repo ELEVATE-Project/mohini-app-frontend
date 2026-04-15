@@ -21,13 +21,13 @@ export default function MitraAiAssistantAside() {
       <button
         onClick={() => setOpen(!open)}
         className="fixed bottom-32 right-32 z-50 bg-[var(--listing-primary)] text-white 
-                   w-14 h-14 rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)]  flex items-center 
+                   w-16 h-16 rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)]  flex items-center 
                    justify-center hover:scale-105 transition-all"
       >
         {open ? (
-          <X className="w-6 h-6" />
+          <X className="w-10 h-10" />
         ) : (
-          <img src={aiBookIcon} alt="AI Book" className="w-8 h-8" />
+          <img src={aiBookIcon} alt="AI Book" className="w-10 h-10" />
         )}
       </button>
 

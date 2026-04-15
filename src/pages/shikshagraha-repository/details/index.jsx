@@ -51,7 +51,7 @@ export default function ResourceDetailPage() {
   return (
     <>
       <div
-        className="fixed top-0 left-0 right-0 w-screen h-screencree pointer-events-none z-0"
+        className="fixed top-0 left-0 right-0 w-screen h-screen pointer-events-none z-0"
         style={{
           backgroundImage: `url(${left1}), url(${right1}), url(${left2}), url(${right2})`,
           backgroundPosition: "left 0px top 400px, right 0px top 500px, left 0px bottom 0px, right 0px bottom 0px",

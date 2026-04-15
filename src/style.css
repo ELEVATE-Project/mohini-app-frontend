@@ -16,6 +16,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body{
@@ -38,6 +39,14 @@ body .landing {
 
 .listing-pages {
   font-family: var(--tertiary-font-family);
+}
+
+.repository-detail-page a {
+  color: var(--listing-secondary) !important;
+}
+
+.repository-detail-page a:hover {
+  color: var(--listing-secondary-hover) !important;
 }
 
 .background-img-wrap {
@@ -703,3 +712,4 @@ NEW CSS COLORS FROM FIGMA
   }
   
 }
+

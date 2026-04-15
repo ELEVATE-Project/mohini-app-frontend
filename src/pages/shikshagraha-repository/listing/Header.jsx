@@ -91,7 +91,7 @@ export default function Header({ isHeroSection = true, isBackButton = false, onS
         )}{" "} */}
       </header>
       {isHeroSection && (
-        <div className="mt-[-1rem] flex justify-start w-full">
+        <div className="mt-[-1rem] w-screen overflow-x-hidden">
           <HeroSection />
         </div>
       )}{" "}

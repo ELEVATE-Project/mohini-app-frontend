@@ -68,6 +68,21 @@ export default function Filters() {
   //   [search]
   // )
 
+  const [isSticky, setIsSticky] = useState(false)
+  const filtersRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!filtersRef.current) return
+
+      const { top } = filtersRef.current.getBoundingClientRect()
+      setIsSticky(top <= 0)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   function handleSendMessage(event) {
     if (event) {
       event.preventDefault()
@@ -268,7 +283,7 @@ export default function Filters() {
 
   const searchInput = (
     <form
-      className="relative flex flex-row items-center justify-center w-full h-full px-3 py-2 rounded-[12px] border border-gray-300"
+      className="relative flex flex-row items-center justify-center w-full h-full px-3 py-2 rounded-[12px] border border-[var(--listing-border)]"
       onSubmit={event => {
         if (!hasStartedListening && !isConvertingVoiceToText) {
           handleSendMessage(event)
@@ -277,11 +292,11 @@ export default function Filters() {
       autoComplete="off"
     >
       <div className="flex items-center justify-center relative h-full pointer-events-none">
-        <Search className="w-4 h-4 text-gray-300" />
+        <Search className="w-4 h-4 text-[var(--listing-subdued-text)]" />
       </div>
       <div className="relative w-full flex items-center justify-center">
         <textarea
-          className={`${isConvertingVoiceToText ? "min-h-[29px] sm:min-h-0" : ""} pl-3 max-w-[331px] w-full border-0 focus:outline-none focus:bg-transparent bg-transparent rounded-[12px] text-[14px] font-manrope text-gray-700 placeholder-[#9CA3AF] resize-none !overflow-y-auto`}
+          className={`${isConvertingVoiceToText ? "min-h-[29px] sm:min-h-0" : ""} pl-3 max-w-[331px] w-full border-0 focus:outline-none focus:bg-transparent bg-transparent rounded-[12px] text-[14px] font-manrope text-[var(--listing-muted-text)] placeholder-[var(--listing-subdued-text)] resize-none !overflow-y-auto`}
           style={{
             backgroundColor: "transparent",
             height: "29px",
@@ -349,16 +364,16 @@ export default function Filters() {
           }}
         />
         {hasStartedRecording && (
-          <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center space-x-1 text-red-600 text-sm font-medium pointer-events-none">
-            <FaCircle className="text-red-500 animate-pulse text-xs" />
+          <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center space-x-1 text-[var(--listing-danger)] text-sm font-medium pointer-events-none">
+            <FaCircle className="text-[var(--listing-danger)] animate-pulse text-xs" />
             <span>{formatTime(seconds)}</span>
           </div>
         )}
       </div>
-      <button className={`flex items-center justify-center relative ${hasStartedRecording ? "text-red-500" : "text-black"} disabled:text-[#64748b] disabled:cursor-not-allowed cursor-pointer`} onClick={hasStartedRecording ? stopRecording : startRecording}>
+      <button className={`flex items-center justify-center relative ${hasStartedRecording ? "text-[var(--listing-danger)]" : "text-black"} disabled:text-[var(--listing-disabled-text)] disabled:cursor-not-allowed cursor-pointer`} onClick={hasStartedRecording ? stopRecording : startRecording}>
         {hasStartedRecording ? <FaRegStopCircle className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] lg:w-[24px] lg:h-[24px]" /> : <IoMicOutline className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] lg:w-[24px] lg:h-[24px]" />}
       </button>
-      <button type="submit" disabled={hasStartedRecording || isConvertingVoiceToText} className={`flex items-center justify-center relative md:pl-[6px] pl-[12px] disabled:cursor-not-allowed disabled:text-[#64748b] cursor-pointer ${!disableSendButton ? "text-[#007BFF]" : ""}`}>
+      <button type="submit" disabled={hasStartedRecording || isConvertingVoiceToText} className={`flex items-center justify-center relative md:pl-[6px] pl-[12px] disabled:cursor-not-allowed disabled:text-[var(--listing-disabled-text)] cursor-pointer ${!disableSendButton ? "text-[var(--listing-info)]" : ""}`}>
         <TbSend2 className="md:w-[18px] md:h-[18px] lg:w-[24px] lg:h-[24px]" />
       </button>
     </form>
@@ -375,7 +390,7 @@ export default function Filters() {
         }
         textarea[name="message-box"] {
           scrollbar-width: thin;
-          scrollbar-color: #9CA3AF transparent;
+          scrollbar-color: var(--listing-subdued-text) transparent;
           line-height: 19px;
           padding-top: 5px;
           padding-bottom: 5px;
@@ -387,51 +402,97 @@ export default function Filters() {
           background: transparent;
         }
         textarea[name="message-box"]::-webkit-scrollbar-thumb {
-          background-color: #9CA3AF;
+          background-color: var(--listing-subdued-text);
           border-radius: 2px;
         }
         textarea[name="message-box"]::-webkit-scrollbar-thumb:hover {
-          background-color: #6B7280;
+          background-color: var(--listing-muted-text);
         }
       `}</style>
       <HiddenRecorder />
       <Notification />
-      <div id="filters-boundary" className="md:sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
+      <div ref={filtersRef} id="filters-boundary" className="md:sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
         <div className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap">
 
           {!!dropdown_meta?.length
             ? dropdown_meta?.map(({ label, options, key }, index) => (
-                <React.Fragment key={`label-${label}-${index}`}>
-                  <DropdownSelect key={label} label={label} options={options} selected={filters[key] || "Select a " + label} onChange={value => handleChange(key, value)} />
-                </React.Fragment>
-              ))
+              <React.Fragment key={`label-${label}-${index}`}>
+                <DropdownSelect key={label} label={label} options={options} selected={filters[key] || "Select a " + label} onChange={value => handleChange(key, value)} />
+              </React.Fragment>
+            ))
             : null}
 
           {!!Object.keys(filters).some(key => !!filters[key]?.length) && (
-            <button className="min-w-[100px] p-2 rounded-[12px] flex items-center gap-2 text-red-600 bg-red-50" onClick={() => resetFilters()}>
+            <button className="min-w-[100px] p-2 rounded-[12px] flex items-center gap-2 text-[var(--listing-danger)] bg-[var(--listing-danger-soft)]" onClick={() => resetFilters()}>
               <X className="w-4 h-4" /> Clear All
             </button>
           )}
         </div>
 
-        <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
+        {/* <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
           <div className="flex flex-col items-start w-full h-[53px]">{searchInput}</div>
-        </div>
+        </div> */}
+
+        {isSticky && (
+          <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
+            <div className="flex flex-col items-start w-full h-[53px]">
+              {searchInput}
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
 }
 
 const CheckboxOption = props => {
+  const { isSelected } = props
+
   return (
     <components.Option {...props}>
-      <div className="flex items-center">
-        <input type="checkbox" checked={props.isSelected} readOnly className="mr-2 accent-blue-500" />
-        <label>{props.label}</label>
+      <div className="flex items-center px-2 py-1">
+        <span
+          style={{
+            width: 16,
+            height: 16,
+            minWidth: 16,          // 👈 prevents shrink
+            minHeight: 16,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 8,
+            border: "1.5px solid",
+            borderColor: isSelected
+              ? "var(--listing-secondary)"
+              : "#9CA3AF",
+            backgroundColor: isSelected
+              ? "var(--listing-secondary)"
+              : "#fff",
+            borderRadius: 3,
+            flexShrink: 0,         // 👈 VERY IMPORTANT
+          }}
+        >
+          {isSelected && (
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 20 20"
+              fill="white"
+            >
+              <path d="M7.629 14.571L3.286 10.229l1.428-1.429 2.915 2.914 7.657-7.657 1.428 1.429z" />
+            </svg>
+          )}
+        </span>
+
+        <label style={{ cursor: "pointer" }}>
+          {props.label}
+        </label>
       </div>
     </components.Option>
   )
 }
+
+
 
 const MenuList = props => {
   const { options, value, onChange } = props.selectProps
@@ -448,10 +509,48 @@ const MenuList = props => {
 
   return (
     <components.MenuList {...props}>
-      <div className="flex items-center px-3 py-2 border-b border-gray-200 bg-gray-50">
-        <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="mr-2 accent-blue-500" />
-        <label className="font-medium text-gray-700 cursor-pointer select-none">{allSelected ? "Deselect All" : "Select All"}</label>
+      <div
+        className="flex items-center px-3 py-2 border-b border-[var(--listing-border)] bg-[var(--listing-surface)] cursor-pointer"
+        onClick={toggleSelectAll}
+      >
+        <span
+          style={{
+            width: 16,
+            height: 16,
+            minWidth: 16,
+            minHeight: 16,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 8,
+            border: "1.5px solid",
+            borderColor: allSelected
+              ? "var(--listing-secondary)"
+              : "#9CA3AF",
+            backgroundColor: allSelected
+              ? "var(--listing-secondary, #5832AC)"
+              : "#fff",
+            borderRadius: 3,
+            flexShrink: 0,
+          }}
+        >
+          {allSelected && (
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 20 20"
+              fill="white"
+            >
+              <path d="M7.629 14.571L3.286 10.229l1.428-1.429 2.915 2.914 7.657-7.657 1.428 1.429z" />
+            </svg>
+          )}
+        </span>
+
+        <label className="font-medium text-[var(--listing-strong-text)] cursor-pointer select-none">
+          {allSelected ? "Deselect All" : "Select All"}
+        </label>
       </div>
+
       {props.children}
     </components.MenuList>
   )
@@ -461,62 +560,65 @@ const DropdownSelect = ({ label, options, selected, onChange }) => {
   const selectedCount = Array.isArray(selected) ? selected.length : 0
 
   return (
-  <div className="relative mr-4 flex-shrink-0">
+    <div className="relative mr-4 flex-shrink-0">
       {selectedCount > 0 && (
-        <div className="absolute -top-1 -right-2 z-10 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-blue-500 rounded-full">
+        <div className="absolute -top-1 -right-2 z-10 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-[var(--listing-secondary)] rounded-full">
           {selectedCount}
         </div>
       )}
-    <Select
-      options={options.map(x => ({ value: x.value, label: x.display }))}
-      value={selected}
-      onChange={onChange}
-      isMulti
-      placeholder={label}
-      closeMenuOnSelect={false}
-      hideSelectedOptions={false}
-      menuPortalTarget={document.body}
-      menuPosition="fixed"
-      controlShouldRenderValue={false}
-      components={{
-        Option: CheckboxOption,
-        MenuList: MenuList,
-      }}
-      styles={{
-        control: base => ({
-          ...base,
-          border: "none",
-          background: "rgb(82 82 91 / 1%)",
-          boxShadow: "none",
-          minHeight: "36px",
-          "&:hover": { border: "none" },
-        }),
-        placeholder: base => ({ ...base, color: "#49454F", gridArea: "1/1/2/3" }),
-        valueContainer: base => ({
-          ...base,
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          padding: "0px 8px",
-          overflow: "hidden",
-        }),
-        input: base => ({
-          ...base,
-          gridArea: "1/1/2/3",
-          margin: 0,
-          padding: 0,
-        }),
-        menu: base => ({
-          ...base,
-          zIndex: 9999,
-        }),
-        menuPortal: base => ({
-          ...base,
-          zIndex: 9999,
-        }),
-      }}
-      className="max-w-[200px] min-w-[128px] bg-gray-100 rounded-[12px] text-zinc-600 text-sm"
-    />
-  </div>
-)
+      <Select
+        options={options.map(x => ({ value: x.value, label: x.display }))}
+        value={selected}
+        onChange={onChange}
+        isMulti
+        placeholder={label}
+        closeMenuOnSelect={false}
+        hideSelectedOptions={false}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        controlShouldRenderValue={false}
+        components={{
+          Option: CheckboxOption,
+          MenuList: MenuList,
+        }}
+        styles={{
+          control: base => ({
+            ...base,
+            border: "none",
+            background: "var(--listing-surface-soft)",
+            boxShadow: "none",
+            minHeight: "36px",
+            "&:hover": { border: "none" },
+          }),
+
+          option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+              ? "var(--listing-secondary, #5832AC)"  // fallback color
+              : "white",
+            color: state.isSelected
+              ? "white"
+              : "var(--listing-strong-text)",
+            cursor: "pointer",
+          }),
+
+          placeholder: base => ({
+            ...base,
+            color: "var(--listing-muted-text)",
+            gridArea: "1/1/2/3"
+          }),
+
+          menu: base => ({
+            ...base,
+            zIndex: 9999,
+          }),
+
+          menuPortal: base => ({
+            ...base,
+            zIndex: 9999,
+          }),
+        }}
+      />
+    </div>
+  )
 }

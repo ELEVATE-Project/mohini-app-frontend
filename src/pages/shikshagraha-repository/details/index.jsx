@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Footer from "../common/Footer";
 import ROUTES from "../../../url";
 import { trackResourceDownload } from "api/endpoints/analytics";
+import { theme } from "../../../theme";
 
 export default function ResourceDetailPage() {
   const params = useParams();
@@ -46,7 +47,11 @@ export default function ResourceDetailPage() {
   return (
     <>
       {" "}
-      <div className="max-w-[1100px] mx-auto px-4 py-8 relative" ref={containerRef}>
+      <div
+        className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page"
+        ref={containerRef}
+        style={theme.vars}
+      >
         <ToastContainer />
         {isLoading && (
           <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-black bg-opacity-75 text-white h-screen">
@@ -173,7 +178,7 @@ function Actions({ downloadUrl, resourceId }) {
   return (
     <div className="flex gap-2 mt-4">
       <button
-        className="flex gap-1 items-center justify-center bg-blue-600 text-white px-6 py-2 rounded shadow font-medium"
+        className="flex gap-1 items-center justify-center bg-[var(--listing-primary)] text-white px-6 py-2 rounded shadow font-medium hover:bg-[var(--listing-primary-hover)] transition-colors"
         onClick={handleDownload}
       >
         <Download size={16} /> Download Resource
@@ -200,11 +205,11 @@ function Tabs({ tab, setTab }) {
   return (
     <div className="flex gap-8 border-b pt-8 mb-2 sticky top-0 bg-white">
       {TABS_LIST.map((name) => (
-        <button
+          <button
           key={name}
           className={`px-2 py-2 outline-none border-b-2 transition ${
             tab === name
-              ? "border-blue-600 text-blue-600 font-medium"
+              ? "border-[var(--listing-primary)] text-[var(--listing-primary)] font-medium"
               : "border-transparent text-gray-600"
           }`}
           onClick={() => setTab(name)}
@@ -263,7 +268,7 @@ function OverviewContent({ overview }) {
       {/* Paste overview markdown/html as needed */}
       {overview?.map(({ key, value }, index) => (
         <div key={index} className="mb-6">
-          <h2 className="capitalize text-2xl font-semibold text-blue-600 mb-4">
+          <h2 className="capitalize text-2xl font-semibold text-[var(--listing-secondary)] mb-4">
             {index + 1}. {String(key).toLowerCase()}
           </h2>
           <div>{processValue(value)}</div>{" "}
@@ -275,7 +280,7 @@ function OverviewContent({ overview }) {
 function ReviewsSection({ reviews }) {
   return (
     <div className="py-8">
-      <h2 className="text-[1.5rem] font-semibold text-blue-700 mb-6">
+      <h2 className="text-[1.5rem] font-semibold text-[var(--listing-secondary)] mb-6">
         User Feedback
       </h2>
       <div className="flex flex-col gap-6">

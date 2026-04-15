@@ -22,13 +22,13 @@ export const getMediaFileTypeStyles = (label_value, cardBackground) => {
       }
     case MEDIA_FILE_TYPE.DOCX:
       return {
-        background: "bg-[var(--listing-info)]",
+        background: "bg-[var(--listing-docx)]",
         textColor: "text-white",
         Icon: FileText,
       }
     case MEDIA_FILE_TYPE.XLSX:
       return {
-        background: "bg-emerald-500",
+        background: "bg-[var(--listing-xlsx)]",
         textColor: "text-white",
         Icon: FileSpreadsheet,
       }

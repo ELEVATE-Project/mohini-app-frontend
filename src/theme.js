@@ -63,5 +63,8 @@ export const theme = {
     "--listing-page-shell": "#1E3360",
     "--listing-page-shell-hover": "#152847",
     "--listing-white": "#FFFFFF",
+    "--listing-pdf": "#DA1618",
+    "--listing-docx": "#2563EB",
+    "--listing-xlsx": "#0DB563",
   },
 }

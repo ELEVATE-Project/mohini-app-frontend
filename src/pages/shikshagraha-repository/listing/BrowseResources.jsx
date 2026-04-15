@@ -123,7 +123,7 @@ const Dropdown = ({
       )}
       {isOpen && !disabled && (
         <div
-          className={`absolute right-0 z-10 mt-2 md:w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${dropdownClassName}`}
+          className={`absolute right-0 z-[9999] mt-2 md:w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${dropdownClassName}`}
           role="listbox"
         >
           <div className="py-1">
@@ -199,14 +199,15 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
     // { value: "-organization", label: "Organization (Z-A)" },
   ];
 
+  const itemsPerPage = pagination.limit;
+
   const perPageOptions = [
+    { value: 6, label: "6" },
     { value: 12, label: "12" },
     { value: 24, label: "24" },
-    { value: 36, label: "36" },
     { value: 48, label: "48" },
   ];
 
-  const itemsPerPage = pagination.limit;
   const handleItemsPerPageChange = (value) => {
     setPagination({ limit: Number(value) });
   };
@@ -278,12 +279,11 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
             options={perPageOptions}
             selectedValue={itemsPerPage}
             onSelect={(value) => {
-              handleItemsPerPageChange(Number(value));
+              handleItemsPerPageChange(value);
             }}
-
             dropdownClassName="w-32"
             renderButton={(selected) => (
-              <span>{selected?.value || 12} Per Page</span>
+              <span>{selected?.label || "6"} Per Page</span>
             )}
           />
           </div>
@@ -301,7 +301,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
             backgroundSize: "160px, 160px, 200px, 200px",
           }}
         />
-        <div className="relative z-10 max-h-[70vh] min-h-[50vh] overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="relative z-10 pr-2">
           <div className="flex gap-0 md:!gap-6 items-stretch justify-center">
             <div
               className={`flex flex-col md:grid gap-6 w-full lg:!w-[calc(90%-1.5rem)]  ${

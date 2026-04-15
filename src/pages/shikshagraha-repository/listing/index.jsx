@@ -81,33 +81,7 @@ export default function RepositoryPage() {
       )}
 
       {/* Floating Action Button */}
-      <button
-        onClick={() => setIsMitraPopupOpen(!isMitraPopupOpen)}
-        className="fixed lg:!hidden bottom-8 right-8 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-[60]"
-        style={{ 
-          backgroundColor: 'var(--listing-page-shell)',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--listing-page-shell-hover)'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--listing-page-shell)'}
-        aria-label={isMitraPopupOpen ? "Close Mitra AI Assistant" : "Open Mitra AI Assistant"}
-      >
-        {isMitraPopupOpen ? (
-          <X className="w-6 h-6 text-white" />
-        ) : (
-          <img src="https://static-media.gritworks.ai/fe-images/SVG/SG%20Commons/icon-chat.svg" className="w-6 h-6" />
-        )}
-      </button>
-
-      {/* Mitra AI Assistant Popup */}
-      {isMitraPopupOpen && (
-        <>
-
-          {/* Popup Modal */}
-          <div className="fixed bottom-24 right-8 w-[250px] z-50">
-            <MitraAiAssistantAside />
-          </div>
-        </>
-      )}
+      <MitraAiAssistantAside />
 
       <Footer />
     </div>

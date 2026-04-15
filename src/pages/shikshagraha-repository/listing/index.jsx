@@ -9,7 +9,7 @@ import { useRepositoryStore } from "../repository-hooks/useRepositoryStore.js";
 import { GrResources } from "react-icons/gr";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { listingTheme } from "./listingTheme";
+import { listingTheme } from "../../../theme";
 
 export default function RepositoryPage() {
   const [viewMode, setViewMode] = useState("grid");

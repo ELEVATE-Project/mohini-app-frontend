@@ -3,7 +3,7 @@ import { Star, Download, FileSpreadsheet, FileText, FileType, File, Eye } from "
 import ROUTES from "../../../url"
 import env from "../../../utils/env"
 import { trackResourceView } from "api/endpoints/analytics"
-import { listingTheme } from "./listingTheme"
+import { listingTheme } from "../../../theme"
 
 const MEDIA_FILE_TYPE = {
   PDF: "PDF",

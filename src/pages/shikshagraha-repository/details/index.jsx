@@ -8,7 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Footer from "../common/Footer";
 import ROUTES from "../../../url";
 import { trackResourceDownload } from "api/endpoints/analytics";
-import { listingTheme } from "../listing/listingTheme";
+import { listingTheme } from "../../../theme";
 
 export default function ResourceDetailPage() {
   const params = useParams();

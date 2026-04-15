@@ -1,4 +1,4 @@
-export const listingTheme = {
+export const theme = {
   colors: {
     primary: "#7F3289",
     primaryHover: "#6B2A73",

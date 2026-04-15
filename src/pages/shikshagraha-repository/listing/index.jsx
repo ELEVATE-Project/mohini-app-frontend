@@ -9,7 +9,7 @@ import { useRepositoryStore } from "../repository-hooks/useRepositoryStore.js";
 import { GrResources } from "react-icons/gr";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { listingTheme } from "../../../theme";
+import { theme } from "../../../theme";
 
 export default function RepositoryPage() {
   const [viewMode, setViewMode] = useState("grid");
@@ -39,7 +39,7 @@ export default function RepositoryPage() {
   }, [mediaList]);
 
   return (
-    <div className="bg-[var(--listing-white)] relative listing-pages" ref={containerRef} style={listingTheme.vars}>
+    <div className="bg-[var(--listing-white)] relative listing-pages" ref={containerRef} style={theme.vars}>
       <div className="container max-w-[1500px] h-full mx-auto">
         <div className="min-h-screen  py-3 flex flex-col  align-items-center gap-4 ">
           <Header />

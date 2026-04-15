@@ -8,7 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Footer from "../common/Footer";
 import ROUTES from "../../../url";
 import { trackResourceDownload } from "api/endpoints/analytics";
-import { listingTheme } from "../../../theme";
+import { theme } from "../../../theme";
 
 export default function ResourceDetailPage() {
   const params = useParams();
@@ -50,7 +50,7 @@ export default function ResourceDetailPage() {
       <div
         className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page"
         ref={containerRef}
-        style={listingTheme.vars}
+        style={theme.vars}
       >
         <ToastContainer />
         {isLoading && (

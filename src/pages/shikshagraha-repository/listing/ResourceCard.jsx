@@ -3,7 +3,7 @@ import { Star, Download, FileSpreadsheet, FileText, FileType, File, Eye } from "
 import ROUTES from "../../../url"
 import env from "../../../utils/env"
 import { trackResourceView } from "api/endpoints/analytics"
-import { listingTheme } from "../../../theme"
+import { theme } from "../../../theme"
 
 const MEDIA_FILE_TYPE = {
   PDF: "PDF",
@@ -45,9 +45,9 @@ export const getMediaFileTypeStyles = (label_value, cardBackground) => {
 
 
 export default function ResourceCard({ resource, index }) {
-  const paletteEntry = listingTheme.cardPalette[index % listingTheme.cardPalette.length] || {
-    background: listingTheme.colors.dangerSoft,
-    text: listingTheme.colors.strongText,
+  const paletteEntry = theme.cardPalette[index % theme.cardPalette.length] || {
+    background: theme.colors.dangerSoft,
+    text: theme.colors.strongText,
   }
   const cardStyle = {
     backgroundColor: paletteEntry.background,

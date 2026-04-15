@@ -10,6 +10,10 @@ import ResourceCard from "./ResourceCard";
 import { useRepositoryStore } from "../repository-hooks/useRepositoryStore";
 import MitraAiAssistantAside from "./MitraAiAssistantAside.jsx";
 import { useTranslation } from "react-i18next";
+import left1 from "../../../assets/dandelion-left-1.png";
+import left2 from "../../../assets/dandelion-left-2.png";
+import right1 from "../../../assets/dandelion-right-1.png";
+import right2 from "../../../assets/dandelion-right-2.png";
 
 // Custom hook for dropdown functionality
 const useDropdown = () => {
@@ -119,7 +123,7 @@ const Dropdown = ({
       )}
       {isOpen && !disabled && (
         <div
-          className={`absolute right-0 z-10 mt-2 md:w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${dropdownClassName}`}
+          className={`absolute right-0 z-[9999] mt-2 md:w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${dropdownClassName}`}
           role="listbox"
         >
           <div className="py-1">
@@ -195,21 +199,28 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
     // { value: "-organization", label: "Organization (Z-A)" },
   ];
 
+  const itemsPerPage = pagination.limit;
+
   const perPageOptions = [
+    { value: 6, label: "6" },
     { value: 12, label: "12" },
     { value: 24, label: "24" },
-    { value: 36, label: "36" },
     { value: 48, label: "48" },
   ];
 
-  const itemsPerPage = pagination.limit;
   const handleItemsPerPageChange = (value) => {
     setPagination({ limit: Number(value) });
   };
    
-  // Removed unused variables
   return (
-    <section className="px-1 md:px-4 pb-4 pt-1 max-w-[1670px]">
+    <div className="relative overflow-hidden px-1 md:px-4 py-12 max-w-[1670px] mx-auto min-h-screen">
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        
+      />
+      <section className="relative z-10 min-h-screen">
+        {/* ⬇️ EVERYTHING BELOW IS EXACT SAME (no change) */}
+
       <div className="flex flex-col md:flex-row items-center justify-between mb-6">
         <div className="w-full mb-3">
           <h2 className="text-lg font-semibold text-[var(--listing-strong-text)] mb-1">
@@ -239,7 +250,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
             tooltipText={`${t("sortDisabledTooltipText")}`}
           />
           </div>
-       
+
 
           <div className="flex items-center justify-between flex-row-reverse lg:flex-row lg:justify-start lg:gap-6 w-full lg:w-auto">
           <div className="flex items-center gap-1 border border-[var(--listing-border)] rounded">
@@ -268,41 +279,55 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
             options={perPageOptions}
             selectedValue={itemsPerPage}
             onSelect={(value) => {
-              handleItemsPerPageChange(Number(value));
+              handleItemsPerPageChange(value);
             }}
-            // className="ml-2"
             dropdownClassName="w-32"
             renderButton={(selected) => (
-              <span>{selected?.value || 12} Per Page</span>
+              <span>{selected?.label || "6"} Per Page</span>
             )}
           />
           </div>
-       
+
         </div>
       </div>
-      <div className="flex gap-0 md:!gap-6 items-stretch justify-center">
+
+      <div className="relative overflow-hidden rounded-[32px] bg-[var(--listing-white)] p-6">
         <div
-          className={`flex flex-col md:grid gap-6 w-full lg:!w-[calc(80%-1.5rem)]  ${
-            viewMode === "grid"
-              ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3 sm:grid-cols-1"
-              : "grid-cols-1"
-          }`}
-        >
-          {resources.map((resource, index) => (
-            <React.Fragment key={`resource-${resource.id}-${index}`}>
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
-                index={index}
-              />
-            </React.Fragment>
-          ))}
-        </div>  
-      </div>
-      <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl">
-          <MitraAiAssistantAside />
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${left1}), url(${right1}), url(${left2}), url(${right2})`,
+            backgroundPosition: `left 0 top 100px, right 0 top 300px, left 0 bottom 200px, right 0 bottom 50px`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "160px, 160px, 200px, 200px",
+          }}
+        />
+        <div className="relative z-10 pr-2">
+          <div className="flex gap-0 md:!gap-6 items-stretch justify-center">
+            <div
+              className={`flex flex-col md:grid gap-6 w-full lg:!w-[calc(90%-1.5rem)]  ${
+                viewMode === "grid"
+                  ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3 sm:grid-cols-1"
+                  : "grid-cols-1"
+              }`}
+            >
+              {resources.map((resource, index) => (
+                <React.Fragment key={`resource-${resource.id}-${index}`}>
+                  <ResourceCard
+                    key={resource.id}
+                    resource={resource}
+                    index={index}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
         </div>
-        
+        <div className="hidden lg:block w-[20%] self-stretch bg-white p-4 rounded-xl z-[9999]">
+              <MitraAiAssistantAside />
+            </div>
+      </div>
+
     </section>
+    </div>
   );
 }

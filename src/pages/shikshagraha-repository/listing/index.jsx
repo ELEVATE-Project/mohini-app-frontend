@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./Header.jsx";
 import Filters from "./Filters.jsx";
 import BrowseResources from "./BrowseResources.jsx";
@@ -27,19 +27,9 @@ export default function RepositoryPage() {
   const pagination = useRepositoryStore((state) => state.pagination);
   const setPagination = useRepositoryStore((state) => state.setPagination);
   const itemsPerPage = pagination.limit;
-  const containerRef = useRef(null);
-
-
-
-  //scrolling logic
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current?.scrollIntoView({ behavior: "smooth", y: -999 });
-    }
-  }, [mediaList]);
 
   return (
-    <div className="bg-[var(--listing-white)] relative listing-pages" ref={containerRef} style={theme.vars}>
+    <div className="bg-[var(--listing-white)] relative listing-pages" style={theme.vars}>
       <div className="container max-w-[1500px] h-full mx-auto">
         <div className="min-h-screen  py-3 flex flex-col  align-items-center gap-4 ">
           <Header />

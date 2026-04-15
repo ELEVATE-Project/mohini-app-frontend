@@ -1,6 +1,10 @@
 // ResourceDetailPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Download, Heart, Share2, Star } from "lucide-react";
+import left1 from "../../../assets/dandelion-left-1.png";
+import left2 from "../../../assets/dandelion-left-2.png";
+import right1 from "../../../assets/dandelion-right-1.png";
+import right2 from "../../../assets/dandelion-right-2.png";
 import ReviewForm from "./ReviewForm";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRepositoryStore } from "../repository-hooks/useRepositoryStore";
@@ -46,25 +50,35 @@ export default function ResourceDetailPage() {
 
   return (
     <>
-      {" "}
       <div
-        className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page"
+        className="absolute top-0 left-0 right-0 w-screen h-full pointer-events-none"
+        style={{
+          backgroundImage: `url(${left1}), url(${right1}), url(${left2}), url(${right2})`,
+          backgroundPosition: "left 80px top 110px, right 200px top 250px, left 120px bottom 170px, right 200px bottom 150px",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "160px, 160px, 200px, 200px",
+        }}
+      />
+      <div
+        className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page overflow-visible"
         ref={containerRef}
         style={theme.vars}
       >
-        <ToastContainer />
-        {isLoading && (
-          <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-black bg-opacity-75 text-white h-screen">
-            Please wait we are loading your data
-          </div>
-        )}
-        <BackButton />
+        <div className="relative z-10">
+          <ToastContainer />
+          {isLoading && (
+            <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-black bg-opacity-75 text-white h-screen">
+              Please wait we are loading your data
+            </div>
+          )}
+          <BackButton />
         <div className="flex gap-8 mt-2">
           {/* <ResourceImages images={resourceData?.images} /> */}
           <ResourceMeta resource={resourceData} />
         </div>
         <Tabs tab={tab} setTab={setTab} />
         <TabContent tab={tab} resource={resourceData} />
+      </div>
       </div>
       <Footer />
     </>

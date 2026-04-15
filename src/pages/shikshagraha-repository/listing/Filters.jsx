@@ -35,11 +35,11 @@ export default function Filters() {
   const setFilters = useRepositoryStore(state => state.setFilters)
   const setGlobalSearch = useRepositoryStore(state => state.setSearch)
   const setSearchInput = useRepositoryStore(state => state.setSearchInput)
+  const search = useRepositoryStore(state => state.searchInput)
 
   const languageToUse = useSiteDataLocalStore(state => state.chatLanguage)
   const sessionId = useChatStorage()(state => state.sessionId)
 
-  const [search, setSearch] = useState("")
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [hasStartedRecording, setHasStartedRecording] = useState(false)
   // const [isConvertingVoiceToText, setIsFetchingData] = useState(false)
@@ -127,7 +127,7 @@ export default function Filters() {
   const startRecording = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       handleOnStopSpeaking()
-      setSearch("")
+      setSearchInput("")
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then(stream => {
@@ -187,7 +187,7 @@ export default function Filters() {
                   },
                 })
               } else {
-                setSearch(transcriptResult)
+                setSearchInput(transcriptResult)
                 // setGlobalSearch(transcriptResult)
               }
               setIsConvertingVoiceToText(false)
@@ -206,7 +206,6 @@ export default function Filters() {
     }
   }
   const handleOnInputText = inpText => {
-    setSearch(inpText)
     setSearchInput(inpText) // Update store with current input value
 
     if (inpText.trim() === "") {
@@ -234,20 +233,10 @@ export default function Filters() {
   }, [hasStartedRecording])
 
   useEffect(() => {
-    const params = new URLSearchParams()
-    if (search) {
-      params.set("q", search)
-    }
-    const searchParams = `?${params.toString()}`
-    window.history.replaceState({}, "", `${window.location.pathname}${searchParams}`)
-  }, [search])
-
-  useEffect(() => {
     fetchMasterList()
     const searched_param = new URLSearchParams(window.location.search)?.get("q")
-    setSearch(searched_param ?? "")
+    setSearchInput(searched_param ?? "")
     setGlobalSearch(searched_param ?? "")
-    setSearchInput(searched_param ?? "") // Also set searchInput on mount
 
     return () => {
       setIsMaxLengthReached(false)

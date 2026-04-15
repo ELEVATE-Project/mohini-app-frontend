@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import { IoMicOutline } from "react-icons/io5";
@@ -10,12 +10,11 @@ import heroImg from "../../../assets/background-image.png";
 export default function HeroSection() {
   const { t } = useTranslation();
 
-  const [search, setSearch] = useState("");
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [hasStartedRecording, setHasStartedRecording] = useState(false);
-
-  const setGlobalSearch = useRepositoryStore(state => state.setSearch);
-  const setSearchInput = useRepositoryStore(state => state.setSearchInput);
+  const search = useRepositoryStore((state) => state.searchInput);
+  const setGlobalSearch = useRepositoryStore((state) => state.setSearch);
+  const setSearchInput = useRepositoryStore((state) => state.setSearchInput);
+  const [mediaRecorder, setMediaRecorder] = React.useState(null);
+  const [hasStartedRecording, setHasStartedRecording] = React.useState(false);
 
   const disableSendButton =
     search.trim().length === 0 || hasStartedRecording;
@@ -31,7 +30,6 @@ export default function HeroSection() {
   };
 
   const handleOnInputText = value => {
-    setSearch(value);
     setSearchInput(value);
 
     if (value.trim() === "") {
@@ -65,7 +63,7 @@ export default function HeroSection() {
       style={{
         backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url(${heroImg})`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "center top",
         backgroundRepeat: "no-repeat",
         minHeight: "700px",
       }}

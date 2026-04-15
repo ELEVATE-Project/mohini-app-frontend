@@ -51,34 +51,32 @@ export default function ResourceDetailPage() {
   return (
     <>
       <div
-        className="absolute top-0 left-0 right-0 w-screen h-full pointer-events-none"
+        className="fixed top-0 left-0 right-0 w-screen h-screen pointer-events-none z-0"
         style={{
           backgroundImage: `url(${left1}), url(${right1}), url(${left2}), url(${right2})`,
-          backgroundPosition: "left 80px top 110px, right 200px top 250px, left 120px bottom 170px, right 200px bottom 150px",
+          backgroundPosition: "left 0px top 400px, right 0px top 500px, left 0px bottom 0px, right 0px bottom 0px",
           backgroundRepeat: "no-repeat",
           backgroundSize: "160px, 160px, 200px, 200px",
         }}
       />
       <div
-        className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page overflow-visible"
+        className="max-w-[1100px] mx-auto px-4 py-8 relative repository-detail-page overflow-visible z-10 bg-white"
         ref={containerRef}
-        style={theme.vars}
+        style={{...theme.vars, backgroundImage: "none"}}
       >
-        <div className="relative z-10">
-          <ToastContainer />
-          {isLoading && (
-            <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-black bg-opacity-75 text-white h-screen">
-              Please wait we are loading your data
-            </div>
-          )}
-          <BackButton />
+        <ToastContainer />
+        {isLoading && (
+          <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-black bg-opacity-75 text-white h-screen">
+            Please wait we are loading your data
+          </div>
+        )}
+        <BackButton />
         <div className="flex gap-8 mt-2">
           {/* <ResourceImages images={resourceData?.images} /> */}
           <ResourceMeta resource={resourceData} />
         </div>
         <Tabs tab={tab} setTab={setTab} />
         <TabContent tab={tab} resource={resourceData} />
-      </div>
       </div>
       <Footer />
     </>

@@ -232,15 +232,6 @@ export default function Filters() {
     return () => clearInterval(intervalId)
   }, [hasStartedRecording])
 
-  // useEffect(() => {
-  //   const params = new URLSearchParams()
-  //   if (search) {
-  //     params.set("q", search)
-  //   }
-  //   const searchParams = `?${params.toString()}`
-  //   window.history.replaceState({}, "", `${window.location.pathname}${searchParams}`)
-  // }, [search])
-
   useEffect(() => {
     fetchMasterList()
     const searched_param = new URLSearchParams(window.location.search)?.get("q")

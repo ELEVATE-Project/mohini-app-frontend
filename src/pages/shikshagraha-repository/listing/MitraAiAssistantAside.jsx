@@ -6,7 +6,7 @@ import { rootPath } from "utils/constants";
 import aiBookIcon from "../../../assets/hugeicons_ai-book.svg";
 import { X } from "lucide-react";
 
-export default function MitraAiAssistantAside({ defaultBottom = 120 }) {
+export default function MitraAiAssistantAside({ defaultBottom = 90 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(defaultBottom);
@@ -58,7 +58,7 @@ export default function MitraAiAssistantAside({ defaultBottom = 120 }) {
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed ${isMobile ? "right-4" : "right-32"} z-50 bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-16 h-16" : "w-20 h-20"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105 transition-all`}
+        className={`fixed ${isMobile ? "right-4" : "right-10"} z-[9999] bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-16 h-16" : "w-20 h-20"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105 transition-all`}
         style={{ bottom: `${bottomOffset + (isMobile ? 10 : 0)}px` }}
       >
         {open ? (
@@ -71,7 +71,7 @@ export default function MitraAiAssistantAside({ defaultBottom = 120 }) {
       {/* Floating Card */}
       {open && (
         <aside
-          className={`fixed ${isMobile ? "right-4" : "right-32"} z-50 ${isMobile ? "w-[calc(100vw-1.5rem)]" : "w-72"} bg-white px-3 py-3 md:px-4 md:py-6 rounded-lg shadow-2xl transition-all duration-300`}
+          className={`fixed ${isMobile ? "right-4" : "right-20"} z-[9999] ${isMobile ? "w-[calc(100vw-1.5rem)]" : "w-72"} bg-white px-3 py-3 md:px-4 md:py-6 rounded-lg shadow-2xl transition-all duration-300`}
           style={{ bottom: `${bottomOffset + 85 + (isMobile ? 20 : 0)}px` }}
         >
           <div className="flex items-center justify-between">

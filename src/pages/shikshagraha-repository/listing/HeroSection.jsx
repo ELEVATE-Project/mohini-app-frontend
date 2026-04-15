@@ -61,23 +61,24 @@ export default function HeroSection() {
 
   return (
     <div
-      className="w-full flex-1 relative rounded-xl overflow-hidden"
+      className="relative w-full left-1/2 -translate-x-1/2 overflow-hidden mt-4"
       style={{
         backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url(${heroImg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         minHeight: "700px",
       }}
     >
-      <div className="w-full h-full flex flex-col items-center justify-center text-center px-4">
-
-        <h1 className="text-lg md:text-3xl text-white mb-3 font-semibold">
+      <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
+        <div className="flex w-full max-w-4xl flex-col items-center gap-4">
+        <h1 className="text-lg md:text-3xl text-white font-semibold">
           {t("heroTitle")}
         </h1>
 
-        <p className="text-white text-sm md:text-lg mb-6">
+        <p className="text-white text-sm md:text-lg">
           {t("heroDescription")}
         </p>
-
-
 
         <form
           onSubmit={handleSendMessage}
@@ -121,7 +122,7 @@ export default function HeroSection() {
             <TbSend2 className="w-5 h-5 text-white" />
           </button>
         </form>
-
+        </div>
       </div>
     </div>
   );

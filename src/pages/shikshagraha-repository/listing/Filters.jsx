@@ -69,6 +69,8 @@ export default function Filters() {
   //   [search]
   // )
 
+  const [shouldScrollToTop, setShouldScrollToTop] = useState(false)
+
   const [isSticky, setIsSticky] = useState(false)
   const filtersRef = useRef(null)
 
@@ -83,6 +85,13 @@ export default function Filters() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (!loadingList && shouldScrollToTop) {
+      scrollToBrowseResources()
+      setShouldScrollToTop(false)
+    }
+  }, [loadingList, shouldScrollToTop])
 
   function scrollToBrowseResources() {
     const browseSection = document.querySelector('[data-browse-resources]')
@@ -232,12 +241,12 @@ export default function Filters() {
     setSearchInput(inpText) // Update store with current input value
 
     if (inpText.trim() === "") {
-      // setIsRecognizing(false)
       setHasStartedListening(false)
-    }
-
-    if (inpText.trim() === "" && search.trim() !== "") {
+if (inpText.trim() === "" && search.trim() !== "") {
       setGlobalSearch("")
+       setShouldScrollToTop(true)
+    }
+     
     }
   }
 
@@ -424,7 +433,7 @@ export default function Filters() {
       `}</style>
       <HiddenRecorder />
       <Notification />
-      <div ref={filtersRef} id="filters-boundary" className="md:sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
+      <div ref={filtersRef} id="filters-boundary" className="sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
         <div className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap">
 
           {!!dropdown_meta?.length

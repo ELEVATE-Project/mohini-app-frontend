@@ -1,7 +1,6 @@
 // repository-api.js
 import axios from "axios"
 import env from "../../../utils/env"
-import { useUserDataLocalStore } from "store"
 
 const API_BASE_URL = `${env.LOCAL_PROXY()}/api/v1/media`
 
@@ -18,23 +17,6 @@ const apiClientV2 = axios.create({
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
 })
-
-// Add request interceptor to include auth token
-apiClient.interceptors.request.use((config) => {
-  const token = useUserDataLocalStore.getState().access_token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-apiClientV2.interceptors.request.use((config) => {
-  const token = useUserDataLocalStore.getState().access_token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 /**
  * Fetch paginated list of media documents with optional filtering and sorting.

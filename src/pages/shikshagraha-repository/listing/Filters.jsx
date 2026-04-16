@@ -192,8 +192,14 @@ export default function Filters() {
 
               setIsConvertingVoiceToText(true)
               let transcriptResult = ""
-              const s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`)
+              let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`)
               if (!s3Url || s3Url === "") {
+                transcriptResult = t("asrError")
+              }
+              let storedRoute = bot_routes.search_bot
+
+              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
+              if (!transcriptResult || transcriptResult === "") {
                 showNotification({
                   message: t("asrError"),
                   type: "error",

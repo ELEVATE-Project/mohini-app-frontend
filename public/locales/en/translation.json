@@ -113,7 +113,7 @@
     "maxInputCharacters": "Maximum 250 characters allowed",
     "mitraAiAssistant": "Program Design AI assistant",
     "generateMicroImprovementProjects": "Generate Improvement Projects (MIPs)",
-    "generateMicroImprovementProjectsDescription": "Helps you design programs using the SG-Commons curated knowledge base",
+    "generateMicroImprovementProjectsDescription": "Are you a program designer? Discover, learn from, reuse, and build new program solutions using the SG Commons knowledge base.",
     "generateImprovementProjects": "Get Started",
     "PPsCompletionMessage": "<div class='text-class'>Thank you! Your answer has been successfully recorded.</div>",
     "PPsCompletionCTA": "Submit another response",

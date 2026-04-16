@@ -22,11 +22,22 @@ export default function RepositoryPage() {
   const isLoading = loadingList || loadingDetail || loadingMaster;
 
   const mediaList = useRepositoryStore((state) => state.mediaList);
+  const q = useRepositoryStore((state) => state.q);
 
   const mediaCount = useRepositoryStore((state) => state.mediaCount);
   const pagination = useRepositoryStore((state) => state.pagination);
   const setPagination = useRepositoryStore((state) => state.setPagination);
   const itemsPerPage = pagination.limit;
+
+  // Scroll to Browse Resources section when search completes
+  React.useEffect(() => {
+    if (!!mediaList?.length && q && !loadingList) {
+      const browseSection = document.querySelector('[data-browse-resources]');
+      if (browseSection) {
+        browseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [mediaList, q, loadingList]);
 
   return (
     <div className="bg-[var(--listing-white)] relative listing-pages" style={theme.vars}>

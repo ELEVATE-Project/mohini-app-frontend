@@ -197,6 +197,14 @@ export const useRepositoryStore = create((set, get) => ({
         ? { ...state.pagination, offset: 0 }
         : state.pagination,
     }));
+    // Update URL with search query
+    const url = new URL(window.location);
+    if (newSearch.trim()) {
+      url.searchParams.set('q', newSearch);
+    } else {
+      url.searchParams.delete('q');
+    }
+    window.history.replaceState(null, '', url.toString());
     get().fetchMediaList();
   },
   /**

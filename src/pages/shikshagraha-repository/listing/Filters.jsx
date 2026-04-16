@@ -36,6 +36,7 @@ export default function Filters() {
   const setGlobalSearch = useRepositoryStore(state => state.setSearch)
   const setSearchInput = useRepositoryStore(state => state.setSearchInput)
   const search = useRepositoryStore(state => state.searchInput)
+  const loadingList = useRepositoryStore(state => state.loadingList)
 
   const languageToUse = useSiteDataLocalStore(state => state.chatLanguage)
   const sessionId = useChatStorage()(state => state.sessionId)
@@ -83,11 +84,20 @@ export default function Filters() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  function scrollToBrowseResources() {
+    const browseSection = document.querySelector('[data-browse-resources]')
+    if (browseSection) {
+      browseSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   function handleSendMessage(event) {
     if (event) {
       event.preventDefault()
       event.stopPropagation()
     }
+
+    if (loadingList) return;
 
     if (audioRef.current) {
       audioRef.current.pause()
@@ -98,11 +108,13 @@ export default function Filters() {
 
     if (!!search && search?.length > 3) {
       setGlobalSearch(search)
+      scrollToBrowseResources()
     }
   }
 
   const handleChange = (key, value) => {
     setFilters({ [key]: value }, true)
+    scrollToBrowseResources()
   }
 
   const stopRecording = () => {
@@ -148,6 +160,7 @@ export default function Filters() {
           }
 
           recorder.onstop = async () => {
+            setHasStartedRecording(false)
             if (localAudioChunks.length > 0) {
               const audioBlob = new Blob(localAudioChunks, {
                 type: "audio/webm;codecs=opus",
@@ -164,19 +177,14 @@ export default function Filters() {
                     style: { fontWeight: "bold" },
                   },
                 })
+                setIsConvertingVoiceToText(false)
                 return
               }
 
               setIsConvertingVoiceToText(true)
               let transcriptResult = ""
-              let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`)
+              const s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`)
               if (!s3Url || s3Url === "") {
-                transcriptResult = t("asrError")
-              }
-              let storedRoute = bot_routes.search_bot
-
-              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
-              if (!transcriptResult || transcriptResult === "") {
                 showNotification({
                   message: t("asrError"),
                   type: "error",
@@ -187,8 +195,23 @@ export default function Filters() {
                   },
                 })
               } else {
-                setSearchInput(transcriptResult)
-                // setGlobalSearch(transcriptResult)
+                const storedRoute = bot_routes.search_bot
+                transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
+                if (!transcriptResult || transcriptResult === "") {
+                  showNotification({
+                    message: t("asrError"),
+                    type: "error",
+                    options: {
+                      position: "top-center",
+                      autoClose: 6000,
+                      style: { fontWeight: "bold" },
+                    },
+                  })
+                } else {
+                  setSearchInput(transcriptResult)
+                  setGlobalSearch(transcriptResult)
+                  scrollToBrowseResources()
+                }
               }
               setIsConvertingVoiceToText(false)
             } else {
@@ -268,13 +291,13 @@ export default function Filters() {
     }
   }, [search])
 
-  const disableSendButton = search?.trim()?.length === 0 || isConvertingVoiceToText || hasStartedRecording
+  const disableSendButton = search?.trim()?.length === 0 || isConvertingVoiceToText || hasStartedRecording || loadingList
 
   const searchInput = (
     <form
       className="relative flex flex-row items-center justify-center w-full h-full px-3 py-2 rounded-[12px] border border-[var(--listing-border)]"
       onSubmit={event => {
-        if (!hasStartedListening && !isConvertingVoiceToText) {
+        if (!hasStartedListening && !isConvertingVoiceToText && !loadingList) {
           handleSendMessage(event)
         }
       }}
@@ -316,6 +339,7 @@ export default function Filters() {
             }
           }}
           onChange={e => {
+            if (loadingList) return;
             e.preventDefault()
             const inpText = e.target.value
             if (inpText?.length > 250) {
@@ -343,7 +367,7 @@ export default function Filters() {
           name="message-box"
           value={search}
           autoFocus={false}
-          disabled={hasStartedRecording || isConvertingVoiceToText}
+          disabled={hasStartedRecording || isConvertingVoiceToText || loadingList}
           ref={textAreaRef}
           onKeyDown={e => {
             if (e.key === "Enter" && e.shiftKey) {
@@ -362,7 +386,7 @@ export default function Filters() {
       <button className={`flex items-center justify-center relative ${hasStartedRecording ? "text-[var(--listing-danger)]" : "text-black"} disabled:text-[var(--listing-disabled-text)] disabled:cursor-not-allowed cursor-pointer`} onClick={hasStartedRecording ? stopRecording : startRecording}>
         {hasStartedRecording ? <FaRegStopCircle className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] lg:w-[24px] lg:h-[24px]" /> : <IoMicOutline className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] lg:w-[24px] lg:h-[24px]" />}
       </button>
-      <button type="submit" disabled={hasStartedRecording || isConvertingVoiceToText} className={`flex items-center justify-center relative md:pl-[6px] pl-[12px] disabled:cursor-not-allowed disabled:text-[var(--listing-disabled-text)] cursor-pointer ${!disableSendButton ? "text-[var(--listing-info)]" : ""}`}>
+      <button type="submit" disabled={hasStartedRecording || isConvertingVoiceToText || loadingList} className={`flex items-center justify-center relative md:pl-[6px] pl-[12px] disabled:cursor-not-allowed disabled:text-[var(--listing-disabled-text)] cursor-pointer ${!disableSendButton ? "text-[var(--listing-info)]" : ""}`}>
         <TbSend2 className="md:w-[18px] md:h-[18px] lg:w-[24px] lg:h-[24px]" />
       </button>
     </form>
@@ -412,7 +436,10 @@ export default function Filters() {
             : null}
 
           {!!Object.keys(filters).some(key => !!filters[key]?.length) && (
-            <button className="min-w-[100px] p-2 rounded-[12px] flex items-center gap-2 text-[var(--listing-danger)] bg-[var(--listing-danger-soft)]" onClick={() => resetFilters()}>
+            <button className="min-w-[100px] p-2 rounded-[12px] flex items-center gap-2 text-[var(--listing-danger)] bg-[var(--listing-danger-soft)]" onClick={() => {
+              resetFilters()
+              scrollToBrowseResources()
+            }}>
               <X className="w-4 h-4" /> Clear All
             </button>
           )}

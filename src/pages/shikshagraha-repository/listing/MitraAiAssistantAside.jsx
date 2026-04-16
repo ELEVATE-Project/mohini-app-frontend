@@ -6,7 +6,7 @@ import { rootPath } from "utils/constants";
 import aiBookIcon from "../../../assets/hugeicons_ai-book.svg";
 import { X } from "lucide-react";
 
-export default function MitraAiAssistantAside({ defaultBottom = 90 }) {
+export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(defaultBottom);
@@ -58,13 +58,13 @@ export default function MitraAiAssistantAside({ defaultBottom = 90 }) {
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed ${isMobile ? "right-4" : "right-10"} z-[9999] bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-16 h-16" : "w-20 h-20"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105 transition-all`}
+        className={`fixed ${isMobile ? "right-4" : "right-10"} z-[9999] bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-14 h-14" : "w-16 h-16"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105 transition-all`}
         style={{ bottom: `${bottomOffset + (isMobile ? 10 : 0)}px` }}
       >
         {open ? (
-          <X className={`${isMobile ? "w-6 h-6" : "w-10 h-10"}`} />
+          <X className={`${isMobile ? "w-6 h-6" : "w-8 h-8"}`} />
         ) : (
-          <img src={aiBookIcon} alt="AI Book" className={`${isMobile ? "w-7 h-7" : "w-10 h-10"}`} />
+          <img src={aiBookIcon} alt="AI Book" className={`${isMobile ? "w-7 h-7" : "w-8 h-8"}`} />
         )}
       </button>
 

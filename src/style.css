@@ -713,3 +713,6 @@ NEW CSS COLORS FROM FIGMA
   
 }
 
+#filters-boundary {
+  -webkit-transform: translate3d(0,0,0);
+}

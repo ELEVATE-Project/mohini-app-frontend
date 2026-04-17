@@ -73,18 +73,27 @@ export default function Filters() {
 
   const [isSticky, setIsSticky] = useState(false)
   const filtersRef = useRef(null)
+  const stickySentinelRef = useRef(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!filtersRef.current) return
-
-      const { top } = filtersRef.current.getBoundingClientRect()
-      const nextStickyState = top <= 0
-      setIsSticky(prev => (prev === nextStickyState ? prev : nextStickyState))
+    if (!stickySentinelRef.current || typeof IntersectionObserver === "undefined") {
+      return undefined
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const nextStickyState = !entry.isIntersecting
+        setIsSticky(prev => (prev === nextStickyState ? prev : nextStickyState))
+      },
+      {
+        threshold: 0,
+        rootMargin: "-1px 0px 0px 0px",
+      }
+    )
+
+    observer.observe(stickySentinelRef.current)
+
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -440,19 +449,17 @@ if (inpText.trim() === "" && search.trim() !== "") {
       `}</style>
       <HiddenRecorder />
       <Notification />
+      <div ref={stickySentinelRef} className="h-px -mb-px" aria-hidden="true" />
       <div
         ref={filtersRef}
         id="filters-boundary"
         className="sticky top-0 z-50 isolate flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px] w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]"
-        style={{
-          transform: "translateZ(0)",
-          WebkitTransform: "translateZ(0)",
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
-          willChange: "transform",
-        }}
+        
       >
-        <div className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap">
+        <div
+          className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap"
+        
+        >
 
           {!!dropdown_meta?.length
             ? dropdown_meta?.map(({ label, options, key }, index) => (
@@ -477,17 +484,13 @@ if (inpText.trim() === "" && search.trim() !== "") {
         </div> */}
 
         <div
-          className={`flex justify-end ml-auto relative z-10 w-full lg:w-[25%] overflow-hidden transition-[max-height,margin,opacity] duration-150 ${
+          className={`flex justify-end ml-auto relative z-10 w-full lg:w-[25%] overflow-hidden ${
             isSticky
-              ? "max-h-[53px] mt-7 lg:mt-0 opacity-100 visible"
-              : "max-h-0 mt-0 opacity-0 invisible pointer-events-none"
+              ? "max-h-[53px] mt-7 lg:mt-0 opacity-100 block"
+            : "max-h-0 mt-0 opacity-0 invisible pointer-events-none hidden"
           }`}
           aria-hidden={!isSticky}
           style={{
-            transform: "translateZ(0)",
-            WebkitTransform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
           }}
         >
           <div className="flex flex-col items-start w-full h-[53px]">

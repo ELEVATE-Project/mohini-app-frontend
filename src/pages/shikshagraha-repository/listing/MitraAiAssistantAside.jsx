@@ -9,8 +9,14 @@ import { X } from "lucide-react";
 export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [renderCard, setRenderCard] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(defaultBottom);
   const [isMobile, setIsMobile] = useState(false);
+
+  const buttonBottom = bottomOffset + (isMobile ? 10 : 0);
+  const buttonHeight = isMobile ? 56 : 64;
+  const cardGap = 12;
+  const cardBottom = buttonBottom + buttonHeight + cardGap;
 
   const handleClick = () => {
     const fullUrl = `${window.location.origin}${rootPath}${ROUTES.MITRA_CHAT}`;
@@ -27,7 +33,17 @@ export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
   }, []);
 
   useEffect(() => {
-    const footer = document.querySelector("section.footer");
+    if (open) {
+      setRenderCard(true);
+      return;
+    }
+
+    const timeout = setTimeout(() => setRenderCard(false), 300);
+    return () => clearTimeout(timeout);
+  }, [open]);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer, section.footer, .footer");
     if (!footer) return;
 
     const DEFAULT_BOTTOM = defaultBottom;
@@ -36,11 +52,7 @@ export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
     const updateOffset = () => {
       const footerRect = footer.getBoundingClientRect();
       const visibleOverlap = window.innerHeight - footerRect.top;
-      if (visibleOverlap <= 0) {
-        setBottomOffset(DEFAULT_BOTTOM);
-        return;
-      }
-      setBottomOffset(visibleOverlap + GAP);
+      setBottomOffset(visibleOverlap > 0 ? visibleOverlap + GAP : DEFAULT_BOTTOM);
     };
 
     updateOffset();
@@ -51,15 +63,19 @@ export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
       window.removeEventListener("scroll", updateOffset);
       window.removeEventListener("resize", updateOffset);
     };
-  }, []);
+  }, [defaultBottom]);
 
   return (
     <>
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed ${isMobile ? "right-4" : "right-10"} z-[9999] bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-14 h-14" : "w-16 h-16"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105 transition-all`}
-        style={{ bottom: `${bottomOffset + (isMobile ? 10 : 0)}px` }}
+        className={`fixed ${isMobile ? "right-4" : "right-10"} z-[9999] bg-[var(--listing-primary)] text-white border border-white ${isMobile ? "w-14 h-14" : "w-16 h-16"} rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.45)] flex items-center justify-center hover:scale-105`}
+        style={{
+          bottom: `${buttonBottom}px`,
+          transition: "bottom 220ms ease-out, transform 220ms ease-out",
+          willChange: "bottom, transform",
+        }}
       >
         {open ? (
           <X className={`${isMobile ? "w-6 h-6" : "w-8 h-8"}`} />
@@ -69,16 +85,22 @@ export default function MitraAiAssistantAside({ defaultBottom = 70 }) {
       </button>
 
       {/* Floating Card */}
-      {open && (
+      {renderCard && (
         <aside
-          className={`fixed ${isMobile ? "right-4" : "right-20"} z-[9999] ${isMobile ? "w-[calc(100vw-1.5rem)]" : "w-72"} bg-white px-3 py-3 md:px-4 md:py-6 rounded-lg shadow-2xl transition-all duration-300`}
-          style={{ bottom: `${bottomOffset + 85 + (isMobile ? 20 : 0)}px` }}
+          className={`fixed z-[9999] ${isMobile ? "left-4 right-4 max-w-[calc(100vw-2rem)]" : "right-20 w-72"} bg-white px-3 py-3 md:px-4 md:py-6 rounded-lg shadow-2xl ${open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
+          style={{
+            bottom: `${cardBottom}px`,
+            maxHeight: "calc(100vh - 140px)",
+            overflowY: "auto",
+            transition: "bottom 220ms ease-out, opacity 220ms ease-out, transform 220ms ease-out",
+            willChange: "bottom, transform, opacity",
+          }}
         >
           <div className="flex items-center justify-between">
             <h3 className="text-base md:text-lg font-bold leading-[28px]">
               {t("mitraAiAssistant")}
             </h3>
-            <MdMoreVert className="w-5 h-5 text-[var(--listing-subdued-text)]" />
+            {/* <MdMoreVert className="w-5 h-5 text-[var(--listing-subdued-text)]" /> */}
           </div>
 
           <div className="h-[1px] border-t border-[var(--listing-border)] my-2 md:my-4"></div>

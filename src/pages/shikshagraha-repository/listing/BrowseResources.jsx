@@ -213,7 +213,10 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
   };
    
   return (
-    <div className="relative overflow-hidden px-1 md:px-4 py-12 max-w-[1670px] mx-auto min-h-screen">
+    <div
+      className="relative overflow-hidden px-1 md:px-4 py-12 max-w-[1670px] mx-auto min-h-screen scroll-mt-24"
+      data-browse-resources
+    >
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         
@@ -222,7 +225,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
         {/* ⬇️ EVERYTHING BELOW IS EXACT SAME (no change) */}
 
       <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-        <div className="w-full mb-3">
+        <div className="w-full mb-3" data-browse-resources>
           <h2 className="text-lg font-semibold text-[var(--listing-strong-text)] mb-1">
             Browse Resources
           </h2>
@@ -291,7 +294,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-[32px] bg-[var(--listing-white)] p-6">
+      <div className="relative overflow-hidden rounded-[32px] bg-[var(--listing-white)] pt-4 md:p-6">
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
@@ -302,7 +305,7 @@ export default function BrowseResources({ resources, viewMode, setViewMode }) {
           }}
         />
         <div className="relative z-10 pr-2">
-          <div className="flex gap-0 md:!gap-6 items-stretch justify-center">
+          <div className="flex gap-0 md:!gap-6 items-stretch justify-start md:justify-center">
             <div
               className={`flex flex-col md:grid gap-6 w-full lg:!w-[calc(90%-1.5rem)]  ${
                 viewMode === "grid"

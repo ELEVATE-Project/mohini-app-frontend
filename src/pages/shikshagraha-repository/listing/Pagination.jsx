@@ -13,6 +13,10 @@ function Pagination({
   const handlePageClick = (e) => {
     const selectedPage = e.selected;
     paginate(selectedPage);
+    const browseSection = document.querySelector('[data-browse-resources]');
+    if (browseSection) {
+      browseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
   const defined_dimension_class = isMobile ? "w-[34px] h-[34px]" : "w-[54px] h-[54px]"
   const label_class = "flex flex-col items-center justify-center border p-1 rounded bg-white text-sm  " + defined_dimension_class  

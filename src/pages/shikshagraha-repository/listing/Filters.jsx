@@ -443,7 +443,7 @@ if (inpText.trim() === "" && search.trim() !== "") {
       <div
         ref={filtersRef}
         id="filters-boundary"
-        className="sticky top-0 z-50 relative isolate flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px] w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]"
+        className="sticky top-0 z-50 isolate flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px] w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]"
         style={{
           transform: "translateZ(0)",
           WebkitTransform: "translateZ(0)",

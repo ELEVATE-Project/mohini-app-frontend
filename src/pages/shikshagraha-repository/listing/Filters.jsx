@@ -79,10 +79,11 @@ export default function Filters() {
       if (!filtersRef.current) return
 
       const { top } = filtersRef.current.getBoundingClientRect()
-      setIsSticky(top <= 0)
+      const nextStickyState = top <= 0
+      setIsSticky(prev => (prev === nextStickyState ? prev : nextStickyState))
     }
 
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -439,7 +440,18 @@ if (inpText.trim() === "" && search.trim() !== "") {
       `}</style>
       <HiddenRecorder />
       <Notification />
-      <div ref={filtersRef} id="filters-boundary" className="sticky top-0 z-50 flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px]  w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]">
+      <div
+        ref={filtersRef}
+        id="filters-boundary"
+        className="sticky top-0 z-50 relative isolate flex flex-col lg:flex-row items-stretch lg:items-center p-3 bg-white max-w-[1670px] w-full rounded-[1rem] shadow-[0_0_4px_rgba(0,0,0,0.2)]"
+        style={{
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          willChange: "transform",
+        }}
+      >
         <div className="min-h-[40px] flex items-center pt-2 gap-1 w-full lg:w-[75%] overflow-x-auto flex-shrink-0 lg:flex-wrap">
 
           {!!dropdown_meta?.length
@@ -464,13 +476,24 @@ if (inpText.trim() === "" && search.trim() !== "") {
           <div className="flex flex-col items-start w-full h-[53px]">{searchInput}</div>
         </div> */}
 
-        {isSticky && (
-          <div className="flex justify-end ml-auto relative z-10 w-full lg:w-[25%] mt-7 lg:mt-0">
-            <div className="flex flex-col items-start w-full h-[53px]">
-              {searchInput}
-            </div>
+        <div
+          className={`flex justify-end ml-auto relative z-10 w-full lg:w-[25%] overflow-hidden transition-[max-height,margin,opacity] duration-150 ${
+            isSticky
+              ? "max-h-[53px] mt-7 lg:mt-0 opacity-100 visible"
+              : "max-h-0 mt-0 opacity-0 invisible pointer-events-none"
+          }`}
+          aria-hidden={!isSticky}
+          style={{
+            transform: "translateZ(0)",
+            WebkitTransform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+          }}
+        >
+          <div className="flex flex-col items-start w-full h-[53px]">
+            {searchInput}
           </div>
-        )}
+        </div>
       </div>
     </>
   )

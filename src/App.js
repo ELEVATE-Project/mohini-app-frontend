@@ -1,19 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { sessionFlowName } from "./constants/session"
-import { useRoutes, Navigate, useLocation } from "react-router-dom"
+import { useRoutes, Navigate } from "react-router-dom"
 import { UserProvider } from "./context/user"
 import CommonHomePage from "./pages/Login/commonPage"
-import NotFound from "./pages/shikshagraha-repository/not-found"
 import PrivacyPage from "./pages/privacyPage"
 import ROUTES from "./url"
-import ShikshagrahaRepository from "./pages/shikshagraha-repository/listing"
-import ShikshagrahaRepositoryDetail from "./pages/shikshagraha-repository/details"
 import ShikshalokamChat from "./pages/shikshalokamChat"
 import SsoFlow from "./pages/ssoFlow"
 import UnifiedChat from "./pages/UnifiedChat/UnifiedChat"
 import ChatContainer from "./pages/ShikshalokamVoiceChat/chat-container"
-import MainPage from "pages/ai-creation/pages/shikshalokam-mitra/MainPage"
-import ImprovementPlan from "pages/ai-creation/pages/improvement-plan"
 import I18nLoader from "./i18nLoader"
 
 const queryClient = new QueryClient()
@@ -45,10 +40,6 @@ const protected_routes = []
 
 const unprotected_old_routes = [
 
-  // mitra chat routes
-  { path: ROUTES.MITRA_CHAT, element: <MainPage /> },
-  { path: ROUTES.IMPROVEMENT_PLAN, element: <ImprovementPlan /> },
-
   // { path: ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN, element: <Shikshalokam type={"shikshalokam"} variant={"publicBot"} /> },
   // { path: ROUTES.SHIKSHALOKAM_VOICE_CHAT, element: <ShikshalokamVoiceBasedChat type={"shikshalokam"} variant={"publicBot"} /> },
 
@@ -70,9 +61,6 @@ const unprotected_old_routes = [
   { path: ROUTES.TERMS_AND_CONDITIONS, element: <PrivacyPage /> },
   { path: ROUTES.SHIKSHALOKAM_HOME_PAGE, element: <CommonHomePage /> },
   { path: ROUTES.SSO_FLOW, element: <SsoFlow /> },
-  { path: ROUTES.SHIKSHAGRAHA_REPOSITORY, element: <ShikshagrahaRepository /> },
-  { path: ROUTES.SHIKSHAGRAHA_REPOSITORY_DETAIL, element: <ShikshagrahaRepositoryDetail /> },
-  { path: ROUTES.NOT_FOUND, element: <NotFound /> },
 ]
 
 const unprotected_routes_config = []

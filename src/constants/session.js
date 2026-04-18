@@ -18,10 +18,6 @@ export const sessionFlowName = {
   YLC: "YLC",
   ListeningActivity: "listening-activity",
   ParentPerceptionSurvey: "parent_perception_survey",
-  Creation: "creation",
-  LFA: "lfa",
-  LCF: "lcf",
-  FreeFlow: "free_flow",
   ShikshaSamvad: "shiksha-samvad",
   DelhiShikshaSamvad: "delhi-shiksha-samvad",
 }

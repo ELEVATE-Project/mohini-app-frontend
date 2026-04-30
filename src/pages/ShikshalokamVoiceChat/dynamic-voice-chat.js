@@ -1796,7 +1796,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
     if (rerouteUrl && rerouteUrl !== null && rerouteUrl !== undefined && rerouteUrl !== "") {
       window.location.href = rerouteUrl
     } else {
-      window.location.replace("https://www.google.com")
+      clearFromStorage()
+      navigate(-1)
     }
   }
 

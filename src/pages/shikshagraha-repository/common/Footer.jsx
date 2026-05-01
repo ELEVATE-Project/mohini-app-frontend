@@ -15,12 +15,12 @@ const movementLinks = [
   { label: "Samvaad", href: `${BASE_URL}/media-update/shiksha-samvaad-ignites-national-momentum-for-improving-indias-public-education-system` },
   { label: "Awards", href: `${BASE_URL}/awards` },
   { label: "Commons", href: `https://commons.shikshagraha.org/` },
-  { label: "Media", href: "#" },
+  { label: "Media"},
 ];
 
 const connectLinks = [
   { label: "Our Partners", href: `${BASE_URL}/#partners` },
-  { label: "FAQs", href: "#" },
+  { label: "FAQs" },
   { label: "hello@shikshagraha.org", href: "mailto:hello@shikshagraha.org" },
 ];
 

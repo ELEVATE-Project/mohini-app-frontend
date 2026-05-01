@@ -15,7 +15,7 @@ const movementLinks = [
   { label: "Samvaad", href: `${BASE_URL}/media-update/shiksha-samvaad-ignites-national-momentum-for-improving-indias-public-education-system` },
   { label: "Awards", href: `${BASE_URL}/awards` },
   { label: "Commons", href: `https://commons.shikshagraha.org/` },
-  { label: "Media"},
+  { label: "Media" , href: `${BASE_URL}/story-archive`},
 ];
 
 const connectLinks = [

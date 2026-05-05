@@ -253,7 +253,7 @@ const footerStyles = `
 const movementLinks = [
   { label: "Home", href: BASE_URL },
   { label: "About Us", href: `${BASE_URL}/about-us` },
-  { label: "Impact", href: `${BASE_URL}/story-archive` },
+  { label: "Impact", href: `https://dashboard.shikshagraha.org/` },
   { label: "Samvaad", href: `${BASE_URL}/media-update/shiksha-samvaad-ignites-national-momentum-for-improving-indias-public-education-system` },
   { label: "Awards", href: `${BASE_URL}/awards` },
   { label: "Commons", href: `https://commons.shikshagraha.org/` },

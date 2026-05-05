@@ -197,6 +197,7 @@ const footerStyles = `
 
     .sg-footer__right {
       gap: 40px;
+      margin-left: 0px;
     }
 
     .sg-footer__tagline {
@@ -212,6 +213,7 @@ const footerStyles = `
     .sg-footer__right {
       flex-direction: column;
       gap: 40px;
+      margin-left: 0px;
     }
 
     .sg-footer__bottom {

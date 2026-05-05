@@ -27,41 +27,54 @@ const footerStyles = `
 
   .sg-footer__bg2 {
     position: absolute;
-    top: 180px;
-    right: 53%;
+    top: 140px;
+    right: 42%;
     width: 50px;
   }
 
   .sg-footer__bg3 {
     position: absolute;
-    top: 300px;
-    right: 4%;
+    top: 260px;
+    right: 6%;
     width: 60px;
   }
 
   .sg-footer__bg4 {
     position: absolute;
-    top: 300px;
-    right: 4%;
-    width: 60px;
+    top: 260px;
+    right: 65%;
+    width: 38px;
   }
 
   .sg-footer__main {
     display: flex;
     flex-wrap: wrap;
-    padding: 60px 10%;
-    gap: 100px;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: min(1200px, calc(100% - 4rem));
+    margin: 0 auto;
+    padding: 80px 0 40px;
+    gap: 56px;
   }
 
-  .sg-footer__logo-col,
-  .sg-footer__right > div {
-    flex: 1;
+  .sg-footer__logo-col {
+    flex: 1 1 360px;
+    max-width: 420px;
   }
 
   .sg-footer__right {
     display: flex;
-    flex: 2;
-    gap: 40px;
+    flex: 1 1 520px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 80px;
+    margin-left: 80px;
+  }
+
+  .sg-footer__right > div {
+    flex: 1 1 220px;
+    max-width: 240px;
   }
 
   .sg-footer__logo-row {
@@ -76,16 +89,17 @@ const footerStyles = `
   }
 
   .sg-footer__tagline {
+    margin: 0;
     font-size: 16px;
     line-height: 1.7;
-    font-weight: 600;
-    width: 400px;
+    font-weight: 500;
+    max-width: 430px;
   }
 
   .sg-footer__socials {
     display: flex;
     gap: 12px;
-    margin-top: 14px;
+    margin-top: 40px;
   }
 
   .sg-footer__social-link {
@@ -108,16 +122,17 @@ const footerStyles = `
   .sg-footer__nav-list {
     list-style: none;
     padding: 0;
+    margin: 0;
   }
 
   .sg-footer__nav-link {
     display: inline-flex;
     align-items: center;
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 16px;
+    color: #fff;
     text-decoration: none;
-    margin-bottom: 12px;
-    font-weight: 600;
+    margin-bottom: 20px;
+    font-weight: 400;
   }
 
   .sg-footer__nav-link::before {
@@ -141,14 +156,14 @@ const footerStyles = `
 
   .sg-footer__join-btn {
     display: inline-block;
-    margin-top: 10px;
+    margin-top: 20px;
     padding: 12px 20px;
     background: #7f3289;
     border-radius: 25px;
     text-decoration: none;
     color: white;
     width: fit-content;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 20px;
   }
 
@@ -160,30 +175,32 @@ const footerStyles = `
 
   .sg-footer__bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 20px 1%;
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 24px;
     font-size: 14px;
-    font-weight: 600;
-    margin: 0 13%;
+    font-weight: 400;
+    width: min(1200px, calc(100% - 4rem));
+    margin: 0 auto;
+    padding: 30px 0 0;
+  }
+
+  .sg-footer__bottom p {
+    margin: 0;
   }
 
   @media (max-width: 1024px) {
     .sg-footer__logo-col {
-      flex: 0 0 100%;
+      max-width: none;
     }
 
     .sg-footer__right {
-      flex: 0 0 100%;
-      justify-content: space-between;
-    }
-
-    .sg-footer__right > div {
-      flex: 0 0 48%;
+      gap: 40px;
     }
 
     .sg-footer__tagline {
-      width: 300px;
+      max-width: 520px;
     }
 
     .sg-footer {
@@ -194,38 +211,35 @@ const footerStyles = `
   @media (max-width: 600px) {
     .sg-footer__right {
       flex-direction: column;
+      gap: 40px;
     }
 
     .sg-footer__bottom {
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 20px 2%;
-      display: flex;
       flex-direction: column;
       gap: 12px;
-      justify-content: center;
       font-size: 14px;
-      font-weight: 600;
-      margin: 0 4%;
+      width: calc(100% - 2rem);
     }
 
     .sg-footer__tagline {
-      width: auto;
+      max-width: none;
     }
 
     .sg-footer__main {
-      gap: 40px;
-      padding: 40px 6%;
+      gap: 50px;
+      width: calc(100% - 2rem);
+      padding: 40px 0 28px;
     }
 
-    .sg-footer__bg2 {
+    .sg-footer__bg2, .sg-footer__bg4 {
       display: none;
     }
 
     .sg-footer__bg3 {
       position: absolute;
-      top: 613px;
-      right: 35%;
-      width: 50px;
+        top: 31px;
+        right: 10%;
+        width: 38px;
     }
 
     .sg-footer {
@@ -277,11 +291,14 @@ export default function Footer() {
   return (
     <>
       <style
-        type="text/css"
-        dangerouslySetInnerHTML={{
-          __html: footerStyles,
-        }}
-      />
+  type="text/css"
+  dangerouslySetInnerHTML={{
+    __html: `
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+      ${footerStyles}
+    `,
+  }}
+/>
       <footer className="sg-footer">
         <img src={dandelion} className="sg-footer__bg1" alt="" />
         <img src={dandelion1} className="sg-footer__bg2" alt="" />

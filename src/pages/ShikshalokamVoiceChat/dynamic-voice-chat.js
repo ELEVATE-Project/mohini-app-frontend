@@ -67,7 +67,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
   // ========== useState Hooks ==========
   const [asrAudio, setAsrAudio] = useState(null)
   const [audioCache, setAudioCache] = useState({})
-  const [botNameToDisplay, setBotNameToDisplay] = useState("Bot")
+  const [botNameToDisplay, setBotNameToDisplay] = useState("")
   const [companySlug, setCompanySlug] = useState("")
   const [editor, setEditor] = useState(null)
   const [editorCopyChanges, setEditorCopyChanges] = useState(null)
@@ -167,19 +167,43 @@ const DynamicVoiceChat = ({ type = "" }) => {
     refetchOnReconnect: false,
   })
 
-  const { data: companyBotData } = useQuery({
+
+
+  const isCompanyBotQueryEnabled =
+    !!(languageToUse &&
+      shouldFetchIntro &&
+      isNewChatOpen &&
+      profileToUse &&
+      flowInfo?.bot_route)
+
+  const {
+    data: companyBotData,
+    isPending: isCompanyBotPending,
+  } = useQuery({
     queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, flowInfo?.bot_route, languageToUse, accessToken],
     queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: flowInfo.bot_route, target_language: languageToUse }),
-    enabled: !!(languageToUse && shouldFetchIntro && isNewChatOpen && profileToUse && flowInfo?.bot_route),
+    enabled: isCompanyBotQueryEnabled,
   })
 
-  const { data: introMessageData, isLoading: isIntroMessageLoading } = useQuery({
+
+  const isIntroQueryEnabled =
+    !!(
+      companyBotData &&
+      languageToUse &&
+      companyBotData?.results?.length > 0 &&
+      flowInfo?.bot_route
+    )
+
+  const {
+    data: introMessageData,
+    isPending: isIntroMessagePending,
+  } = useQuery({
     queryKey: [API_ENDPOINTS.BOT_VERNACULAR, flowInfo?.bot_route, languageToUse],
     queryFn: () => getTranslatedIntroMessageApi({
       language: languageToUse,
       company_bot__route: flowInfo.bot_route,
     }),
-    enabled: !!(companyBotData && languageToUse && companyBotData?.results?.length > 0 && flowInfo?.bot_route),
+    enabled: isIntroQueryEnabled
   })
 
   const { data: chatSessionData } = useQuery({
@@ -797,7 +821,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     } else {
       message = introMessageData[0]?.alt_introductory_message
     }
-    const botName = introMessageData[0]?.name || "Bot"
+    const botName = introMessageData[0]?.name || ""
 
     setBotName(botName)
     setDefaultBotName(introMessageData[0]?.default_name)
@@ -1475,7 +1499,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     let shouldPlay = false
     if (showFileInput) {
       shouldPlay = true
-    } else if ((noStoryFound || noStoryFound === null) && !isIntroMessageLoading && !isLoading && !endStoryMutation.isPending) {
+    } else if ((noStoryFound || noStoryFound === null) && !isIntroMessagePending && !isLoading && !endStoryMutation.isPending) {
       const currentFlow = storageFlow
 
       if (currentFlow) {
@@ -1486,11 +1510,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
         } else {
           shouldPlay = true
         }
-      } else if (chatHistory && chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot" && !isIntroMessageLoading && !isLoading && !endStoryMutation.isPending) {
+      } else if (chatHistory && chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot" && !isIntroMessagePending && !isLoading && !endStoryMutation.isPending) {
         shouldPlay = true
       }
     }
-    if (isStreamingComplete && shouldPlay && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && isMute && acceptedTnc && acceptedTnc !== "ONGOING" && !isIntroMessageLoading) {
+    if (isStreamingComplete && shouldPlay && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && isMute && acceptedTnc && acceptedTnc !== "ONGOING" && !isIntroMessagePending) {
       const speakerButtons = document.querySelectorAll(".button-11.button-3")
       const lastSpeakerButton = speakerButtons[speakerButtons.length - 1]
 
@@ -1498,7 +1522,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
         lastSpeakerButton.click()
       }
     }
-  }, [isStreamingComplete, showFileInput, showHomepage, endStoryMutation.isPending, isLoading, isPdfDownloading, storyData, chatHistory, isMute, acceptedTnc, isIntroMessageLoading, noStoryFound])
+  }, [isStreamingComplete, showFileInput, showHomepage, endStoryMutation.isPending, isLoading, isPdfDownloading, storyData, chatHistory, isMute, acceptedTnc, isIntroMessagePending, noStoryFound])
 
   /**
    * Process TTS requests for unnarrated bot messages
@@ -2248,7 +2272,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
           />
         </div>
       </div>
-      {(isInitialising || isLoading || isIntroMessageLoading || endStoryMutation.isPending) && (
+      {(
+          isInitialising ||
+          isLoading ||
+          (isCompanyBotQueryEnabled && isCompanyBotPending) ||
+          (isIntroQueryEnabled && isIntroMessagePending) ||
+          endStoryMutation.isPending
+        ) && (
         <div className="loader-load-spinner">
           <div className="div67">
             <BiLoader className="loader-rotate-loader loader-icon" />

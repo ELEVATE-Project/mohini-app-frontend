@@ -1,51 +1,50 @@
 // components/LanguageSelectionGrid.js
-import { useTranslation } from "react-i18next"
-import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum"
-import { useLocation } from "react-router-dom"
-import { useChatStorage, useSiteStorage } from "hooks/useStorage"
-import { STORE_NAME_CONSTANTS } from "store/constants"
-import { SESSION_USECASE_TYPE } from "constants/session"
-import ROUTES from "../url"
-import { useNavigate } from "react-router-dom"
-import { useSiteDataLocalStore } from "store"
+import { useTranslation } from "react-i18next";
+import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
+import { useLocation } from "react-router-dom";
+import { useChatStorage, useSiteStorage } from "hooks/useStorage";
+import { SESSION_USECASE_TYPE } from "constants/session";
+import ROUTES from "../url";
+import { useNavigate } from "react-router-dom";
+import { useSiteDataLocalStore } from "store";
 
 const LanguageSelectionGrid = ({
   usecaseType,
   // onLanguageSelect,
   // setIsLanguageProcessing
 }) => {
-  const { t } = useTranslation()
-  const location = useLocation()
-  const navigate = useNavigate()
+  const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage)
-  const setHasSelectedLanguage = useSiteDataLocalStore(state => state.setHasSelectedLanguage)
-  const setFlow = useChatStorage()(state => state.setFlow)
-  const setPreviousUrl = useSiteStorage()(state => state.setPreviousUrl)
+  const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage);
+  const setHasSelectedLanguage = useSiteDataLocalStore(state => state.setHasSelectedLanguage);
+  const setFlow = useChatStorage()(state => state.setFlow);
+  const setPreviousUrl = useSiteStorage()(state => state.setPreviousUrl);
 
   const handleLanguageClick = langValue => {
-    setChatLanguage(langValue)
-    setHasSelectedLanguage(true)
+    setChatLanguage(langValue);
+    setHasSelectedLanguage(true);
 
     const ROUTE_MAP = {
       [SESSION_USECASE_TYPE.MEGA_PTM]: ROUTES.SHIKSHALOKAM_PTM_CHAT_PAGE,
       [SESSION_USECASE_TYPE.YLC]: ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE,
-    }
+    };
 
     const FLOW_MAP = {
       [SESSION_USECASE_TYPE.MEGA_PTM]: sessionFlowName.megaPTM,
       [SESSION_USECASE_TYPE.YLC]: sessionFlowName.YLC,
-    }
+    };
 
-    setPreviousUrl(window.location.href)
+    setPreviousUrl(window.location.href);
     if (ROUTE_MAP[usecaseType]) {
-      setFlow(FLOW_MAP[usecaseType])
-      navigate(ROUTE_MAP[usecaseType])
+      setFlow(FLOW_MAP[usecaseType]);
+      navigate(ROUTE_MAP[usecaseType]);
     }
-  }
+  };
 
-  const searchParams = new URLSearchParams(location.search)
-  const currentFlow = searchParams.get("flow")
+  const searchParams = new URLSearchParams(location.search);
+  const currentFlow = searchParams.get("flow");
 
   return (
     <>
@@ -63,7 +62,7 @@ const LanguageSelectionGrid = ({
           ))}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default LanguageSelectionGrid
+export default LanguageSelectionGrid;

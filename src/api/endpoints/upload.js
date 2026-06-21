@@ -36,7 +36,7 @@ export const uploadToS3Api = async (uploadUrl, file) => {
       method: "PUT",
       headers: {
         "Content-Type": file.type,
-        "x-amz-acl": "public-read",
+        // "x-amz-acl": "public-read",
       },
       body: file,
     })

@@ -1,5 +1,6 @@
-import { API_ENDPOINTS } from "constants/urls"
-import { apiClient } from "../client"
+import { API_ENDPOINTS } from "constants/urls";
+import { apiClient } from "../client";
+import env from "utils/env";
 
 /**
  * Creates a new user profile
@@ -8,9 +9,9 @@ import { apiClient } from "../client"
  * @returns {Promise<Object>} The created user profile data
  */
 export const createUserProfileApi = async data => {
-  const response = await apiClient.post(API_ENDPOINTS.CREATE_USER_PROFILE, data)
-  return response.data
-}
+  const response = await apiClient.post(API_ENDPOINTS.CREATE_USER_PROFILE, data);
+  return response.data;
+};
 
 /**
  * Get user profile with optional filter
@@ -19,17 +20,17 @@ export const createUserProfileApi = async data => {
  */
 export const getUserProfileApi = async filter => {
   try {
-    const endpoint = `${API_ENDPOINTS.GET_USER_PROFILE}${filter}`
+    const endpoint = `${API_ENDPOINTS.GET_USER_PROFILE}${filter}`;
     const response = await apiClient.get(endpoint, {
       headers: {
         "Content-Type": "application/json",
       },
-    })
-    return response.data
+    });
+    return response.data;
   } catch (error) {
-    return error?.response?.data
+    return error?.response?.data;
   }
-}
+};
 
 /**
  * Get or create profile details
@@ -42,12 +43,12 @@ export const getProfileDetailsApi = async body => {
       headers: {
         "Content-Type": "application/json",
       },
-    })
-    return response.data
+    });
+    return response.data;
   } catch (error) {
-    return error?.response?.data
+    return error?.response?.data;
   }
-}
+};
 
 /**
  * Read Elevate profile using access token
@@ -56,17 +57,19 @@ export const getProfileDetailsApi = async body => {
  */
 export const readElevateProfileApi = async accessToken => {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.READ_ELEVATE_PROFILE, {
+    const authUrl = env.AUTH_ROUTE();
+    const response = await apiClient.get(authUrl, {
       headers: {
         "Content-Type": "application/json",
         "X-auth-token": accessToken,
       },
-    })
-    return response?.data
+      withCredentials: true,
+    });
+    return response?.data;
   } catch (error) {
-    return error?.response?.data
+    return error?.response?.data;
   }
-}
+};
 
 /**
  * Get profile user by ID
@@ -81,9 +84,9 @@ export const getProfileUserApi = async (profileId, accessToken) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-    })
-    return response.data
+    });
+    return response.data;
   } catch (error) {
-    return error?.response?.data
+    return error?.response?.data;
   }
-}
+};

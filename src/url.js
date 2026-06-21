@@ -8,7 +8,6 @@ const ROUTES = {
   SHIKSHALOKAM_GUEST_MI_STORY: "/guest-mi",
   SHIKSHALOKAM_GUEST_PAGE: "/flow",
   SHIKSHALOKAM_GUEST_VOICE_CHAT: "/guest-chat",
-  SHIKSHALOKAM_PPPI_VOICE_CHAT: "/survey-chat",
   SHIKSHALOKAM_HOME_PAGE: "/home",
   SHIKSHALOKAM_PTM_CHAT_PAGE: "/ptm/chat",
   SHIKSHALOKAM_PTM_HOME_PAGE: "/ptm/start",
@@ -19,6 +18,7 @@ const ROUTES = {
   SSO_FLOW: "/sso",
   TERMS_AND_CONDITIONS: "/tnc",
   SHIKSHAGRAHA_REPOSITORY_MITRA_AI_ASSISTANT: "/create-profile/mitra-chat",
-}
+  AP_SCHOOL_SURVEY: "/school-survey",
+};
 
-export default ROUTES
+export default ROUTES;

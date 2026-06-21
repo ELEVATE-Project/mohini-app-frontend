@@ -16,7 +16,7 @@
   "reDownloadStoryText": "ಕಥೆಯನ್ನು ಮರುನಿರ್ಮಿಸು",
   "reDownloadReportText": "ವರದಿಯನ್ನು ಪುನರುತ್ಪಾದಿಸಿ",
   "editStoryText": "ಕಥೆಯನ್ನು ತಿದ್ದೀರಿ",
-  "editReportText": "ವರದಿಯನ್ನು ತಿದ್ದೀರಿ",
+  "editReportText": "ವರದಿಯನ್ನು ಸಂಪಾದಿಸಿ",
   "storyLoaderHeading": "ಈ ಸುಧಾರಣಾ ಪ್ರಯಾಣದಲ್ಲಿ ನಿಮ್ಮ ಅನುಭವಗಳನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.",
   "storyGuestLoaderHeading": "ಧನ್ಯವಾದಗಳು! ನೀವು ಹಂಚಿಕೊಂಡ ವಿಷಯಗಳ ಆಧಾರದ ಮೇಲೆ ಸುಧಾರಣೆಯ ಕಥೆಯನ್ನು ತಯಾರಿಸಲಾಗುತ್ತಿದೆ.",
   "reportLoaderHeading": "ನಿಮ್ಮ ಚರ್ಚೆಯ ವಿವರಗಳನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.",
@@ -25,7 +25,7 @@
   "downloadLoader": "ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ...",
   "homepageHeading": "ಸೂಕ್ಷ್ಮ ಸುಧಾರಣಾ ವರದಿ",
   "homepageHeading1": "ಮಿತ್ರ ಜೊತೆ!",
-  "homepageList": "ಕೆಳಗೆ ಮಿತ್ರ ಜೊತೆ ಚಾಟ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿ",
+  "homepageList": "ಕೆಳಗೆ ಶಾಲಾ ಸಮೀಕ್ಷಾ ಬಾಟ್ ಜೊತೆ ಚಾಟ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿ",
   "homepageList1": "ನಿಮ್ಮ ವರದಿಗೆ ಫೋಟೋಗಳನ್ನು ಸೇರಿಸಿ",
   "homepageList2": "ನಿಮ್ಮ ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
   "placeholder1": "ಆಲಿಸುತ್ತಿದ್ದೇನೆ... ಈಗ ಮಾತನಾಡಿ",
@@ -67,7 +67,7 @@
   "onlineNetwork": "ನೀವು ಮರುಬಂದಿದ್ದೀರಿ.",
   "languageQuestion": "ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
   "welcome_paragraph1": "ಮಿತ್ರಾ ಒಂದು ಬಹುಭಾಷಾ, AI-ಚಾಲಿತ, ಧ್ವನಿ-ಸಕ್ರಿಯಗೊಳಿಸಿದ ಚಾಟ್‌ಬಾಟ್ ಆಗಿದ್ದು, ಇದು ಶಿಕ್ಷಣ ನಾಯಕರು - ಶಿಕ್ಷಕರು, ಶಾಲಾ ನಾಯಕರು, ಸಮುದಾಯ ಸದಸ್ಯರು, ಪೋಷಕರು ಮತ್ತು ಯುವ ನಾಯಕರು - ತಮ್ಮ ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಪ್ರಯಾಣವನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲು ಮತ್ತು ಹಂಚಿಕೊಳ್ಳಲು ಅಧಿಕಾರ ನೀಡುತ್ತದೆ.",
-  "welcome_heading1": "ಮಿತ್ರ: ಧ್ವನಿಗಳ ಪಸರಣೆ , ಪ್ರಭಾವಗಳ ಕ್ರೋಢೀಕರಣೆ",
+  "welcome_heading1": "ಧ್ವನಿಗಳ ಪಸರಣೆ , ಪ್ರಭಾವಗಳ ಕ್ರೋಢೀಕರಣೆ",
   "welcome_text": "ಸ್ವಾಗತ",
   "commonPageSelectionText": "ನೀವು ಇಂದು ಏನು ಮಾಡಲು ಬಯಸುತ್ತೀರಿ?",
   "loginBtnText": "ಲಾಗಿನ್/ಸೈನ್ ಅಪ್",
@@ -90,7 +90,7 @@
   "challengesHeader": "ಸವಾಲುಗಳು",
   "solutionsHeader": "ಪರಿಹಾರಗಳು",
   "photosLimitMsg": "ನೀವು ಗರಿಷ್ಠ 10 ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಬಹುದು.",
-  "pageLogo": "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/Shikshagraha/PDF Logo/Kannada Horizontal.png",
+  "pageLogo": "logo.jpeg",
   "continueBtnText": "ಮುಂದುವರಿಯಿರಿ",
   "commonPageButtonText1": "ಸುಧಾರಣೆ ಕಥೆ ಹಂಚಿಕೊಳ್ಳಿ",
   "commonPageButtonText2": "ಚರ್ಚೆ ದಾಖಲಿಸಿ",
@@ -101,5 +101,6 @@
   "ptmIntroductionDescriptionLine1": "ಮಿತ್ರದೊಂದಿಗೆ ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ",
   "ptmIntroductionDescriptionLine2": "ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ನಿಮ್ಮ ಆಲೋಚನೆಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ.",
   "ptmIntroductionDescriptionLine3": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಸಲ್ಲಿಸಿ",
-  "filesUploadedMessage": "ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ"
+  "filesUploadedMessage": "ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
+  "flowCompletionReturn": "ಹಿಂದೆ ಹೋಗಿ"
 }

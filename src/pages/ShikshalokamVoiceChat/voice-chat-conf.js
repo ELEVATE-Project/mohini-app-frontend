@@ -2,13 +2,13 @@ import "../../style.css";
 import "./shikshaChatStyle.css";
 import { AiOutlineEye } from "react-icons/ai";
 import { BiLoader } from "react-icons/bi";
-import { bot_routes } from "../../configure";
 import { buildWebSocketUrl } from "utils/helpers";
 import { clearFromStorage, handleS3Upload } from "../../services/storage_service";
 import { createMessage } from "../interview-voice";
 import { createStoryMediaApi, getStoryAllMedia, partialUpdateStoryById } from "api/endpoints/story";
 import { createUserProfileApi, getProfileUserApi } from "api/endpoints/user";
 import { FiDownload } from "react-icons/fi";
+import { FLOW_CONFIG_V2, getRouteFromSession, getStringVariables, processStringSubstitution } from "../../config/flowConfig";
 import { getChatSessionApi } from "api/endpoints/chat";
 import { getCompanyBotApi } from "api/endpoints/chat";
 import { getSessionDetails } from "../../services/api.service";
@@ -52,6 +52,7 @@ import remarkGfm from "remark-gfm";
 import ReportEditor from "components/ReportEditor";
 import ROUTES from "../../url";
 import Sidebar from "./shikshaChatSidebar";
+import Swal from "sweetalert2";
 import UploadImages from "./upload-images";
 import useCustomMediaQuery from "hooks/useCustomMediaQuery";
 import useSmartChatStorage from "hooks/useSmartChatStorage";
@@ -63,8 +64,8 @@ import WaveSurferPlayer from "../interview-text-voice/voice-player";
 const cookies = new Cookies();
 
 // TODO: After testing, revert this to the original code
-// const wss_protocol = window.location.protocol === "https:" ? "wss://" : "ws://"
-const wss_protocol = "ws://";
+const wss_protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+// const wss_protocol = "wss://";
 
 const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   // ========== useState Hooks ==========
@@ -116,9 +117,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const [companySlug, setCompanySlug] = useState("");
   const [error, setError] = useState({ response: "", status: 200 });
   const [visibleItemCount, setVisibleItemCount] = useState(10);
-  // const [showHomepage, setShowHomepage] = useState(true)
-  // const [isReconnectInProgress, setIsReconnectInProgress] = useState(false);
-  // const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
   // ========== useRef Hooks ==========
   const lastBotMessageIndex = useRef(-1);
@@ -251,7 +249,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   const isSpecialFlow = useMemo(() => {
     if (!storageFlow) return false;
-    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory].includes(storageFlow);
+    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.SchoolSurvey].includes(storageFlow);
   }, [storageFlow]);
 
   const shouldFetchChatSession = useMemo(() => {
@@ -447,6 +445,37 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       }
     }
   };
+
+  function showCompletionPopupFn() {
+    Swal.fire({
+      title: t(FLOW_CONFIG_V2[storageFlow].completionMessageKey),
+      showCancelButton: false,
+      confirmButtonText: t(FLOW_CONFIG_V2[storageFlow].completionCTAKey),
+      showCloseButton: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+      imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+      imageHeight: "100",
+    }).then(result => {
+      if (result.isConfirmed) {
+        
+
+        // For School Survey flow, navigate back
+        if (storageFlow === sessionFlowName.SchoolSurvey) {
+          clearFromStorage();
+          navigate(-3);
+        } else {
+          // For other flows, keep existing behavior
+          clearFromStorage();
+          window.location.reload();
+          setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
+          setHasSelectedLanguage(false);
+          stopAllAudio();
+          window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE + "?flow=" + storageFlow);
+        }
+      }
+    });
+  }
 
   /**
    * Transforms chat data from API into sentences and chat history format
@@ -874,7 +903,6 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           clearFromStorage();
           navigateSsoFlow(ssoRerouteURL);
         } else {
-          console.log("navigating to login page");
           navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN);
         }
       }
@@ -917,8 +945,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   useEffect(() => {
     if (!profileToUse) setCompanySlug("shikshalokamstaging");
-    const profile = getProfileUserApi(profileToUse, accessToken);
-    setCompanySlug(profile?.company?.slug);
+    getProfileUserApi(profileToUse, accessToken);
+    // setCompanySlug(profile?.company?.slug);
   }, [profileToUse]);
 
   /**
@@ -1006,13 +1034,11 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         } else {
           navigate(ROUTES.EXIT_ROUTE);
           clearFromStorage();
-          console.log("navigating to on api fail");
           navigate(-1);
         }
       } catch (error) {
         console.error(error);
         clearFromStorage();
-        console.log("navigating to on api fail");
         navigate(-1);
       } finally {
         setIsLoading(false);
@@ -1071,6 +1097,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         setShouldFetchIntro(true);
         setShowHomepage(false);
       } else if (isNewChatOpen === true) {
+        // setShowHomepage(showHomepage !== null ? showHomepage : true);
         setShowHomepage(true);
       }
     } else {
@@ -1207,7 +1234,12 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    */
   useEffect(() => {
     if (isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && noStoryFound && (!llmError || llmError === "") && acceptedTnc && acceptedTnc !== "ONGOING") {
-      callEndStory();
+      if (FLOW_CONFIG_V2[storageFlow].postChatConfig.generateStory) {
+        callEndStory();
+      } else {
+        // setShowHomepage(showHomepage !== null ? showHomepage : true);
+        showCompletionPopupFn();
+      }
     }
   }, [isStreamingComplete, strandStep, accessToken, stateMachineLength, languageToUse, noStoryFound]);
 
@@ -1834,6 +1866,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
     setLanguage(LANGUAGE_ENUMS.ENGLISH);
     setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
     setHasSelectedLanguage(false);
+    // navigate(ROUTES.SHIKSHALOKAM_GUEST_PAGE)
+    // navigate("/", { replace: true });
     if (rerouteUrl && rerouteUrl !== null && rerouteUrl !== undefined && rerouteUrl !== "") {
       window.location.href = rerouteUrl;
     } else {
@@ -2042,41 +2076,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   function getSessionRoute() {
     const currentFlow = storageFlow;
-    console.log("Current Flow:", currentFlow);
-    console.log("Is the flow equal", currentFlow === sessionFlowName.ListeningActivity);
-
-    // Configuration mapping flow names to bot routes
-    const flowToRouteMap = {
-      [sessionFlowName.GuestDiscussion]: bot_routes.shikshalokam_chaupal,
-      [sessionFlowName.LoginDiscussion]: bot_routes.shikshalokam_chaupal,
-      [sessionFlowName.ListeningActivity]: bot_routes.listening_activity,
-    };
-
-    const typeBasedRouteMap = {
-      normal: {
-        [sessionFlowName.LoginMiStory]: bot_routes.normal,
-        [sessionFlowName.GuestMiStory]: bot_routes.guest_normal,
-      },
-      oneshot: {
-        [sessionFlowName.LoginMiStory]: bot_routes.oneshot,
-        [sessionFlowName.GuestMiStory]: bot_routes.guest_oneshot,
-      },
-    };
-
-    // Check direct flow mapping first
-    if (currentFlow && flowToRouteMap[currentFlow]) {
-      return flowToRouteMap[currentFlow];
-    }
-
-    // Check type-based mapping
-    const routeMap = selectedType === "normal" ? typeBasedRouteMap.normal : typeBasedRouteMap.oneshot;
-
-    if (currentFlow && routeMap[currentFlow]) {
-      return routeMap[currentFlow];
-    }
-
-    // Default route
-    return bot_routes.reflection;
+    return getRouteFromSession(currentFlow, selectedType);
   }
 
   // ========================================================================
@@ -2773,20 +2773,36 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
                   const isListening = [sessionFlowName.ListeningActivity].includes(storageFlow);
                   const prefix = isListening ? "la_" : "";
 
+                  let chatHeading = FLOW_CONFIG_V2[storageFlow].chatHeading;
+                  let chatDescription = FLOW_CONFIG_V2[storageFlow].chatDescription;
+
+                  const headingVariables = getStringVariables(chatHeading).map(val => {
+                    return val.slice(1, -1);
+                  });
+
+                  if (!headingVariables || headingVariables.length === 0) chatHeading = undefined;
+                  else {
+                    headingVariables.forEach(variable => {
+                      chatHeading = processStringSubstitution(chatHeading, { [variable]: t(`${variable}`) });
+                    });
+                  }
+
+                  const descriptionVariables = getStringVariables(chatDescription)?.map(val => {
+                    return val.slice(1, -1);
+                  });
+
+                  if (descriptionVariables && descriptionVariables.length > 0) {
+                    descriptionVariables.forEach(variable => {
+                      chatDescription = processStringSubstitution(chatDescription, { [variable]: t(`${prefix}${variable}`) });
+                    });
+                  }
+
                   return (
                     <>
                       <div className="div10">
-                        <h3 className="h3-1">
-                          {t(`${prefix}homepageHeading`)}
-                          <br />
-                          {t(`${prefix}homepageHeading1`)}
-                        </h3>
+                        <h3 className="h3-1 whitespace-pre-line">{chatHeading && t(`${chatHeading}`)}</h3>
                       </div>
-                      <ul className="div11">
-                        <li>{t(`${prefix}homepageList`)}</li>
-                        <li>{t(`${prefix}homepageList1`)}</li>
-                        <li>{t(`${prefix}homepageList2`)}</li>
-                      </ul>
+                      <div className="div11 whitespace-pre-line">{chatDescription}</div>
                     </>
                   );
                 })()}

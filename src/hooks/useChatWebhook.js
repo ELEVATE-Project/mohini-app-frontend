@@ -1,102 +1,97 @@
-import { useRef, useState, useCallback, useEffect } from "react"
+import { useRef, useState, useCallback, useEffect } from "react";
 
 export const useChatWebhook = (url, options = {}) => {
-  const { onFinalReconnectAttempt, onOpen, onMessage, onError, onClose, reconnect = true, reconnectInterval = 3000, reconnectAttempts = 5, autoConnect = true } = options
+    const {
+        onOpen,
+        onMessage,
+        onError,
+        onClose,
+        reconnect = true,
+        reconnectInterval = 3000,
+        reconnectAttempts = 5,
+    } = options;
 
-  const ws = useRef(null)
-  const reconnectCount = useRef(1)
-  const reconnectTimeout = useRef(null)
-  const socketQueue = useRef([])
+    const ws = useRef(null);
+    const reconnectCount = useRef(0);
+    const reconnectTimeout = useRef(null);
 
-  const [isConnected, setIsConnected] = useState(false)
+    const [isConnected, setIsConnected] = useState(false);
 
-  const connect = useCallback(() => {
-    if (!url) return
+    const connect = useCallback(() => {
+        if (!url) return;
 
-    if (ws.current && (ws.current.readyState === WebSocket.CONNECTING || ws.current.readyState === WebSocket.OPEN)) {
-      return
-    }
+        try {
+            ws.current = new WebSocket(url);
 
-    try {
-      ws.current = new WebSocket(url)
+            ws.current.onopen = (event) => {
+                setIsConnected(true);
+                reconnectCount.current = 0;
+                if (onOpen) onOpen(event);
+            };
 
-      ws.current.onopen = event => {
-        setIsConnected(true)
-        if (socketQueue.current.length) {
-          socketQueue.current.forEach(message => {
-            ws.current.send(typeof message === "string" ? message : JSON.stringify(message))
-          })
-          socketQueue.current = []
+            ws.current.onmessage = (event) => {
+                if (onMessage) onMessage(event);
+            };
+
+            ws.current.onerror = (event) => {
+                if (onError) onError(event);
+            };
+
+            ws.current.onclose = (event) => {
+                setIsConnected(false);
+                if (onClose) onClose(event);
+
+                // Reconnect logic
+                if (reconnect && reconnectCount.current < reconnectAttempts) {
+                reconnectTimeout.current = setTimeout(() => {
+                    reconnectCount.current++;
+                    connect();
+                }, reconnectInterval);
+                }
+            };
+        } catch (error) {
+            console.error('WebSocket connection error:', error);
         }
-        socketQueue.current = []
-        // reconnectCount.current = 0
-        if (onOpen) onOpen(event)
-      }
+    }, [url, onOpen, onMessage, onError, onClose, reconnect, reconnectInterval, reconnectAttempts]);
 
-      ws.current.onmessage = event => {
-        if (onMessage) onMessage(event)
-      }
-
-      ws.current.onerror = event => {
-        if (onError) onError(event)
-      }
-
-      ws.current.onclose = event => {
-        setIsConnected(false)
-        if (onClose) onClose(event)
-
-        // Reconnect logic
-        if (reconnect && reconnectCount.current < reconnectAttempts) {
-          reconnectCount.current = reconnectCount.current + 1
-          reconnectTimeout.current = setTimeout(() => {
-            connect()
-          }, reconnectInterval)
-        } else if (reconnectCount.current >= reconnectAttempts) {
-          if (onFinalReconnectAttempt) onFinalReconnectAttempt()
+    const disconnect = useCallback(() => {
+        if (reconnectTimeout.current) {
+            clearTimeout(reconnectTimeout.current);
         }
-      }
-    } catch (error) {
-      console.error("WebSocket connection error:", error)
-    }
-  }, [url, onOpen, onMessage, onError, onClose, reconnect, reconnectInterval, reconnectAttempts])
+        if (ws.current) {
+            ws.current.close();
+        }
+    }, []);
 
-  const disconnect = useCallback(() => {
-    if (reconnectTimeout.current) {
-      clearTimeout(reconnectTimeout.current)
-    }
-    if (ws.current) {
-      ws.current.close()
-    }
-  }, [])
 
-  const sendMessage = useCallback(message => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(typeof message === "string" ? message : JSON.stringify(message))
-      return true
-    } else if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
-      socketQueue.current.push(message)
-    }
-    return false
-  }, [])
+    const sendMessage = useCallback((message) => {
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            ws.current.send(typeof message === 'string' ? message : JSON.stringify(message));
+            return true;
+        }
+        return false;
+    }, []);
 
-  useEffect(() => {
-    reconnectCount.current = 0
-    if (autoConnect) connect()
+    useEffect(() => {
+        connect();
 
-    return () => {
-      if (reconnectTimeout.current) {
-        clearTimeout(reconnectTimeout.current)
-      }
-      if (ws.current) {
-        ws.current.close()
-      }
-    }
-  }, [connect])
+        return () => {
+            if (reconnectTimeout.current) {
+                clearTimeout(reconnectTimeout.current);
+            }
+            if (ws.current) {
+                ws.current.close();
+            }
+        };
+    }, [connect]);
 
-  return {
-    isConnected,
-    sendMessage,
-    connect,
-    disconnect,
-  }
-}
+
+    return {
+        isConnected,
+        sendMessage,
+        connect,
+        disconnect,
+    };
+
+
+};

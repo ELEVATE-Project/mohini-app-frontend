@@ -1,125 +1,120 @@
-import { useEffect, useMemo } from "react"
-import { LANGUAGE_ENUMS, sessionFlowName } from "pages/ShikshalokamVoiceChat/enum"
+import { useEffect, useMemo } from "react";
+import { LANGUAGE_ENUMS, sessionFlowName } from "pages/ShikshalokamVoiceChat/enum";
 
 // Custom Hooks
-import { useLanguage } from "../../hooks/useLanguage"
-import { useAudio } from "../../hooks/useAudio"
-import { useFlow } from "../../hooks/useFlow"
-import { useSearchParams, useNavigate } from "react-router-dom"
-import { SESSION_USECASE_TYPE } from "constants/session"
+import { useLanguage } from "../../hooks/useLanguage";
+import { useAudio } from "../../hooks/useAudio";
+import { useFlow } from "../../hooks/useFlow";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { SESSION_USECASE_TYPE } from "constants/session";
 
 // Components
-import LanguageSelectionGrid from "../../components/LanguageSelectionGrid"
-import Header from "../../components/Header"
-import FlowSelection from "../../components/FlowSelection"
-import LoadingSpinner from "../../components/LoadingSpinner"
-import ROUTES from "url"
-import { useChatStorage, useSiteStorage } from "hooks/useStorage"
-import { useSiteDataLocalStore } from "store"
+import LanguageSelectionGrid from "../../components/LanguageSelectionGrid";
+import Header from "../../components/Header";
+import FlowSelection from "../../components/FlowSelection";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import ROUTES from "url";
+import { useChatStorage, useSiteStorage } from "hooks/useStorage";
+import { useSiteDataLocalStore } from "store";
 
 // Styles
-import "../../components/custom-style.css"
-import "../../index.css"
-import "./commonPageStyle.css"
+import "../../components/custom-style.css";
+import "../../index.css";
+import "./commonPageStyle.css";
+import { FLOW_TO_WEB_ROUTE_MAP } from "../../config/flowConfig";
 
 function CommonHomePage({ usecaseType }) {
-  const ptm_case = [SESSION_USECASE_TYPE.MEGA_PTM].some(x => x === usecaseType)
-  const ylc_case = [SESSION_USECASE_TYPE.YLC].some(x => x === usecaseType)
+  const ptm_case = [SESSION_USECASE_TYPE.MEGA_PTM].some(x => x === usecaseType);
+  const ylc_case = [SESSION_USECASE_TYPE.YLC].some(x => x === usecaseType);
 
   // Custom hooks
-  const chatLanguage = useSiteDataLocalStore(state => state.chatLanguage)
-  const storageFlow = useChatStorage()(state => state.flow)
-  const setFlow = useChatStorage()(state => state.setFlow)
-  const hasSelectedLanguage = useSiteDataLocalStore(state => state.hasSelectedLanguage)
-  const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage)
-  const { languageButtonSelect, handleLanguageChange } = useLanguage()
-  const { audioRef, stopAudioTriggered, setStopAudioTriggered, stopAllAudio } = useAudio()
-  const { isLoading, setIsLoading, handleFlowSelection } = useFlow(usecaseType)
+  const chatLanguage = useSiteDataLocalStore(state => state.chatLanguage);
+  const setFlow = useChatStorage()(state => state.setFlow);
+  const hasSelectedLanguage = useSiteDataLocalStore(state => state.hasSelectedLanguage);
+  const setChatLanguage = useSiteDataLocalStore(state => state.setChatLanguage);
+  const { languageButtonSelect, handleLanguageChange } = useLanguage();
+  const { audioRef, stopAudioTriggered, setStopAudioTriggered, stopAllAudio } = useAudio();
+  const { isLoading, setIsLoading, handleFlowSelection } = useFlow(usecaseType);
 
-  const navigate = useNavigate()
-  const setPreviousUrl = useSiteStorage()(state => state.setPreviousUrl)
+  const navigate = useNavigate();
+  const setPreviousUrl = useSiteStorage()(state => state.setPreviousUrl);
 
-  const [searchParams] = useSearchParams()
-  const urlLanguage = useMemo(() => searchParams.get("language"), [searchParams])
-  const urlFlow = useMemo(() => searchParams.get("flow"), [searchParams])
+  const [searchParams] = useSearchParams();
+  const urlLanguage = useMemo(() => searchParams.get("language"), [searchParams]);
+  const urlFlow = useMemo(() => searchParams.get("flow"), [searchParams]);
 
   // Check if it's PTM use case
-  const isPTMCase = ptm_case || ylc_case
-  const shouldShowLanguageGrid = !urlLanguage && !hasSelectedLanguage
-  const shouldShowFlowSelection = !urlFlow && !isPTMCase
+  const isPTMCase = ptm_case || ylc_case;
+  const shouldShowLanguageGrid = !urlLanguage && !hasSelectedLanguage;
+  const shouldShowFlowSelection = !urlFlow && !isPTMCase;
 
   useEffect(() => {
     if (urlFlow && Object.values(sessionFlowName).includes(urlFlow)) {
-      setFlow(urlFlow)
+      setFlow(urlFlow);
     }
-  }, [urlFlow])
+  }, [urlFlow]);
 
   // Initialize language and flow processing
   useEffect(() => {
-    if (chatLanguage) return
+    if (chatLanguage) return;
 
     if (!urlLanguage && !languageButtonSelect) {
-      setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
+      setChatLanguage(LANGUAGE_ENUMS.ENGLISH);
     }
-  }, [chatLanguage])
+  }, [chatLanguage]);
 
   useEffect(() => {
-    if (!hasSelectedLanguage) return
+    if (!hasSelectedLanguage) return;
     const ROUTE_MAP = {
       [SESSION_USECASE_TYPE.MEGA_PTM]: ROUTES.SHIKSHALOKAM_PTM_CHAT_PAGE,
       [SESSION_USECASE_TYPE.YLC]: ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE,
-    }
+    };
 
     const FLOW_MAP = {
       [SESSION_USECASE_TYPE.MEGA_PTM]: sessionFlowName.megaPTM,
       [SESSION_USECASE_TYPE.YLC]: sessionFlowName.YLC,
-    }
+    };
 
     if (ROUTE_MAP[usecaseType]) {
-      setFlow(FLOW_MAP[usecaseType])
-      navigate(ROUTE_MAP[usecaseType])
+      setFlow(FLOW_MAP[usecaseType]);
+      navigate(ROUTE_MAP[usecaseType]);
     }
-  }, [])
+  }, []);
 
   // Process language selection
   useEffect(() => {
     // Don't process if user hasn't selected a language (and no URL language) or if no flow is specified
     if ((!urlLanguage && !hasSelectedLanguage) || !urlFlow) {
-      setIsLoading(false)
-      return
+      setIsLoading(false);
+      return;
     }
 
-    setPreviousUrl(window.location.href)
-    console.log("previousUrl", window.location.href)
+    setPreviousUrl(window.location.href);
+    console.log("previousUrl", window.location.href);
 
     if (ptm_case) {
-      console.log("Navigating to PTM chat")
-      return navigate(ROUTES.SHIKSHALOKAM_PTM_CHAT_PAGE)
+      console.log("Navigating to PTM chat");
+      return navigate(ROUTES.SHIKSHALOKAM_PTM_CHAT_PAGE);
     } else if (ylc_case) {
-      console.log("Navigating to YLC chat")
-      return navigate(ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE)
+      console.log("Navigating to YLC chat");
+      return navigate(ROUTES.SHIKSHALOKAM_YLC_CHAT_PAGE);
     }
 
-    const flowRoutes = {
-      [sessionFlowName.GuestMiStory]: ROUTES.SHIKSHALOKAM_GUEST_MI_STORY,
-      [sessionFlowName.GuestDiscussion]: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT,
-      [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
-      [sessionFlowName.ParentPerceptionSurvey]: ROUTES.SHIKSHALOKAM_PPPI_VOICE_CHAT,
-    }
+    const flowRoutes = FLOW_TO_WEB_ROUTE_MAP;
 
-    const route = flowRoutes[urlFlow]
+    const route = flowRoutes[urlFlow];
     if (route) {
-      return navigate(route)
+      return navigate(route);
     }
-  }, [chatLanguage, urlLanguage, urlFlow, hasSelectedLanguage])
+  }, [chatLanguage, urlLanguage, urlFlow, hasSelectedLanguage]);
 
   useEffect(() => {
-    handleLanguageChange(chatLanguage, audioRef, stopAllAudio, setStopAudioTriggered)
-  }, [chatLanguage])
+    handleLanguageChange(chatLanguage, audioRef, stopAllAudio, setStopAudioTriggered);
+  }, [chatLanguage]);
 
   const onFlowContinue = () => {
-    return handleFlowSelection(stopAllAudio)
-  }
+    return handleFlowSelection(stopAllAudio);
+  };
 
   // Updated render conditions
   return (
@@ -135,14 +130,15 @@ function CommonHomePage({ usecaseType }) {
         <div className="bg-slate-50 sm:pt-6 sm:h-[100%] flex flex-col justify-center mt-0 w-full">
           <div className="flex justify-end mr-6 relative block sm:hidden"></div>
 
-          {shouldShowLanguageGrid ? <LanguageSelectionGrid usecaseType={usecaseType} /> : shouldShowFlowSelection ? <FlowSelection audioRef={audioRef} stopAudioTriggered={stopAudioTriggered} setStopAudioTriggered={setStopAudioTriggered} onFlowContinue={onFlowContinue} setIsLoading={setIsLoading} /> : null}
+          {shouldShowLanguageGrid && <LanguageSelectionGrid usecaseType={usecaseType} />}
+          {!shouldShowLanguageGrid && shouldShowFlowSelection && <FlowSelection audioRef={audioRef} stopAudioTriggered={stopAudioTriggered} setStopAudioTriggered={setStopAudioTriggered} onFlowContinue={onFlowContinue} setIsLoading={setIsLoading} />}
         </div>
       </div>
 
       {/* Loading Spinner */}
       <LoadingSpinner isVisible={isLoading} />
     </div>
-  )
+  );
 }
 
-export default CommonHomePage
+export default CommonHomePage;

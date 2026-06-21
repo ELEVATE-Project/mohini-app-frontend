@@ -1,14 +1,15 @@
-import { useChatStorage } from "./useStorage"
+import { useChatStorage } from "./useStorage";
+import { STORE_NAME_CONSTANTS } from "store/constants";
 
 const useSmartChatStorage = () => {
-  const chatHistory = useChatStorage()(state => state.chatHistory)
-  const { setChatHistory, getChatHistory } = useChatStorage().getState()
+  const chatHistory = useChatStorage()(state => state.chatHistory);
+  const setChatHistory = useChatStorage()(state => state.setChatHistory);
 
   const removeVal = () => {
-    setChatHistory([])
-  }
+    setChatHistory([]);
+  };
 
-  return [chatHistory, setChatHistory, removeVal, getChatHistory]
-}
+  return [chatHistory, setChatHistory, removeVal];
+};
 
 export default useSmartChatStorage

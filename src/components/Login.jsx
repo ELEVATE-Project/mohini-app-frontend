@@ -1,145 +1,145 @@
 /**
  * @deprecated
  */
-import { useState, useEffect } from "react"
-import { getSessionDetailsApi } from "../api/endpoints/chat"
-import { getProfileDetailsApi } from "../api/endpoints/user"
-import Cookies from "universal-cookie"
-import { useNavigate } from "react-router-dom"
-import { useUserDispatcher } from "../context/user"
-import { useLocalStorage } from "react-use"
-import USER_ACTIONS from "../context/user/user-actions"
-import FormData from "./Form/FormData"
-import ROUTES from "../url"
-import { BiLoader } from "react-icons/bi"
-import "./custom-style.css"
-import "../index.css"
-import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum"
-import { setLanguage } from "../i18n"
-import { useTranslation } from "react-i18next"
-import { clearFromStorage } from "../services/storage_service"
-import { loginApi } from "api/endpoints/auth"
-import { getLocationApi } from "api/endpoints/location"
+import { useState, useEffect } from "react";
+import { getSessionDetailsApi } from "../api/endpoints/chat";
+import { getProfileDetailsApi } from "../api/endpoints/user";
+import Cookies from "universal-cookie";
+import { useNavigate } from "react-router-dom";
+import { useUserDispatcher } from "../context/user";
+import { useLocalStorage } from "react-use";
+import USER_ACTIONS from "../context/user/user-actions";
+import FormData from "./Form/FormData";
+import ROUTES from "../url";
+import { BiLoader } from "react-icons/bi";
+import "./custom-style.css";
+import "../index.css";
+import { languageList, sessionFlowName } from "../pages/ShikshalokamVoiceChat/enum";
+import { setLanguage } from "../i18n";
+import { useTranslation } from "react-i18next";
+import { clearFromStorage } from "../services/storage_service";
+import { loginApi } from "api/endpoints/auth";
+import { getLocationApi } from "api/endpoints/location";
 
-const cookies = new Cookies()
+const cookies = new Cookies();
 
 function Login({ type, variant }) {
-  const navigate = useNavigate()
-  const [firstName, setFirstName] = useState("")
-  const [emailId, setEmailId] = useState("")
-  const [userLanguage, setUserLanguage] = useState("")
-  const [isChecked, setIsChecked] = useState(false)
+  const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+  const [emailId, setEmailId] = useState("");
+  const [userLanguage, setUserLanguage] = useState("");
+  const [isChecked, setIsChecked] = useState(false);
 
-  const [pageLanguage, setPageLanguage] = useState(JSON.parse(localStorage.getItem("local_route")) || languageList[0].value)
+  const [pageLanguage, setPageLanguage] = useState(JSON.parse(localStorage.getItem("local_route")) || languageList[0].value);
   const [userState, setUserState] = useState({
     key: "",
     value: "",
-  })
+  });
   const [userDistrict, setUserDistrict] = useState({
     key: "",
     value: "",
-  })
+  });
   const [userBlock, setUserBlock] = useState({
     key: "",
     value: "",
-  })
-  const [phoneNumberField, setPhoneNumberField] = useState("")
-  const [fieldError, setFieldError] = useState("")
-  const [loginErrorMessage, setLoginErrorMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const userDispatcher = useUserDispatcher()
-  const [, setLocalUserData] = useLocalStorage("grit", {})
-  const [, , removeLocalChatHistory] = useLocalStorage("chat-history", [])
+  });
+  const [phoneNumberField, setPhoneNumberField] = useState("");
+  const [fieldError, setFieldError] = useState("");
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const userDispatcher = useUserDispatcher();
+  const [, setLocalUserData] = useLocalStorage("grit", {});
+  const [, , removeLocalChatHistory] = useLocalStorage("chat-history", []);
 
-  const [stateLabelArray, setStateLabelArray] = useState([])
-  const [districtLabelArray, setDistrictLabelArray] = useState([])
-  const [blockLabelArray, setBlockLabelArray] = useState([])
+  const [stateLabelArray, setStateLabelArray] = useState([]);
+  const [districtLabelArray, setDistrictLabelArray] = useState([]);
+  const [blockLabelArray, setBlockLabelArray] = useState([]);
 
-  const { t } = useTranslation()
-
-  useEffect(() => {
-    clearFromStorage()
-  }, [])
+  const { t } = useTranslation();
 
   useEffect(() => {
-    getStateLabelValue()
-  }, [])
+    clearFromStorage();
+  }, []);
+
+  useEffect(() => {
+    getStateLabelValue();
+  }, []);
 
   const handlePageLanguageChange = e => {
-    setPageLanguage(e?.target?.value)
-    setLanguage(e?.target?.value)
-    localStorage.setItem("local_route", JSON.stringify(e?.target?.value))
-  }
+    setPageLanguage(e?.target?.value);
+    setLanguage(e?.target?.value);
+    localStorage.setItem("local_route", JSON.stringify(e?.target?.value));
+  };
 
   const handleLanguageChange = e => {
-    setUserLanguage(e.target.value)
-    localStorage.setItem("preferred_route", JSON.stringify(e?.target?.value))
+    setUserLanguage(e.target.value);
+    localStorage.setItem("preferred_route", JSON.stringify(e?.target?.value));
     // setLanguage(e.target.value)
-  }
+  };
 
   const handlePhoneChange = e => {
     if (e?.target?.value?.length <= 10) {
-      const numericInput = e?.target?.value?.replace(/[^0-9]/g, "")
-      setPhoneNumberField(numericInput)
+      const numericInput = e?.target?.value?.replace(/[^0-9]/g, "");
+      setPhoneNumberField(numericInput);
     }
-  }
+  };
 
   const handleStateChange = e => {
     setUserState({
       key: e?.target?.selectedOptions[0]?.text,
       value: e?.target?.value,
-    })
-    setDistrictLabelArray([])
-    setBlockLabelArray([])
-    getDistrictLabelValue(e?.target?.value)
+    });
+    setDistrictLabelArray([]);
+    setBlockLabelArray([]);
+    getDistrictLabelValue(e?.target?.value);
     setUserDistrict({
       key: "",
       value: "",
-    })
+    });
     setUserBlock({
       key: "",
       value: "",
-    })
-  }
+    });
+  };
 
   const handleDistrictChange = e => {
     setUserDistrict({
       key: e?.target?.selectedOptions[0]?.text,
       value: e?.target?.value,
-    })
-    setBlockLabelArray([])
-    getBlockLabelValue(e?.target?.value)
+    });
+    setBlockLabelArray([]);
+    getBlockLabelValue(e?.target?.value);
     setUserBlock({
       key: "",
       value: "",
-    })
-  }
+    });
+  };
 
   const handleBlockChange = e => {
     setUserBlock({
       key: e?.target?.selectedOptions[0]?.text,
       value: e?.target?.value,
-    })
-  }
+    });
+  };
 
   const handleEmailChange = e => {
-    setEmailId(e.target.value)
-  }
+    setEmailId(e.target.value);
+  };
 
   const handleNameChange = e => {
-    setFirstName(e.target.value)
-  }
+    setFirstName(e.target.value);
+  };
 
   const isValidIndianMobileNumber = number => {
-    const regex = /^(?!.*(\d)(\1{9}))[6-9]\d{9}$/
-    return regex.test(number)
-  }
+    const regex = /^(?!.*(\d)(\1{9}))[6-9]\d{9}$/;
+    return regex.test(number);
+  };
 
   const getStateLabelValue = async () => {
     try {
-      const response = await getLocationApi()
+      const response = await getLocationApi();
 
-      const list = response?.list
+      const list = response?.list;
 
       if (Array.isArray(list) && list.length > 0) {
         setStateLabelArray(
@@ -147,22 +147,22 @@ function Login({ type, variant }) {
             label: item?.name || "",
             value: item?.id || "",
           }))
-        )
+        );
       }
     } catch (error) {
-      console.error("Error fetching location data:", error)
+      console.error("Error fetching location data:", error);
     }
-  }
+  };
 
   const getDistrictLabelValue = async id => {
     try {
       if (!id) {
-        setDistrictLabelArray([])
-        return
+        setDistrictLabelArray([]);
+        return;
       }
-      const response = await getLocationApi(id)
+      const response = await getLocationApi(id);
 
-      const list = response?.list
+      const list = response?.list;
 
       if (Array.isArray(list) && list.length > 0) {
         setDistrictLabelArray(
@@ -170,24 +170,24 @@ function Login({ type, variant }) {
             label: item?.name || "",
             value: item?.id || "",
           }))
-        )
+        );
       } else {
-        setDistrictLabelArray([])
+        setDistrictLabelArray([]);
       }
     } catch (error) {
-      console.error("Error fetching location data:", error)
+      console.error("Error fetching location data:", error);
     }
-  }
+  };
 
   const getBlockLabelValue = async id => {
     try {
       if (!id) {
-        setBlockLabelArray([])
-        return
+        setBlockLabelArray([]);
+        return;
       }
-      const response = await getLocationApi(id)
+      const response = await getLocationApi(id);
 
-      const list = response?.list
+      const list = response?.list;
 
       if (Array.isArray(list) && list.length > 0) {
         setBlockLabelArray(
@@ -195,35 +195,35 @@ function Login({ type, variant }) {
             label: item?.name || "",
             value: item?.id || "",
           }))
-        )
+        );
       } else {
-        setBlockLabelArray([])
+        setBlockLabelArray([]);
       }
     } catch (error) {
-      console.error("Error fetching location data:", error)
+      console.error("Error fetching location data:", error);
     }
-  }
+  };
 
   const submitForm = async event => {
     try {
       if (!event.target.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-        return
+        event.preventDefault();
+        event.stopPropagation();
+        return;
       }
 
-      event.preventDefault()
-      setFieldError("")
+      event.preventDefault();
+      setFieldError("");
 
       if (phoneNumberField && !isValidIndianMobileNumber(phoneNumberField)) {
-        setFieldError("Please enter a valid phone number.")
+        setFieldError("Please enter a valid phone number.");
         setTimeout(() => {
-          setFieldError("")
-        }, 10000)
-        return
+          setFieldError("");
+        }, 10000);
+        return;
       }
-      const customEmail = phoneNumberField + "@shikshalokam.org"
-      const currentFlow = localStorage.getItem("flow")
+      const customEmail = phoneNumberField + "@shikshalokam.org";
+      const currentFlow = localStorage.getItem("flow");
 
       const body = {
         first_name: firstName,
@@ -240,69 +240,69 @@ function Login({ type, variant }) {
             district: userDistrict?.key,
           },
         ],
-      }
+      };
 
-      setIsLoading(true)
-      const res = await getProfileDetailsApi(body)
+      setIsLoading(true);
+      const res = await getProfileDetailsApi(body);
 
       if (res?.status === "error") {
-        setLoginErrorMessage(res?.message.slice(2, -2))
-        setIsLoading(false)
-        return
+        setLoginErrorMessage(res?.message.slice(2, -2));
+        setIsLoading(false);
+        return;
       }
-      let session = await getSessionDetailsApi()
-      localStorage.setItem("profileid", JSON.stringify(res.id))
-      localStorage.setItem("sessionid", JSON.stringify(session.sessionid))
-      localStorage.setItem("isNewChatOpen", JSON.stringify(true))
+      let session = await getSessionDetailsApi();
+      localStorage.setItem("profileid", JSON.stringify(res.id));
+      localStorage.setItem("sessionid", JSON.stringify(session.sessionid));
+      localStorage.setItem("isNewChatOpen", JSON.stringify(true));
 
       const response = await loginApi({
         email: phoneNumberField ? customEmail : emailId,
         password: "grit@123",
-      })
+      });
 
       if (!!response?.access_token) {
         userDispatcher({
           type: USER_ACTIONS.LOGIN,
           payload: response?.data,
-        })
-        localStorage.setItem("first_name", JSON.stringify(response?.first_name))
-        localStorage.setItem("accessToken", JSON.stringify(response?.access_token))
-        localStorage.setItem("company", JSON.stringify(response?.company))
-        localStorage.setItem("state", JSON.stringify(response?.state))
-        localStorage.setItem("flow", sessionFlowName.LoginMiStory)
-        localStorage.setItem("has_accepted_tnc", true)
+        });
+        localStorage.setItem("first_name", JSON.stringify(response?.first_name));
+        localStorage.setItem("accessToken", JSON.stringify(response?.access_token));
+        localStorage.setItem("company", JSON.stringify(response?.company));
+        localStorage.setItem("state", JSON.stringify(response?.state));
+        localStorage.setItem("flow", sessionFlowName.LoginMiStory);
+        localStorage.setItem("has_accepted_tnc", true);
         cookies.set("profileid", JSON.stringify(response?.id), {
           path: "/",
-        })
+        });
         cookies.set("accessToken", response?.access_token, {
           path: "/",
-        })
-        setLocalUserData(response)
+        });
+        setLocalUserData(response);
         // temp code (need to remove below later)
-        const lang = localStorage.getItem("preferred_route")
+        const lang = localStorage.getItem("preferred_route");
 
         if (lang) {
-          localStorage.setItem("route", lang)
-          setLanguage(JSON.parse(lang))
+          localStorage.setItem("route", lang);
+          setLanguage(JSON.parse(lang));
         }
         // temp code (need to remove above later)
 
-        navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT)
+        navigate(ROUTES.SHIKSHALOKAM_VOICE_CHAT);
       } else {
-        navigate("/login")
-        window.location.reload()
+        navigate("/login");
+        window.location.reload();
       }
 
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (e) {
-      console.log("Error in submitForm", e)
-      setIsLoading(false)
+      console.log("Error in submitForm", e);
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCheckboxChange = e => {
-    setIsChecked(e?.target?.checked)
-  }
+    setIsChecked(e?.target?.checked);
+  };
 
   return (
     <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 justify-center h-screen">
@@ -431,8 +431,8 @@ function Login({ type, variant }) {
                       href="/terms-and-conditions"
                       className="text-purple-600 hover:underline whitespace-nowrap"
                       onClick={e => {
-                        e.preventDefault()
-                        window.open("/mohini" + ROUTES.TERMS_AND_CONDITIONS, "_blank")
+                        e.preventDefault();
+                        window.open("/mohini" + ROUTES.TERMS_AND_CONDITIONS, "_blank");
                         // navigate(ROUTES.TERMS_AND_CONDITIONS);
                       }}
                     >
@@ -467,9 +467,7 @@ function Login({ type, variant }) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Login
-
-/* eslint-disable react-hooks/exhaustive-deps */
+export default Login;

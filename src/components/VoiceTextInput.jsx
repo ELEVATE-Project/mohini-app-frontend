@@ -123,19 +123,23 @@ const VoiceTextInput = ({ textMessage, onTextChange, onSubmit, hasStartedRecordi
               </div>
             )}
           </div>
-          {isTyping && !hasStartedListening && !isFetchingData ? (
+          {
+            // isTyping && (
+            // !hasStartedListening && !isFetchingData ? (
             <div className="button-container">
-              <button type="submit" disabled={hasStartedRecording || isFetchingData} className="button-6 sm:ml-[1.3rem] ml-[0.8rem]">
+              <button type="submit" disabled={!isTyping && (hasStartedRecording || isFetchingData)} className="button-6 sm:ml-[1.3rem] ml-[0.8rem]">
                 <MdSend />
               </button>
             </div>
-          ) : (
-            <div className={`audio-recorder ${isFetchingData ? "button-container" : ""}`}>
-              <button type="button" onClick={hasStartedRecording ? onStopRecording : onStartRecording} disabled={isFetchingData} className={`button-7 sm:ml-[1.3rem] ml-[0.8rem] ${hasStartedRecording ? "button-8" : "button-9"}`}>
-                {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
-              </button>
-            </div>
-          )}
+            // )
+            //      ) : (
+            //        <div className={`audio-recorder ${isFetchingData ? "button-container" : ""}`}>
+            //          <button type="button" onClick={hasStartedRecording ? onStopRecording : onStartRecording} disabled={isFetchingData} className={`button-7 sm:ml-[1.3rem] ml-[0.8rem] ${hasStartedRecording ? "button-8" : "button-9"}`}>
+            //            {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
+            //          </button>
+            //        </div>
+            // )
+          }
         </form>
       )}
     </>

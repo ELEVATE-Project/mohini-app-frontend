@@ -177,7 +177,8 @@ function ChatBox({
                   transcriptResult = await ai4BharatASRApi(
                     s3Url,
                     languageToUse,
-                    sessionRoute
+                    sessionRoute,
+                    sessionId
                   );
                 }
 

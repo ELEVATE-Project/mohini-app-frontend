@@ -81,13 +81,17 @@ export const readElevateProfile = async accessToken => {
     })
 }
 
-export async function getAI4BharatAudio(text, sourceLanguage = "en", storedRoute = bot_routes.normal) {
+export async function getAI4BharatAudio(text, sourceLanguage = "en", storedRoute = bot_routes.normal, sessionId = null, profileId = null) {
   try {
-    const response = await axiosInstance.post("api/text_to_speech/", {
+    const payload = {
       text: text,
       source_language: sourceLanguage,
       route: storedRoute,
-    })
+    }
+    if (sessionId) payload.sessionid = sessionId
+    if (profileId) payload.profileid = profileId
+
+    const response = await axiosInstance.post("api/text_to_speech/", payload)
 
     return response.data.audio
   } catch (error) {
@@ -96,13 +100,17 @@ export async function getAI4BharatAudio(text, sourceLanguage = "en", storedRoute
   }
 }
 
-export async function ai4BharatASR(base64, sourceLanguage = "en", storedRoute = bot_routes.normal) {
+export async function ai4BharatASR(base64, sourceLanguage = "en", storedRoute = bot_routes.normal, sessionId = null, profileId = null) {
   try {
-    const response = await axiosInstance.post("api/asr/", {
+    const payload = {
       s3Url: base64,
       source_language: sourceLanguage,
       route: storedRoute,
-    })
+    }
+    if (sessionId) payload.sessionid = sessionId
+    if (profileId) payload.profileid = profileId
+
+    const response = await axiosInstance.post("api/asr/", payload)
 
     return response.data.transcript
   } catch (error) {

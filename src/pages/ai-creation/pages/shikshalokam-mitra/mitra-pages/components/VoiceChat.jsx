@@ -135,7 +135,8 @@ const VoiceChat = () => {
               transcriptResult = await ai4BharatASRApi(
                 s3Url,
                 languageToUse,
-                storedRoute
+                storedRoute,
+                sessionId
               );
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({

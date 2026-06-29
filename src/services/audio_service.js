@@ -53,7 +53,7 @@ export const stopRecording = (setHasStartedRecording, mediaRecorder) => {
   }
 }
 
-export const handleAI4BharatTTSRequest = async (text, id, sourceLanguage = "en", audioCache, audioRef, setAudioCache, setIsPlaying, storedRoute) => {
+export const handleAI4BharatTTSRequest = async (text, id, sourceLanguage = "en", audioCache, audioRef, setAudioCache, setIsPlaying, storedRoute, sessionId = null, profileId = null) => {
   try {
     let cachedAudioUrl = audioCache && id in audioCache ? audioCache[id] : null
 
@@ -61,7 +61,7 @@ export const handleAI4BharatTTSRequest = async (text, id, sourceLanguage = "en",
     let audio
 
     if (!cachedAudioUrl) {
-      audio_result = await getAI4BharatAudioApi(text, sourceLanguage, storedRoute)
+      audio_result = await getAI4BharatAudioApi(text, sourceLanguage, storedRoute, sessionId, profileId)
       if (audio_result?.length) {
         cachedAudioUrl = `data:audio/wav;base64,${audio_result}`
         setAudioCache(prevCache => ({

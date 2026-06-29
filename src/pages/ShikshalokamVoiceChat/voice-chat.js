@@ -2453,7 +2453,7 @@ function handleLlmError(errorMessage, errorType) {
       }
 
       if (!cachedAudioUrl) {
-        audio_result = await getAI4BharatAudioApi(text, sourceLanguage, storedRoute)
+        audio_result = await getAI4BharatAudioApi(text, sourceLanguage, storedRoute, sessionId, profileToUse)
         if (audio_result?.length) {
           cachedAudioUrl = `data:audio/wav;base64,${audio_result}`
           setAudioCache(prevCache => ({
@@ -2614,7 +2614,7 @@ function handleLlmError(errorMessage, errorType) {
               }
               setAsrAudio(prev => [...prev, s3Url]) 
               let storedRoute = getSessionRoute()
-              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
+              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute, sessionId, profileToUse)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
                   message: t("asrError"),

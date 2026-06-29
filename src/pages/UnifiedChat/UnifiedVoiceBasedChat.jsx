@@ -786,7 +786,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                 transcriptResult = t("asrError")
               }
               setAsrAudio(s3Url)
-              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, FLOW_ROUTE)
+              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, FLOW_ROUTE, sessionId, profileId)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
                   message: t("asrError"),

@@ -1,7 +1,7 @@
 import { getAI4BharatAudioApi } from "api/endpoints/ai";
 import { bot_routes } from "configure";
 
-export const handleAI4BharatTTSRequest = async (text, id, language, audioCache, setAudioCache, audioRef, setIsBotTalking) => {
+export const handleAI4BharatTTSRequest = async (text, id, language, audioCache, setAudioCache, audioRef, setIsBotTalking, sessionId = null, profileId = null) => {
 
     try {
         let cachedAudioUrl = audioCache[id];
@@ -9,7 +9,7 @@ export const handleAI4BharatTTSRequest = async (text, id, language, audioCache, 
         let audio;
 
         if (!cachedAudioUrl) {
-            audio_result = await getAI4BharatAudioApi(text, language, bot_routes.mitra_create);
+            audio_result = await getAI4BharatAudioApi(text, language, bot_routes.mitra_create, sessionId, profileId);
             if (audio_result?.length) {
                 cachedAudioUrl = `data:audio/wav;base64,${audio_result}`;
                 setAudioCache((prevCache) => ({
@@ -28,7 +28,7 @@ export const handleAI4BharatTTSRequest = async (text, id, language, audioCache, 
                 setIsBotTalking(false);
             };
         } else {
-            audio_result = await getAI4BharatAudioApi(text, language, bot_routes.mitra_create);
+            audio_result = await getAI4BharatAudioApi(text, language, bot_routes.mitra_create, sessionId, profileId);
             if (audio_result?.length) {
                 cachedAudioUrl = `data:audio/wav;base64,${audio_result}`;
                 setAudioCache((prevCache) => ({

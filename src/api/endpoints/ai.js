@@ -9,13 +9,17 @@ import { bot_routes } from "../../configure"
  * @param {string} [storedRoute=bot_routes.normal] - Bot route configuration
  * @returns {Promise<string>} The audio data
  */
-export const getAI4BharatAudioApi = async (text, sourceLanguage = "en", storedRoute = bot_routes.normal) => {
+export const getAI4BharatAudioApi = async (text, sourceLanguage = "en", storedRoute = bot_routes.normal, sessionId = null, profileId = null) => {
   try {
-    const response = await apiClient.post(API_ENDPOINTS.TEXT_TO_SPEECH, {
+    const payload = {
       text: text,
       source_language: sourceLanguage,
       route: storedRoute,
-    })
+    }
+    if (sessionId) payload.sessionid = sessionId
+    if (profileId) payload.profileid = profileId
+
+    const response = await apiClient.post(API_ENDPOINTS.TEXT_TO_SPEECH, payload)
 
     return response.data.audio
   } catch (error) {
@@ -31,13 +35,17 @@ export const getAI4BharatAudioApi = async (text, sourceLanguage = "en", storedRo
  * @param {string} [storedRoute=bot_routes.normal] - Bot route configuration
  * @returns {Promise<string>} The transcript text
  */
-export const ai4BharatASRApi = async (base64, sourceLanguage = "en", storedRoute = bot_routes.normal) => {
+export const ai4BharatASRApi = async (base64, sourceLanguage = "en", storedRoute = bot_routes.normal, sessionId = null, profileId = null) => {
   try {
-    const response = await apiClient.post(API_ENDPOINTS.ASR, {
+    const payload = {
       s3Url: base64,
       source_language: sourceLanguage,
       route: storedRoute,
-    })
+    }
+    if (sessionId) payload.sessionid = sessionId
+    if (profileId) payload.profileid = profileId
+
+    const response = await apiClient.post(API_ENDPOINTS.ASR, payload)
 
     return response.data.transcript
   } catch (error) {
@@ -55,15 +63,19 @@ export const ai4BharatASRApi = async (base64, sourceLanguage = "en", storedRoute
  * @param {boolean} [detect_language=false] - Whether to detect language automatically
  * @returns {Promise<string>} The transliterated text
  */
-export const transliterateApiFunc = async (message, sourceLanguage = "en", targetLanguage = "en", storedRoute = bot_routes.shikshalokam_chaupal, detect_language = false) => {
+export const transliterateApiFunc = async (message, sourceLanguage = "en", targetLanguage = "en", storedRoute = bot_routes.shikshalokam_chaupal, detect_language = false, sessionId = null, profileId = null) => {
   try {
-    const response = await apiClient.post(API_ENDPOINTS.TEXT_TRANSLITERATE, {
+    const payload = {
       message_body: message,
       source_language: sourceLanguage,
       target_language: targetLanguage,
       route: storedRoute,
       detect_language: detect_language,
-    })
+    }
+    if (sessionId) payload.sessionid = sessionId
+    if (profileId) payload.profileid = profileId
+
+    const response = await apiClient.post(API_ENDPOINTS.TEXT_TRANSLITERATE, payload)
 
     const content = response.data?.transcript?.content
     if (Array.isArray(content)) {

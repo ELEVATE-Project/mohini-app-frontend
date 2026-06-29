@@ -160,7 +160,7 @@ export default function Filters() {
               }
               let storedRoute = bot_routes.search_bot
 
-              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
+              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute, sessionId)
               if (!transcriptResult || transcriptResult === "") {
                 showNotification({
                   message: t("asrError"),

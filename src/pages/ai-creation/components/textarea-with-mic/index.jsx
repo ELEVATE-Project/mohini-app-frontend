@@ -164,7 +164,8 @@ function TextareaWithVoice({
             const transcript = await ai4BharatASRApi(
               s3Url,
               languageToUse,
-              sessionRoute
+              sessionRoute,
+              sessionId
             );
 
             if (transcript) onChange(transcript, false);

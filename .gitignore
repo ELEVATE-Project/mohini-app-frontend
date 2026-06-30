@@ -29,3 +29,5 @@ yarn-error.log*
 downloads/
 test-results/
 playwright-report/
+
+env-config.js

@@ -2759,4 +2759,5 @@ function ChatMessage({ userType, message, name, recording, handleOnSpeaking, han
       </div>
     </div>
   )
+  
 }

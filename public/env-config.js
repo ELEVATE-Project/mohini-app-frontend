@@ -1,7 +1,8 @@
 // Placeholder runtime environment configuration.
-// Vite (unlike CRA/webpack) needs this file to physically exist so its HTML
-// build step treats the <script src="%BASE_URL%env-config.js"> reference in
-// index.html as a public/ passthrough asset rather than something to bundle.
+// Loaded dynamically by src/main.jsx before the app renders (not a static
+// <script> tag in index.html - see that file's comment for why). This
+// placeholder still needs to physically exist here so Vite's build step
+// copies it into build/ verbatim, same as CRA's public/ directory did.
 // On the Docker/nginx deploy path, scripts/generate-env-config.sh overwrites
 // this with real values at container start (see Dockerfile). The PM2/Ansible
 // path never invokes that script (confirmed - see

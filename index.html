@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Runtime Environment Configuration - Load this FIRST -->
-    <!-- type="module" required by Vite's build step for any local script src
-         (public/env-config.js exists as a placeholder so this resolves as a
-         public/ passthrough asset, not something Vite bundles/hashes -
-         window._env_ = {} needs no exports so module semantics are fine).
-         Root-relative, not %BASE_URL% - Vite resolves this against public/
-         pre-base-prefixing, then applies `base` to the final output URL
-         itself; combining both fails resolution. -->
-    <script type="module" src="/env-config.js"></script>
+    <!-- Runtime Environment Configuration is loaded dynamically in
+         src/main.jsx before the app renders, not as a static tag here -
+         see that file's comment for why (a static tag can't satisfy both
+         Vite's build-time and dev-server requirements at once). -->
 
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){

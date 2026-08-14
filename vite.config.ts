@@ -15,11 +15,11 @@ const srcRootAliases = Object.fromEntries(
   fs.readdirSync(srcDir).map(entry => [entry.replace(/\.[^.]+$/, ""), path.join(srcDir, entry)])
 )
 
-// Scaffolding for the Vite migration (Plan B in
-// .claude/brain/task/vite-migration-and-lazy-loading-plan.md). Coexists with the
-// CRA/react-scripts setup for now — nothing here replaces the existing
-// dev/build-* npm scripts, which still run react-scripts. See the plan doc's
-// Phase 0 audit for why these specific settings were chosen:
+// Vite migration (Plan B in .claude/brain/task/vite-migration-and-lazy-loading-plan.md).
+// package.json's dev/build-* scripts now run vite/vite build directly (Phase 4) -
+// react-scripts is still a dependency (only "eject" still uses it) but is no
+// longer the live build path. See the plan doc's Phase 0 audit for why these
+// specific settings were chosen:
 //   - base/PORT mirror CRA's homepage ("/mohini") and .env-cmdrc PORT values.
 //   - envPrefix keeps the existing REACT_APP_* var names working unchanged
 //     (Vault secrets, .env-cmdrc, and app code all reference REACT_APP_*;

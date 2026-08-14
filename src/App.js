@@ -2,19 +2,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { sessionFlowName } from "./constants/session"
 import { useRoutes, Navigate } from "react-router-dom"
 import { UserProvider } from "./context/user"
-import CommonHomePage from "./pages/Login/commonPage"
 import NotFound from "./pages/shikshagraha-repository/not-found"
-import PrivacyPage from "./pages/privacyPage"
-import React from "react"
+import React, { Suspense } from "react"
 import ROUTES from "./url"
-import ShikshagrahaRepository from "./pages/shikshagraha-repository/listing"
-import ShikshagrahaRepositoryDetail from "./pages/shikshagraha-repository/details"
-import ShikshalokamChat from "./pages/shikshalokamChat"
-import SsoFlow from "./pages/ssoFlow"
-import UnifiedChat from "./pages/UnifiedChat/UnifiedChat"
-import ChatContainer from "./pages/ShikshalokamVoiceChat/chat-container"
-import MainPage from "pages/ai-creation/pages/shikshalokam-mitra/MainPage"
-import ImprovementPlan from "pages/ai-creation/pages/improvement-plan"
+import LoadingSpinner from "./components/LoadingSpinner"
+
+// Route-level code splitting: these are only pulled into a chunk when their
+// route is actually visited, instead of all landing in one bundle. See
+// .claude/brain/task/vite-migration-and-lazy-loading-plan.md Plan A.
+const CommonHomePage = React.lazy(() => import("./pages/Login/commonPage"))
+const PrivacyPage = React.lazy(() => import("./pages/privacyPage"))
+const ShikshagrahaRepository = React.lazy(() => import("./pages/shikshagraha-repository/listing"))
+const ShikshagrahaRepositoryDetail = React.lazy(() => import("./pages/shikshagraha-repository/details"))
+const ShikshalokamChat = React.lazy(() => import("./pages/shikshalokamChat"))
+const SsoFlow = React.lazy(() => import("./pages/ssoFlow"))
+const UnifiedChat = React.lazy(() => import("./pages/UnifiedChat/UnifiedChat"))
+const ChatContainer = React.lazy(() => import("./pages/ShikshalokamVoiceChat/chat-container"))
+const MainPage = React.lazy(() => import("pages/ai-creation/pages/shikshalokam-mitra/MainPage"))
+const ImprovementPlan = React.lazy(() => import("pages/ai-creation/pages/improvement-plan"))
 
 const queryClient = new QueryClient()
 
@@ -23,7 +28,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UserProvider>{elements}</UserProvider>
+      <UserProvider>
+        <Suspense fallback={<LoadingSpinner isVisible={true} />}>{elements}</Suspense>
+      </UserProvider>
     </QueryClientProvider>
   )
 }

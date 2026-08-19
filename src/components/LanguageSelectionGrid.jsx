@@ -1,3 +1,4 @@
+import "../pages/ShikshalokamVoiceChat/shikshaChatStyle.css"
 import { API_ENDPOINTS, URL_PARAMS } from "../constants/urls"
 import { useChatStorage, useSiteStorage } from "hooks/useStorage"
 import { clearFromStorage } from "../services/storage_service"

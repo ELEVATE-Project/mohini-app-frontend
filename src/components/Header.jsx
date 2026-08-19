@@ -15,7 +15,16 @@ const Header = ({
 
   if (isDesktop) {
     return (
-      <>
+      // Single wrapping element - Header is rendered as a direct child of
+      // commonPage.jsx's `grid md:grid-cols-2` container, so a bare Fragment
+      // here would contribute TWO auto-placed grid items (this and
+      // LanguageSelector) instead of one, throwing off cell placement.
+      // LanguageSelector's `absolute top-6 right-6` still resolves against
+      // the grid container itself (grid containers are the containing block
+      // for absolutely-positioned descendants regardless of intervening
+      // non-positioned wrapper elements), so this wrapper doesn't need its
+      // own `relative`.
+      <div>
         {/* Desktop Language Selector */}
         <LanguageSelector
           // userLanguage={userLanguage}
@@ -36,7 +45,7 @@ const Header = ({
           </div>
           <img src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png" width="360" height="300" className="center-img custom-login-image" alt="" />
         </div>
-      </>
+      </div>
     )
   }
 
@@ -59,7 +68,13 @@ const Header = ({
       <div className="sm:hidden text-center sm:text-sm mb-1 text-md text-slate-700">
         <b>{t("welcome_heading1")}</b>
       </div>
-      <img src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png" width="170" height="100" className="center-img custom-login-image sm:hidden" alt="" />
+      {/* sm:!hidden (not sm:hidden) - custom-login-image's own plain
+          `display: block` rule (custom-style.css) has equal CSS specificity
+          and loads later in the cascade, so a bare `sm:hidden` loses to it
+          and this mobile-only image stays visible above the sm breakpoint.
+          The `!` forces `display: none !important`, which wins regardless
+          of import/cascade order - confirmed via computed-style inspection. */}
+      <img src="https://mohini-static.shikshalokam.org/fe-images/PNG/Shikshalokam/innovationpana-1@2x.png" width="170" height="100" className="center-img custom-login-image sm:!hidden" alt="" />
     </>
   )
 }

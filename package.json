@@ -56,14 +56,16 @@
     "zustand": "^5.0.8"
   },
   "scripts": {
-    "dev": "env-cmd -e dev react-scripts start",
-    "local": "env-cmd -e local react-scripts start",
-    "demo": "env-cmd -e demo react-scripts start",
-    "prod": "env-cmd -e prod react-scripts start",
-    "build-docker": "env-cmd -e docker react-scripts build",
-    "build-prod": "env-cmd -e prod react-scripts build",
-    "build-dev": "env-cmd -e dev react-scripts build",
+    "dev": "env-cmd -e dev vite",
+    "local": "env-cmd -e local vite",
+    "demo": "env-cmd -e demo vite",
+    "prod": "env-cmd -e prod vite",
+    "build-docker": "env-cmd -e docker vite build",
+    "build-prod": "env-cmd -e prod vite build",
+    "build-dev": "env-cmd -e dev vite build",
     "eject": "react-scripts eject",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
@@ -91,11 +93,13 @@
     "@playwright/test": "^1.57.0",
     "@svgr/webpack": "^8.0.1",
     "@types/node": "^24.10.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "dotenv": "^17.2.3",
     "eslint": "^8.57.1",
     "eslint-config-react-app": "^7.0.1",
     "tailwindcss": "^3.3.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3"
   },
   "overrides": {
     "react-scripts": {

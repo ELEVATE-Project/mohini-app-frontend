@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 /* utils and api services */
 import { clearMitraSessionStorage } from "../MainPage";
+import env from "../../../../../utils/env";
 
 import {
   createProject,
@@ -183,7 +184,7 @@ function TitleGeneration({
           const project_duration = useAICreationSessionStore.getState().getSelectedWeek();
           const user_objective = useAICreationSessionStore.getState().getSelectedObjective();
           const user_action_list = useAICreationSessionStore.getState().getSelectedAction()[0]?.actionSteps?.map(step => step?.step);
-          const access_token = sessionStorage.getItem(process.env.REACT_APP_ACCESS_TOKEN_KEY)
+          const access_token = sessionStorage.getItem(env.ACCESS_TOKEN_KEY())
           const objective_chunk = useAICreationSessionStore.getState().getSelectedObjectiveSource() || [];
           const action_chunk = useAICreationSessionStore.getState().getSelectedActionSource() || [];
 

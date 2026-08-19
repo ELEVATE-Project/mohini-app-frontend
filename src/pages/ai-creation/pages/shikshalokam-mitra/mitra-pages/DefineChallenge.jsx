@@ -5,6 +5,7 @@ import useVoiceRecord from "../../text-voice/useVoiceRecord";
 import { useAudio } from "../../../../../hooks/useAudio";
 /* utils and api services */
 import { clearMitraSessionStorage } from "../MainPage";
+import env from "../../../../../utils/env";
 import {
   getNewSessionID,
 } from "../../../../../api/endpoints/chat_flow";
@@ -220,7 +221,7 @@ const DefineChallenge = ({
           }
           let socket;
 
-          let url = `${wss_protocol}${process.env.REACT_APP_WEBSOCKET_HOST}/ws/mitra/`;
+          let url = `${wss_protocol}${env.WEBSOCKET_HOST()}/ws/mitra/`;
 
           socket = new WebSocket(url);
 
@@ -359,7 +360,7 @@ const DefineChallenge = ({
   );
 
   let reconnectAttempts = 0;
-  const maxReconnectAttempts = process.env.REACT_APP_WEBSOCKET_RETRY_NUM || 3;
+  const maxReconnectAttempts = env.WEBSOCKET_RETRY_NUM();
 
   function retryConnection(currentTextMessage = "") {
     if (reconnectAttempts >= maxReconnectAttempts) {

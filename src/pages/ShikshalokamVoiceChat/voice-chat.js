@@ -20,7 +20,7 @@ import { HiMiniSpeakerWave, HiMiniSpeakerXMark } from "react-icons/hi2"
 import { LANGUAGE_ENUMS, languageList } from "./enum"
 import { MdAccountCircle, MdEdit, MdSend } from "react-icons/md"
 import { RxCross2 } from "react-icons/rx"
-import { sessionFlowName } from "../../constants/session"
+import { sessionFlowName, FINISH_REASON_SOCKET, CONVERSATION_USER_TYPES } from "../../constants/session"
 import { setLanguage } from "../../i18n"
 import { TbReload } from "react-icons/tb"
 import { toast } from "react-toastify"
@@ -63,6 +63,17 @@ import WaveSurferPlayer from "../interview-text-voice/voice-player"
 import { getChatsFromDB } from "../../api/endpoints/chat_flow"
 
 const cookies = new Cookies()
+
+async function fetchAudioUrlAsBase64(url) {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result.split(",")[1])
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
 
 // TODO: After testing, revert this to the original code
 // const wss_protocol = window.location.protocol === "https:" ? "wss://" : "ws://"
@@ -181,7 +192,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   // user data actions
   const { setAcceptedTnC, setCompanyName, setFirstName, setState } = useUserStorage().getState()
-  const { llmError, setLlmError, llmErrorType, setLlmErrorType } = useChatStorage().getState()        
+  const { llmError, setLlmError, llmErrorType, setLlmErrorType } = useChatStorage().getState()
   const { setProfileId: setProfileToUse } = useUserStorage().getState()
 
   const endStoryMutation = useMutation({ mutationFn: (data) => endStoryApi(data) })
@@ -290,12 +301,16 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
           if (message?.msg) {
             lastSentence.message += message?.msg
           }
+          if (message.finish_reason === FINISH_REASON_SOCKET && message?.audio_s3_url) {
+            lastSentence.audio_s3_url = message.audio_s3_url
+          }
         } else {
           updatedSentences.push({
             message: message?.msg || "",
             source: "bot",
             isNarrated: false,
             id: new Date().valueOf(),
+            audio_s3_url: message.finish_reason === FINISH_REASON_SOCKET ? message?.audio_s3_url : undefined,
           })
           lastBotMessageIndex.current = updatedSentences.length - 1
         }
@@ -317,7 +332,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       setChatHistory(updated_chat_history)
     }
 
-    if (message.finish_reason === "stop" && message.source === "bot") {
+    if (message.finish_reason === FINISH_REASON_SOCKET && message.source === CONVERSATION_USER_TYPES.BOT) {
       setStrandStep(message?.step)
       handleScrollToView()
       setTalking(0)
@@ -631,6 +646,15 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const handleCompanyChatCall = useCallback(async () => {
     try {
       const storedChatHistory = chatHistory
+      const existingChatIds = new Set(storedChatHistory.map(msg => msg.updated_at))
+      const introAlreadyQueued = sentences.some(msg => msg.id === "intro_msg_id")
+
+      // Reconcile intro: if hydrated chatHistory already has the intro marker,
+      // remove any duplicate queued in sentences regardless of history length
+      if (introAlreadyQueued && existingChatIds.has("intro_msg_id")) {
+        setSentences(prev => prev.filter(msg => msg.id !== "intro_msg_id"))
+      }
+
       if (storedChatHistory.length >= 1) {
         return
       }
@@ -642,30 +666,38 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         const sortedResult = quickSort(Array.isArray(chatSessionData?.results) ? chatSessionData.results : [], compareById)
 
         const intro_message = introMessage
-        
+
 
         // Collect all new sentences and chat history items
         const newSentences = []
         const newChatHistoryItems = []
 
-        // Use Set with IDs for reliable duplicate detection
-        const existingChatIds = new Set(chatHistory.map(msg => msg.updated_at))
-
-        // Add intro message if it exists and not already in history
+        // Add intro message if it exists and not already in history or sentences
         if (intro_message && !existingChatIds.has("intro_msg_id")) {
-          newSentences.push({
-            message: intro_message,
-            source: "bot",
-            isNarrated: true,
-            id: "intro_msg_id",
-          })
+          if (introAlreadyQueued) {
+            // Intro was already queued in sentences by the introMessageData effect;
+            // only add to chatHistory so both stay in sync without duplicating sentences
+            newChatHistoryItems.push({
+              msg: intro_message,
+              source: "bot",
+              updated_at: "intro_msg_id",
+              received: true,
+            })
+          } else {
+            newSentences.push({
+              message: intro_message,
+              source: "bot",
+              isNarrated: true,
+              id: "intro_msg_id",
+            })
 
-          newChatHistoryItems.push({
-            msg: intro_message,
-            source: "bot",
-            updated_at: "intro_msg_id",
-            received: true,
-          })
+            newChatHistoryItems.push({
+              msg: intro_message,
+              source: "bot",
+              updated_at: "intro_msg_id",
+              received: true,
+            })
+          }
         }
 
         // Process all chat messages
@@ -744,7 +776,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
    * Prevents duplicate messages and manages message state
    */
   const handleMessagesForBot = useCallback(
-    sentence => {
+    (sentence, audio_s3_url) => {
       if (isRecognizing || hasStartedListening || !shouldSendMessage) return
 
       const lastMessage = chatHistory[chatHistory?.length - 1]
@@ -755,15 +787,19 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       if (chatHistory[chatHistory?.length - 1]?.source === "bot") {
         const lastMessage = chatHistory[chatHistory?.length - 1]
         lastMessage.msg += " " + sentence
+        if (audio_s3_url) lastMessage.audio_s3_url = audio_s3_url
         setChatHistory([...chatHistory])
       } else {
         setChatHistory([
           ...chatHistory,
-          createMessage({
-            msg: sentence,
-            source: "bot",
-            received: true,
-          }),
+          {
+            ...createMessage({
+              msg: sentence,
+              source: "bot",
+              received: true,
+            }),
+            audio_s3_url,
+          },
         ])
       }
     },
@@ -796,18 +832,18 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   let chatToAddLength = isMobile ? 10 : 10
 
   useEffect(() => {
-    if (!introMessageData || introMessageData?.length === 0) return
+    if (!introMessageData) return
 
-    let message = introMessageData[0]?.introductory_message
+    let message = introMessageData?.introductory_message
     if (profileToUse && firstName && firstName !== "null" && firstName !== "") {
-      message = introMessageData[0]?.introductory_message
+      message = introMessageData?.introductory_message
     } else {
-      message = introMessageData[0]?.alt_introductory_message
+      message = introMessageData?.alt_introductory_message
     }
-    const botName = introMessageData[0]?.name || "Bot"
+    const botName = introMessageData?.name || "Bot"
 
     setBotName(botName)
-    setDefaultBotName(introMessageData[0]?.default_name)
+    setDefaultBotName(introMessageData?.default_name)
     setBotNameToDisplay(botName)
 
     if (isOldChatOpen) {
@@ -825,7 +861,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       words.splice(1, 0, firstName)
       message = words.join(" ")
     }
-    if (message && !!message?.trim() && chatHistory[chatHistory?.length - 1]?.msg !== message && !sentences.some(msg => msg.message === message)) {
+    const introAlreadyInHistory = chatHistory.some(msg => msg.updated_at === "intro_msg_id" || msg.msg === message)
+    if (message && !!message?.trim() && !introAlreadyInHistory && !sentences.some(msg => msg.message === message)) {
       setIntroMessage(message)
       setSentences(prev => [
         ...prev,
@@ -840,6 +877,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
         setNotMute(false)
         setIsNextAllowed(true)
       }
+    } else if (message && !!message?.trim()) {
+      setIntroMessage(message)
     }
 
     setShouldFetchIntro(false)
@@ -1587,7 +1626,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       return () => {}
     }
     if (isNextAllowed && hasUnnarratedMessages && !isLoading && !endStoryMutation.isPending) {
-      handleAI4BharatTTSRequest(unnarratedMessages[0].message, unnarratedMessages[0].id, sourceLanguage)
+      handleAI4BharatTTSRequest(unnarratedMessages[0].message, unnarratedMessages[0].id, sourceLanguage, unnarratedMessages[0].audio_s3_url)
     }
 
     return () => {}
@@ -1726,7 +1765,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
             .ce-block--selected .ce-block__drag-handle { display: none !important; }
             .ce-inline-toolbar { display: none !important; }
             .ce-block--selected { outline: none !important; }
-            
+
             /* Style for spacer blocks */
             .spacer-block {
               min-height: 0.75rem !important;
@@ -1738,7 +1777,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               margin: 0.5rem 0 !important;
               position: relative;
             }
-            
+
             .spacer-block .ce-paragraph {
               pointer-events: none !important;
               user-select: none !important;
@@ -1747,7 +1786,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               opacity: 0 !important;
               min-height: 0.75rem !important;
             }
-            
+
             .spacer-block::before {
               content: '';
               display: block;
@@ -1759,13 +1798,13 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               left: 0;
               transform: translateY(-50%);
             }
-            
+
             /* Add visual separation after answer paragraphs */
             .answer-paragraph {
               margin-bottom: 0.5rem !important;
               padding-bottom: 0.5rem !important;
             }
-            
+
             /* Question header styling */
             .question-header {
               color: #374151 !important;
@@ -1773,16 +1812,16 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
               margin-top: 2rem !important;
               margin-bottom: 1rem !important;
             }
-            
+
             .question-header:first-child {
               margin-top: 0 !important;
             }
-            
+
             /* Non-deletable block styling */
             .non-deletable {
               position: relative;
             }
-            
+
             .non-deletable::after {
               content: '';
               position: absolute;
@@ -2361,7 +2400,7 @@ function handleLlmError(errorMessage, errorType) {
   }
 
   const fetchMoreData = () => {
-  
+
     setTimeout(() => {
       if (visibleItemCount < sessionTitleDetail.length) {
         setVisibleItemCount(prevCount => prevCount + chatToAddLength)
@@ -2426,7 +2465,7 @@ function handleLlmError(errorMessage, errorType) {
     }
   }
 
-  const handleAI4BharatTTSRequest = async (text, id, sourceLanguage) => {
+  const handleAI4BharatTTSRequest = async (text, id, sourceLanguage, audio_s3_url) => {
     try {
       if (id === "intro_msg_id" && isIntroPlayed.current === true) {
         return
@@ -2445,7 +2484,7 @@ function handleLlmError(errorMessage, errorType) {
       let storedRoute = getSessionRoute()
 
       if (!hasOverRideId) {
-        handleMessagesForBot(text)
+        handleMessagesForBot(text, audio_s3_url)
       }
 
       // User has disabled audio for this session: never call the TTS API.
@@ -2468,6 +2507,19 @@ function handleLlmError(errorMessage, errorType) {
         setIsNextAllowed(true)
         setHasOverRideId(null)
         return
+      }
+
+      if (!cachedAudioUrl && audio_s3_url) {
+        try {
+          const audio_result = await fetchAudioUrlAsBase64(audio_s3_url)
+          cachedAudioUrl = `data:audio/wav;base64,${audio_result}`
+          setAudioCache(prevCache => ({
+            ...prevCache,
+            [id]: cachedAudioUrl,
+          }))
+        } catch (error) {
+          console.error("Error fetching audio_s3_url, falling back to TTS:", error)
+        }
       }
 
       if (!cachedAudioUrl) {
@@ -2561,8 +2613,10 @@ function handleLlmError(errorMessage, errorType) {
         return [
           {
             message: messageToPlay?.msg,
+            source: "bot",
             isNarrated: false,
             id: id,
+            audio_s3_url: messageToPlay?.audio_s3_url,
           },
         ]
       })
@@ -2636,7 +2690,7 @@ function handleLlmError(errorMessage, errorType) {
               if (!s3Url || s3Url === "") {
                 transcriptResult = t("asrError")
               }
-              setAsrAudio(prev => [...prev, s3Url]) 
+              setAsrAudio(prev => [...prev, s3Url])
               let storedRoute = getSessionRoute()
               transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, storedRoute)
               if (!transcriptResult || transcriptResult === "") {
@@ -3271,7 +3325,7 @@ function handleLlmError(errorMessage, errorType) {
 
             <button
               type="submit"
-              aria-label={t("sendMessage")}
+              aria-label={"sendMessage"}
               disabled={!textMessage.trim() || hasStartedRecording || isFetchingData || isStartingRecording}
               className="send-btn"
             >

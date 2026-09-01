@@ -35,8 +35,8 @@ export const env = {
   YLC_PROFILE_ID: () => getEnv("REACT_APP_YLC_PROFILE_ID", "127"),
 
   // Paths
-  AUDIO_PATH: () => getEnv("REACT_APP_ADUIO_PATH", "/mohini/"),
-  ROOT_PATH: () => getEnv("REACT_APP_ROOT_PATH", "mohini"),
+  AUDIO_PATH: () => getEnv("REACT_APP_ADUIO_PATH", "/"),
+  ROOT_PATH: () => getEnv("REACT_APP_ROOT_PATH", ""),
 
   // URLs
   RECORD_STORY_URL: () => getEnv("REACT_APP_RECORD_STORY_URL", ""),
@@ -46,6 +46,10 @@ export const env = {
   AUTH_METHOD: () => getEnv("REACT_APP_AUTH_METHOD", "url"),
 
   AUTH_ROUTE: () => getEnv("REACT_APP_AUTH_ROUTE", "/api/shikshalokam/read-elevate-profile/"),
+
+  // Flow Configuration
+  GUEST_DISCUSSION_FLOW: () => getEnv("REACT_APP_GUEST_DISCUSSION_FLOW"),
+  GUEST_MI_STORY_FLOW: () => getEnv("REACT_APP_GUEST_MI_STORY_FLOW"),
 
   // Generic getter for any environment variable
   get: (key: string, defaultValue: string = "") => getEnv(key, defaultValue),

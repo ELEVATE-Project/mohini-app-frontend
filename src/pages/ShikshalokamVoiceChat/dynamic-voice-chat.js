@@ -1914,14 +1914,23 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const handleChildFlowChange = (e) => {
     const newRoute = e.target.value
-    if (chatHistory.length > 0) {
-      showGuestPopup(
-        () => { setSelectedChildFlowRoute(newRoute); resetChat() },
-        stayOnPage
-      )
-    } else {
+
+    // `introMessage` is persisted, and resetChat's reload does not clear it the
+    // way removeChatHistory clears the transcript. Left in place, the reloaded
+    // page seeds the outgoing sub-flow's welcome message into the new chat
+    // before the incoming one is fetched, leaving the greeting one switch
+    // behind. Clearing it here reproduces the first-load state, which is where
+    // the greeting already resolves correctly.
+    const switchToChildFlow = () => {
+      setIntroMessage(null)
       setSelectedChildFlowRoute(newRoute)
       resetChat()
+    }
+
+    if (chatHistory.length > 0) {
+      showGuestPopup(switchToChildFlow, stayOnPage)
+    } else {
+      switchToChildFlow()
     }
   }
 

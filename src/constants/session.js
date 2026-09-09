@@ -35,6 +35,8 @@ export const sessionFlowName = {
   PPPI_BOT_1: "PPPI_Set_1",
   PPPI_Set_2: "PPPI_Set_2",
   Bihar_PTM: "Bihar_PTM",
+  SanjhiSikhiyaStoryBot: "sanjhi_sikhiya_story_bot",
+  SanjhiSikhiyaDiscussionBot: "sanjhi_sikhiya_discussion_bot",
 }
 
 export const STATE_MACHINE_OPERATION_TYPE = {

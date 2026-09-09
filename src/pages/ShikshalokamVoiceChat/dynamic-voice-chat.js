@@ -2467,13 +2467,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
                   {activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute)
                     ? t("feedbackLoaderHeading")
-                    : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute)
+                    : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)
                       ? t("reportLoaderHeading")
-                      : activeFlowRoute && [sessionFlowName.GuestMiStory].includes(activeFlowRoute)
+                      : activeFlowRoute && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(activeFlowRoute)
                         ? t("storyGuestLoaderHeading")
                         : t("storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : t("storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2565,7 +2565,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
                   const prefix = prefixMap[activeFlowRoute] || ""
 
-                  const homePageHeading = activeFlowRoute === sessionFlowName.GuestDiscussion ? "homepageHeadingDiscussion" : "homepageHeading"
+                  const homePageHeading = [sessionFlowName.GuestDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? "homepageHeadingDiscussion" : "homepageHeading"
 
                   return (
                     <>
@@ -2613,7 +2613,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               )}
             </>
           )}
-          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(activeFlowRoute) && accessToken) && (
+          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(activeFlowRoute) && accessToken) && (
             <>
               {activeFlowInfo && activeFlowInfo.image_config && (
                 <div className="div13">
@@ -2622,13 +2622,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     userType="bot"
                     message={(() => {
                       const flow = activeFlowRoute
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = activeFlowRoute
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2722,11 +2722,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")}
+                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2751,7 +2751,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("downloadReportText") : t("downloadStoryText")}
+                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("downloadReportText") : t("downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2764,7 +2764,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("editReportText") : t("editStoryText")}
+                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("editReportText") : t("editStoryText")}
                         </span>
                       </div>
                     </button>

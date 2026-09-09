@@ -189,7 +189,6 @@ const DynamicVoiceChat = ({ type = "" }) => {
     queryKey: [API_ENDPOINTS.FLOW_CONNECTION_INFO, selectedChildFlowRoute],
     queryFn: () => getFlowInfoApi(selectedChildFlowRoute),
     enabled: !!selectedChildFlowRoute,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   })

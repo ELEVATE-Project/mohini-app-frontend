@@ -2994,6 +2994,8 @@ function handleLlmError(errorMessage, errorType) {
                   const prefixMap = {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
+                    [sessionFlowName.Youth_21_25]: "youth_",
+                    [sessionFlowName.Youth_12_20]: "youth_",
                   }
 
                   const prefix = prefixMap[storageFlow] || ""

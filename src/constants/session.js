@@ -37,6 +37,8 @@ export const sessionFlowName = {
   Bihar_PTM: "Bihar_PTM",
   SanjhiSikhiyaStoryBot: "sanjhi_sikhiya_story_bot",
   SanjhiSikhiyaDiscussionBot: "sanjhi_sikhiya_discussion_bot",
+  Youth_21_25: "youth_21-25",
+  Youth_12_20: "youth_12-20",
 }
 
 export const STATE_MACHINE_OPERATION_TYPE = {

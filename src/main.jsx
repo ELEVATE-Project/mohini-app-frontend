@@ -32,15 +32,24 @@ function loadEnvConfig() {
   })
 }
 
-loadEnvConfig().then(() => {
-  const rootPath = env.ROOT_PATH() ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}` : ""
+// Redirect legacy /mohini paths to base URL. Ported from src/index.js (release-2.3.0) - the app
+// moved off the /mohini subpath to root-path serving (see server.js/nginx.conf), so old bookmarked
+// /mohini/* links need a client-side redirect to the equivalent root-path URL.
+const pathname = window.location.pathname
+if (pathname === "/mohini" || pathname.startsWith("/mohini/")) {
+  const newPath = pathname.replace(/^\/mohini/, "") || "/"
+  window.location.replace(newPath + window.location.search + window.location.hash)
+} else {
+  loadEnvConfig().then(() => {
+    const rootPath = env.ROOT_PATH() ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}` : ""
 
-  const el = document.getElementById("root")
-  const root = ReactDOM.createRoot(el)
+    const el = document.getElementById("root")
+    const root = ReactDOM.createRoot(el)
 
-  root.render(
-    <BrowserRouter basename={rootPath}>
-      <App />
-    </BrowserRouter>
-  )
-})
+    root.render(
+      <BrowserRouter basename={rootPath}>
+        <App />
+      </BrowserRouter>
+    )
+  })
+}

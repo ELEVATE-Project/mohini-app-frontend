@@ -27,6 +27,7 @@ import ChatMessage from "../ShikshalokamMegaPTM/ChatMessage"
 import Header from "../ShikshalokamVoiceChat/shikshaChatHeader"
 import PrivacyPolicyPopup from "components/TnC/privacyPolicyPopup"
 import ROUTES from "../../url"
+import { rootPath } from "../../utils/constants"
 import SpeedNotification from "../ShikshalokamMegaPTM/SpeedNotification"
 import Swal from "sweetalert2"
 import useCustomMediaQuery from "hooks/useCustomMediaQuery"
@@ -486,7 +487,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
               window.location.href = previousUrl
             } else {
               // navigate(flowConfig.homePageRoute)
-              window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE)
+              window.location.replace(rootPath + ROUTES.SHIKSHAGRAHA_REPOSITORY)
             }
           } else {
             resetChatState()
@@ -522,11 +523,11 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
         console.log("flowType", flowType)
         stopAllAudio()
         if (flowType === sessionFlowName.megaPTM) {
-          window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_PTM_HOME_PAGE)
+          window.location.replace(rootPath + ROUTES.SHIKSHALOKAM_PTM_HOME_PAGE)
         } else if (flowType === sessionFlowName.YLC) {
-          window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_YLC_HOME_PAGE)
+          window.location.replace(rootPath + ROUTES.SHIKSHALOKAM_YLC_HOME_PAGE)
         } else {
-          window.location.replace("/mohini" + ROUTES.SHIKSHALOKAM_HOME_PAGE)
+          window.location.replace(rootPath + ROUTES.SHIKSHAGRAHA_REPOSITORY)
         }
       }
     })
@@ -799,14 +800,34 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
               }
 
               setIsFetchingData(true)
-              let transcriptResult = ""
-              let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`, null)
-              if (!s3Url || s3Url === "") {
-                transcriptResult = t("asrError")
-              }
-              setAsrAudio(prev => [...prev, s3Url])
-              transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, FLOW_ROUTE)
-              if (!transcriptResult || transcriptResult === "") {
+              try {
+                let transcriptResult = ""
+                let s3Url = await handleS3Upload(audioBlob, `${Date.now()}`, `chatbot/companychat/${sessionId}/`, null)
+                if (!s3Url || s3Url === "") {
+                  transcriptResult = t("asrError")
+                }
+                setAsrAudio(prev => [...prev, s3Url])
+                transcriptResult = await ai4BharatASRApi(s3Url, languageToUse, FLOW_ROUTE)
+                if (!transcriptResult || transcriptResult === "") {
+                  showNotification({
+                    message: t("asrError"),
+                    type: "error",
+                    options: {
+                      position: "top-center",
+                      autoClose: 6000,
+                      style: { fontWeight: "bold" },
+                    },
+                  })
+                } else {
+                  setTextMessage(prev => {
+                    if (prev && prev.trim().length > 0) {
+                      return prev.trimEnd() + " " + transcriptResult
+                    }
+                    return transcriptResult
+                  })
+                }
+              } catch (error) {
+                console.error("Error transcribing recorded audio:", error)
                 showNotification({
                   message: t("asrError"),
                   type: "error",
@@ -816,15 +837,9 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                     style: { fontWeight: "bold" },
                   },
                 })
-              } else {
-                setTextMessage(prev => {
-                  if (prev && prev.trim().length > 0) {
-                    return prev.trimEnd() + " " + transcriptResult
-                  }
-                  return transcriptResult
-                })
+              } finally {
+                setIsFetchingData(false)
               }
-              setIsFetchingData(false)
             } else {
               console.warn("No audio chunks were recorded.")
               setIsFetchingData(false)
@@ -1062,7 +1077,8 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
               event.stopPropagation()
               event.preventDefault()
               stopAllAudio()
-              if (!hasStartedListening && !isFetchingData) {
+              // requestSubmit() bypasses the send button's disabled state, so mirror those guards here
+              if (!hasStartedListening && !isFetchingData && textMessage.trim() && !hasStartedRecording && !isReplying) {
                 const last_question = chatHistory.filter(x => x.source === "bot").sort((a, b) => b.updated_at - a.updated_at)[0]
                 const question = last_question.msg
                 let status = PTM_CONVERSATION_STATUS_TYPE.IN_PROGRESS
@@ -1130,6 +1146,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
               {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
             </button>
 
+            {/* Text area in the middle */}
             <div className="textarea-wrapper relative">
               <textarea
                 id="textBoxID"
@@ -1183,6 +1200,7 @@ const UnifiedVoiceBasedChat = ({ flowType }) => {
                 </div>
               )}
             </div>
+            {/* Send button on the right */}
             <button
               type="submit"
               aria-label={t("sendMessage")}

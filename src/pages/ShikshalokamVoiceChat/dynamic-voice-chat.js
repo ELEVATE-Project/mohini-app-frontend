@@ -79,6 +79,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const { flow: storageFlow } = useUrlFlow()
   const selectedChildFlowRoute = useChatStorage()(state => state.selectedChildFlowRoute)
   const activeFlowRoute = selectedChildFlowRoute || storageFlow
+  const isYouthFlow = [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute)
 
   // ========== useState Hooks ==========
   const [asrAudio, setAsrAudio] = useState([])
@@ -2468,13 +2469,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     ? t("feedbackLoaderHeading")
                     : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)
                       ? t("reportLoaderHeading")
-                      : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute)
+                      : isYouthFlow
                         ? t("youth_storyGuestLoaderHeading")
                         : activeFlowRoute && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(activeFlowRoute)
                           ? t("storyGuestLoaderHeading")
                           : t("storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute) ? t("youth_storyLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : t("storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2725,11 +2726,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute) ? t("youth_storyText") : t("storyText")}
+                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : t("storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute) ? t("youth_storyText") : t("storyText")
+                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : t("storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2754,7 +2755,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("downloadReportText") : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute) ? t("youth_downloadStoryText") : t("downloadStoryText")}
+                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("downloadReportText") : isYouthFlow ? t("youth_downloadStoryText") : t("downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2767,7 +2768,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("editReportText") : activeFlowRoute && [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute) ? t("youth_editReportText") : t("editStoryText")}
+                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("editReportText") : isYouthFlow ? t("youth_editReportText") : t("editStoryText")}
                         </span>
                       </div>
                     </button>

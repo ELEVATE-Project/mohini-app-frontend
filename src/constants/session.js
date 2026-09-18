@@ -35,4 +35,5 @@ export const sessionFlowName = {
   PPPI_BOT_1: "PPPI_Set_1",
   PPPI_Set_2: "PPPI_Set_2",
   Bihar_PTM: "Bihar_PTM",
+  Education_House_Conversation: "Education_House_Conversation",
 }

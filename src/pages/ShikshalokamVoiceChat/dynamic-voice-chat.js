@@ -63,6 +63,7 @@ const cookies = new Cookies()
 
 const DynamicVoiceChat = ({ type = "" }) => {
   const { flow: storageFlow } = useUrlFlow()
+  const isEducationHouseConversationFlow = [sessionFlowName.Education_House_Conversation].includes(storageFlow)
 
   // ========== useState Hooks ==========
   const [asrAudio, setAsrAudio] = useState([])
@@ -2294,9 +2295,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
+                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : isEducationHouseConversationFlow ? t("education_house_conversation_storyGuestLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2383,7 +2384,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     [sessionFlowName.XylemX_entrepreneurship_development]: "shiksha_samvad_",
                     [sessionFlowName.PPPI_BOT_1]: "shiksha_samvad_",
                     [sessionFlowName.PPPI_Set_2]: "shiksha_samvad_",
-                    [sessionFlowName.Bihar_PTM]: "shiksha_samvad_", 
+                    [sessionFlowName.Bihar_PTM]: "shiksha_samvad_",
+                    [sessionFlowName.Education_House_Conversation]: "education_house_conversation_",
                   }
 
                   const prefix = prefixMap[storageFlow] || ""
@@ -2544,11 +2546,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")}
+                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2573,7 +2575,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("downloadReportText") : t("downloadStoryText")}
+                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("downloadReportText") : isEducationHouseConversationFlow ? t("education_house_conversation_downloadReportText") : t("downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2586,7 +2588,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("editReportText") : t("editStoryText")}
+                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("editReportText") : isEducationHouseConversationFlow ? t("education_house_conversation_editReportText") : t("editStoryText")}
                         </span>
                       </div>
                     </button>

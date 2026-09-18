@@ -63,9 +63,7 @@ const cookies = new Cookies()
 
 const DynamicVoiceChat = ({ type = "" }) => {
   const { flow: storageFlow } = useUrlFlow()
-  const selectedChildFlowRoute = useChatStorage()(state => state.selectedChildFlowRoute)
-  const activeFlowRoute = selectedChildFlowRoute || storageFlow
-  const isEducationHouseConversationFlow = [sessionFlowName.Education_House_Conversation].includes(activeFlowRoute)
+  const isEducationHouseConversationFlow = [sessionFlowName.Education_House_Conversation].includes(storageFlow)
 
   // ========== useState Hooks ==========
   const [asrAudio, setAsrAudio] = useState([])

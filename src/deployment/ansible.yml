@@ -192,6 +192,24 @@
       # instead of silently overriding peer-dependency conflicts.
       shell: "cd {{ current_path }} && npm ci"
 
+    - name: Lint frontend
+      # Vite (unlike react-scripts) never runs ESLint itself - dev server or
+      # build, it just isn't part of its job. Without this task nothing in
+      # the deploy pipeline catches a lint error at all. `npm run lint` only
+      # fails on actual ESLint errors, not warnings (this repo currently has
+      # ~314 pre-existing warnings that stay non-blocking) - so this is safe
+      # to gate on today and only starts blocking a deploy if a real error
+      # is introduced.
+      shell: "cd {{ current_path }} && npm run lint"
+
+    - name: Typecheck frontend
+      # CRA's webpack build type-checked .ts/.tsx via ForkTsCheckerWebpackPlugin
+      # and failed the build on type errors. Vite/esbuild strips TS types for
+      # speed without ever validating them, so without this task a type error
+      # would now silently compile and ship. Currently clean (exits 0) - this
+      # only starts blocking a deploy if a real type error is introduced.
+      shell: "cd {{ current_path }} && npm run typecheck"
+
     - name: Set permission for json2env.sh
       shell: "chmod 744 {{ current_path }}/src/scripts/json2env.sh"
 

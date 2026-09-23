@@ -16,6 +16,7 @@
     "axios-retry": "^4.5.0",
     "dompurify": "^3.1.7",
     "env-cmd": "^10.1.0",
+    "express": "^4.22.3",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.2",
     "i18next": "^24.2.2",

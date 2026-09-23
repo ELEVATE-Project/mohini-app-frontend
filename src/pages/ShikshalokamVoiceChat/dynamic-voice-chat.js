@@ -2474,7 +2474,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         ? t("youth_storyGuestLoaderHeading")
                         : isEducationHouseConversationFlow
                           ? t("education_house_conversation_storyGuestLoaderHeading")
-                          : t("storyGuestLoaderHeading")}
+                          : activeFlowRoute && [sessionFlowName.LoginMiStory].includes(activeFlowRoute)
+                            ? t("storyLoaderHeading")
+                            : t("storyGuestLoaderHeading")}
                 </h2>
                 <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
               </div>

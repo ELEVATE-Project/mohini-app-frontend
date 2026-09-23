@@ -38,6 +38,7 @@ memory.sh
 primer.md
 project-memory.md
 graphify-out/
+CLAUDE.md
 
 # Jenkins pipeline reference copy - not meant to live in the repo long-term (see its own header)
 Jenkinsfile

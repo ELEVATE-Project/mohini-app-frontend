@@ -2474,9 +2474,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         ? t("youth_storyGuestLoaderHeading")
                         : isEducationHouseConversationFlow
                           ? t("education_house_conversation_storyGuestLoaderHeading")
-                          : activeFlowRoute && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(activeFlowRoute)
-                            ? t("storyGuestLoaderHeading")
-                            : t("storyLoaderHeading")}
+                          : activeFlowRoute && [sessionFlowName.LoginMiStory].includes(activeFlowRoute)
+                            ? t("storyLoaderHeading")
+                            : t("storyGuestLoaderHeading")}
                 </h2>
                 <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
               </div>
@@ -2630,13 +2630,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     userType="bot"
                     message={(() => {
                       const flow = activeFlowRoute
-                      return flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot, sessionFlowName.ListeningActivity].includes(flow) ? t("evidence") : t("evidenceStory")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = activeFlowRoute
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot, sessionFlowName.ListeningActivity].includes(flow) ? t("evidence") : t("evidenceStory")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}

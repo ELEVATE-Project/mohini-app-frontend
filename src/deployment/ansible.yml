@@ -190,7 +190,15 @@
       # time - reproducible across deploys of the same commit, and fails
       # loudly if package.json/package-lock.json ever drift out of sync
       # instead of silently overriding peer-dependency conflicts.
-      shell: "cd {{ current_path }} && npm ci"
+      #
+      # --legacy-peer-deps is required as of the Phase 5 cleanup (removing
+      # react-scripts): without it, npm ci hard-fails on an ERESOLVE conflict
+      # between react@18 and react-native's optional peer requirement (pulled
+      # in via styled-components/react-spring's optional React Native
+      # support - this app doesn't use React Native at all). This flag only
+      # relaxes peer-conflict resolution, not lockfile strictness - npm ci
+      # still installs exactly what's locked, nothing more.
+      shell: "cd {{ current_path }} && npm ci --legacy-peer-deps"
 
     - name: Lint frontend
       # Vite (unlike react-scripts) never runs ESLint itself - dev server or

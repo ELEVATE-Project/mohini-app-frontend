@@ -16,10 +16,9 @@ const srcRootAliases = Object.fromEntries(
 )
 
 // Vite migration (Plan B in .claude/brain/task/vite-migration-and-lazy-loading-plan.md).
-// package.json's dev/build-* scripts now run vite/vite build directly (Phase 4) -
-// react-scripts is still a dependency (only "eject" still uses it) but is no
-// longer the live build path. See the plan doc's Phase 0 audit for why these
-// specific settings were chosen:
+// package.json's dev/build-* scripts run vite/vite build directly (Phase 4);
+// react-scripts has been removed (Phase 5 cleanup). See the plan doc's
+// Phase 0 audit for why these specific settings were chosen:
 //   - base/PORT mirror package.json's "homepage" ("/", since release-2.3.0 moved the app off the
 //     /mohini subpath to root-path serving - see server.js/nginx.conf) and .env-cmdrc PORT values.
 //   - envPrefix keeps the existing REACT_APP_* var names working unchanged

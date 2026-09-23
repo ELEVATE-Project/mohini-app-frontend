@@ -249,5 +249,19 @@
       environment:
         NODE_OPTIONS: "--max-old-space-size=4096"
 
+    - name: Remove any existing pm2 process for this app
+      # `pm2 start` is NOT idempotent against an already-registered app name -
+      # if one exists (from a prior deploy, or one left crash-looping), it
+      # either no-ops or fights the old process for the same port instead of
+      # cleanly replacing it (confirmed: this caused an EADDRINUSE
+      # crash-loop against a stale process on load-test). Deleting first
+      # guarantees the `pm2 start` below always produces one clean process.
+      # App name is read from the just-fetched config rather than hardcoded,
+      # since each environment's Vault-provided pm2.config.json can use a
+      # different name (see "Fetch pm2 config file" above).
+      shell: >
+        app_name=$(jq -r '.apps[0].name' '{{ current_path }}/pm2.config.json') &&
+        pm2 delete "$app_name" --silent || true
+
     - name: Start pm2
       shell: "cd {{ current_path }} && pm2 start pm2.config.json"

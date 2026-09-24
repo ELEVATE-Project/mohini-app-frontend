@@ -1929,8 +1929,6 @@ const DynamicVoiceChat = ({ type = "" }) => {
           setFiles([])
           setShowFileInput(true)
           setLlmError("")
-          // Reset the audio mute preference once the chat is completed.
-          setDidUserMute(false)
           window.location.reload()
         } else {
           setLlmError(endStoryResponse?.error_message)

@@ -7,7 +7,6 @@ import { setLanguage } from "../i18n";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { languageList } from "./ShikshalokamVoiceChat/enum";
-import { clearFromStorage } from "./ShikshalokamVoiceChat/voice-chat";
 
 
 function PrivacyPage() {

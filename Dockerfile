@@ -6,7 +6,7 @@ COPY . .
 
 # Build the React application
 # Actual env vars will be injected at runtime via env-config.js
-RUN npx react-scripts build
+RUN npx vite build
 
 FROM nginx:alpine
 

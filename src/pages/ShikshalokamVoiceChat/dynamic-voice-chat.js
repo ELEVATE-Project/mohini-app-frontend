@@ -2551,6 +2551,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   const prefixMap = {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
+                    [sessionFlowName.General_Public_Voice]: "shiksha_samvad_",
                     [sessionFlowName.ShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.DelhiShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.StudyTeacherInterview]: "shiksha_samvad_",

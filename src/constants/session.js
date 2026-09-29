@@ -40,6 +40,7 @@ export const sessionFlowName = {
   Youth_21_25: "youth_21-25",
   Youth_12_20: "youth_12-20",
   Education_House_Conversation: "Education_House_Conversation",
+  General_Public_Voice: "General_Public_Voice"
 }
 
 export const STATE_MACHINE_OPERATION_TYPE = {

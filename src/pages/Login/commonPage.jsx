@@ -97,16 +97,7 @@ function CommonHomePage({ usecaseType }) {
       return
     }
 
-    const URL_PARAMS_MAP = {
-      [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
-      [sessionFlowName.ParentPerceptionSurvey]: ROUTES.SHIKSHALOKAM_PPPI_VOICE_CHAT,
-    }
     setPreviousUrl(window.location.href)
-
-    if (URL_PARAMS_MAP[urlFlow]) {
-      navigate(URL_PARAMS_MAP[urlFlow])
-      return
-    }
 
     navigate({
       pathname: ROUTES.COMMON_CHAT,

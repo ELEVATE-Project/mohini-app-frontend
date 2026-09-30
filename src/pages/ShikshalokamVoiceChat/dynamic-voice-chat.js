@@ -1420,6 +1420,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
       [sessionFlowName.PPPI_BOT_1]: "pppi_",
       [sessionFlowName.PPPI_Set_2]: "pppi_",
       [sessionFlowName.Bihar_PTM]: "bihar_ptm_",
+      [sessionFlowName.Parent_Voice]: "pppi_",
+      [sessionFlowName.General_Public_Voice]: "general_public_voice_",
     }
 
     if (paramsMap[activeFlowRoute]) {
@@ -2552,6 +2554,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
                     [sessionFlowName.General_Public_Voice]: "shiksha_samvad_",
+                    [sessionFlowName.One_Million_Youth]: "shiksha_samvad_",
+                    [sessionFlowName.Parent_Voice]: "shiksha_samvad_",
                     [sessionFlowName.ShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.DelhiShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.StudyTeacherInterview]: "shiksha_samvad_",

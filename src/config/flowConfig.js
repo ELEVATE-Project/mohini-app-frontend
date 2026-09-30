@@ -4,8 +4,6 @@ import ptmQuestions from "../services/const/questions/ptmQuestions"
 import ylcQuestions, { ylcStoryTextAudio } from "../services/const/questions/ylcQuestions"
 import env from "../utils/env"
 
-const base_path = env.AUDIO_PATH()
-
 export const FLOW_CONFIG = {
   [sessionFlowName.megaPTM]: {
     flowName: sessionFlowName.megaPTM,

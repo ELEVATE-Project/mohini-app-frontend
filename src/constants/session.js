@@ -41,7 +41,7 @@ export const sessionFlowName = {
   Youth_12_20: "youth_12-20",
   Education_House_Conversation: "Education_House_Conversation",
   General_Public_Voice: "General_Public_Voice",
-  One_Million_Youth: "1MV_Youth_NoPDF",
+  One_Million_Youth: "Youth_Voice",
   Parent_Voice: "Parent_Voice"
 }
 

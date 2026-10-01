@@ -140,6 +140,7 @@
     "pppi_PPsCompletionMessage": "<div class='text-class'>Thank you for your time and sharing your thoughts with us. Your voice matters and will help make the school better for your child and others.</div>",
     "bihar_ptm_PPsCompletionMessage": "<div class='text-class'>Thank you! Your answer has been successfully recorded.</div>",
     "general_public_voice_PPsCompletionMessage": "<div class='text-class'>Thank you for taking the time to answer these questions. You have contributed to a Million voices towards understanding future readiness for youth.</div>",
+    "one_million_youth_PPsCompletionMessage": "<div class='text-class'>Thank you for taking the time to answer these questions.</div>",
     "PPsCompletionCTA": "Submit another response",
     "pppi_homepageHeading": "We're Here to Listen to You",
     "pppi_homepageHeading1": "with MItra!",

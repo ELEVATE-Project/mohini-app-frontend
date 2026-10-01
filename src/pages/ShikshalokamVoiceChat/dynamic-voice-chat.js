@@ -1422,6 +1422,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       [sessionFlowName.Bihar_PTM]: "bihar_ptm_",
       [sessionFlowName.Parent_Voice]: "pppi_",
       [sessionFlowName.General_Public_Voice]: "general_public_voice_",
+      [sessionFlowName.One_Million_Youth]: "one_million_youth_",
     }
 
     if (paramsMap[activeFlowRoute]) {

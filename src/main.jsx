@@ -32,6 +32,28 @@ function loadEnvConfig() {
   })
 }
 
+// A redeploy deletes the previous build's hashed chunks, so a tab opened before
+// the deploy fails to load any lazy route it hasn't visited yet. Vite fires
+// vite:preloadError for that - reload once to pick up the new build. The
+// timestamp guard stops a reload loop if the chunk is genuinely missing; the
+// error then propagates to RouteErrorBoundary instead.
+const PRELOAD_RELOAD_KEY = "vite-preload-reload-at"
+window.addEventListener("vite:preloadError", event => {
+  let lastReload = 0
+  try {
+    lastReload = Number(sessionStorage.getItem(PRELOAD_RELOAD_KEY)) || 0
+  } catch {}
+  if (Date.now() - lastReload < 10000) return
+
+  try {
+    sessionStorage.setItem(PRELOAD_RELOAD_KEY, String(Date.now()))
+  } catch {
+    return // can't guard against a loop without storage - leave it to the error boundary
+  }
+  event.preventDefault()
+  window.location.reload()
+})
+
 // Redirect legacy /mohini paths to base URL. Ported from src/index.js (release-2.3.0) - the app
 // moved off the /mohini subpath to root-path serving (see server.js/nginx.conf), so old bookmarked
 // /mohini/* links need a client-side redirect to the equivalent root-path URL.

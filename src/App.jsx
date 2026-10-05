@@ -6,6 +6,7 @@ import NotFound from "./pages/shikshagraha-repository/not-found"
 import React, { Suspense } from "react"
 import ROUTES from "./url"
 import LoadingSpinner from "./components/LoadingSpinner"
+import RouteErrorBoundary from "./components/RouteErrorBoundary"
 import LanguageGuard from "./hooks/useLanguageGuard"
 
 // Route-level code splitting: these are only pulled into a chunk when their
@@ -30,7 +31,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-        <Suspense fallback={<LoadingSpinner isVisible={true} />}>{elements}</Suspense>
+        <RouteErrorBoundary>
+          <Suspense fallback={<LoadingSpinner isVisible={true} />}>{elements}</Suspense>
+        </RouteErrorBoundary>
       </UserProvider>
     </QueryClientProvider>
   )

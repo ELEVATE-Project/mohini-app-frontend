@@ -37,7 +37,7 @@ export const env = {
   YLC_PROFILE_ID: () => getEnv("REACT_APP_YLC_PROFILE_ID", "127"),
 
   // Paths
-  AUDIO_PATH: () => getEnv("REACT_APP_ADUIO_PATH", "/"),
+  AUDIO_PATH: () => getEnv("REACT_APP_ADUIO_PATH", ""),
   ROOT_PATH: () => getEnv("REACT_APP_ROOT_PATH", ""),
 
   // URLs

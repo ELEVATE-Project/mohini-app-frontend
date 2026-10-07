@@ -190,7 +190,33 @@
       # time - reproducible across deploys of the same commit, and fails
       # loudly if package.json/package-lock.json ever drift out of sync
       # instead of silently overriding peer-dependency conflicts.
-      shell: "cd {{ current_path }} && npm i --force"
+      #
+      # --legacy-peer-deps is required as of the Phase 5 cleanup (removing
+      # react-scripts): without it, npm ci hard-fails on an ERESOLVE conflict
+      # between react@18 and react-native's optional peer requirement (pulled
+      # in via styled-components/react-spring's optional React Native
+      # support - this app doesn't use React Native at all). This flag only
+      # relaxes peer-conflict resolution, not lockfile strictness - npm ci
+      # still installs exactly what's locked, nothing more.
+      shell: "cd {{ current_path }} && npm ci --legacy-peer-deps"
+
+    - name: Lint frontend
+      # Vite (unlike react-scripts) never runs ESLint itself - dev server or
+      # build, it just isn't part of its job. Without this task nothing in
+      # the deploy pipeline catches a lint error at all. `npm run lint` only
+      # fails on actual ESLint errors, not warnings (this repo currently has
+      # ~314 pre-existing warnings that stay non-blocking) - so this is safe
+      # to gate on today and only starts blocking a deploy if a real error
+      # is introduced.
+      shell: "cd {{ current_path }} && npm run lint"
+
+    - name: Typecheck frontend
+      # CRA's webpack build type-checked .ts/.tsx via ForkTsCheckerWebpackPlugin
+      # and failed the build on type errors. Vite/esbuild strips TS types for
+      # speed without ever validating them, so without this task a type error
+      # would now silently compile and ship. Currently clean (exits 0) - this
+      # only starts blocking a deploy if a real type error is introduced.
+      shell: "cd {{ current_path }} && npm run typecheck"
 
     - name: Set permission for json2env.sh
       shell: "chmod 744 {{ current_path }}/src/scripts/json2env.sh"
@@ -222,6 +248,20 @@
       shell: "cd {{ current_path }} && npm run build-prod"
       environment:
         NODE_OPTIONS: "--max-old-space-size=4096"
+
+    - name: Remove any existing pm2 process for this app
+      # `pm2 start` is NOT idempotent against an already-registered app name -
+      # if one exists (from a prior deploy, or one left crash-looping), it
+      # either no-ops or fights the old process for the same port instead of
+      # cleanly replacing it (confirmed: this caused an EADDRINUSE
+      # crash-loop against a stale process on load-test). Deleting first
+      # guarantees the `pm2 start` below always produces one clean process.
+      # App name is read from the just-fetched config rather than hardcoded,
+      # since each environment's Vault-provided pm2.config.json can use a
+      # different name (see "Fetch pm2 config file" above).
+      shell: >
+        app_name=$(jq -r '.apps[0].name' '{{ current_path }}/pm2.config.json') &&
+        pm2 delete "$app_name" --silent || true
 
     - name: Start pm2
       shell: "cd {{ current_path }} && pm2 start pm2.config.json"

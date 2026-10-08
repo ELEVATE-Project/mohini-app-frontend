@@ -8,6 +8,25 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 import "./index.css"
+// Every stylesheet the app uses, loaded up front in the exact order CRA's
+// single bundle loaded them (depth-first import order from release-2.3.2's
+// src/index.js -> App.js). With lazy routes, each page's CSS would otherwise
+// arrive only when that page is visited, so global rules (e.g. style.css's
+// `body { font-family: Manrope }`) go missing on other pages and the cascade
+// order changes with navigation history. Keep this list in this order; route
+// files still import their own CSS, which Vite dedupes into this bundle.
+import "./components/custom-style.css"
+import "./pages/Login/commonPageStyle.css"
+import "react-toastify/dist/ReactToastify.css"
+import "./components/ToastMessage/toastmessage_style.css"
+import "./pages/ai-creation/pages/shikshalokam-mitra/stylesheet/chatStyle.css"
+import "./components/TnC/privacyPolicyPopup.css"
+import "./style.css"
+import "./components/TnC/privacyPolicyStyle.css"
+import "./pages/ShikshalokamVoiceChat/shikshaChatStyle.css"
+import "./storyPdf.css"
+import "react-pdf/dist/Page/AnnotationLayer.css"
+import "react-pdf/dist/Page/TextLayer.css"
 import App from "./App"
 import { BrowserRouter } from "react-router-dom"
 import env from "./utils/env"

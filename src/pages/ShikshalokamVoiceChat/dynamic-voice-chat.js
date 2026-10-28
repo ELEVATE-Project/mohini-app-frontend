@@ -61,6 +61,8 @@ import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-vo
 import WaveSurferPlayer from "../interview-text-voice/voice-player"
 import { apiClient } from "../../api/client"
 import CustomFormData from "../../components/Form/FormData"
+import MultipleChoiceQuestions from "../../components/MultipleChoiceQuestions/MultipleChoiceQuestions"
+import sampleMcqResponse from "../../mock/sample_mcq_response.json"
 
 const cookies = new Cookies()
 
@@ -118,6 +120,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const [trigger, setTrigger] = useState(false)
   const [triggerDownload, setTriggerDownload] = useState(false)
   const [stepMetadata, setStepMetadata] = useState([])
+  const [activeValidations, setActiveValidations] = useState(sampleMcqResponse.validations)
+  const [activeBotMessage, setActiveBotMessage] = useState(sampleMcqResponse.translated_bot_message || sampleMcqResponse.bot_message || "")
 
   // ========== useSelector Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory, getChatHistory] = useSmartChatStorage()
@@ -635,7 +639,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           message: textMessage,
           language: chatLanguage,
           flow_name: activeFlowRoute,
-          company_bot: companyBotData.results[0].id,
+          company_bot: companyBotData?.results?.[0]?.id || 71,
           asr_audio: asrAudio && asrAudio.length > 0 ? asrAudio.join(',') : null
         })
 
@@ -659,6 +663,14 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
         if (res?.step !== undefined) {
           setStrandStep(res.step)
+        }
+
+        if (res?.validations) {
+          setActiveValidations(res.validations)
+          setActiveBotMessage(res?.translated_bot_message || res?.bot_message || "")
+        } else {
+          setActiveValidations(null)
+          setActiveBotMessage("")
         }
 
         if (res?.is_complete) {
@@ -857,6 +869,120 @@ const DynamicVoiceChat = ({ type = "" }) => {
       ])
     }
   }, [])
+
+  // Ensure the question from sampleMcqResponse appears in chat when mock validations are active
+  useEffect(() => {
+    if (activeValidations) {
+      const mockQuestion = sampleMcqResponse.translated_bot_message || sampleMcqResponse.bot_message
+      setChatHistory(prev => {
+        const history = Array.isArray(prev) ? prev : []
+        const alreadyHas = history.some(item => item?.msg === mockQuestion)
+        if (!alreadyHas) {
+          return [
+            ...history,
+            {
+              msg: mockQuestion,
+              source: "bot",
+              updated_at: "mcq_prompt_" + Date.now(),
+              received: true,
+            },
+          ]
+        }
+        return history
+      })
+    }
+  }, [activeValidations])
+
+  const handleMcqSubmit = useCallback(
+    async (selectedChoices, messageText) => {
+      if (!messageText) return
+
+      setLlmError("")
+      handleOnStopSpeaking()
+      setIsChatVisible(true)
+      setShowHomepage(false)
+      setIsMute(true)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+
+      handleMessagesForUser(messageText)
+      setActiveValidations(null)
+      setActiveBotMessage("")
+
+      if (isNonLlmStep(strandStep || 1)) {
+        try {
+          const res = await postNonLlmChat({
+            session: sessionId,
+            profile_id: profileToUse,
+            message: messageText,
+            language: chatLanguage,
+            flow_name: activeFlowRoute,
+            company_bot: companyBotData?.results?.[0]?.id,
+            asr_audio: null,
+          })
+
+          const chat_history_after_send = getChatHistory()
+          const updated_chat_history_after_send = chat_history_after_send.map(chat => {
+            if (!chat.received && chat.msg === messageText) {
+              return { ...chat, received: true }
+            }
+            return chat
+          })
+          setChatHistory(updated_chat_history_after_send)
+
+          const botMsg = res?.translated_bot_message || res?.bot_message
+          if (botMsg) {
+            setSentences(prev => [...prev, { message: botMsg, source: "bot", isNarrated: false, id: Date.now(), audio_s3_url: res?.audio_s3_url }])
+            handleMessagesForBot(botMsg, res?.audio_s3_url)
+          }
+
+          if (res?.step !== undefined) {
+            setStrandStep(res.step)
+          }
+
+          if (res?.validations) {
+            setActiveValidations(res.validations)
+            setActiveBotMessage(res?.translated_bot_message || res?.bot_message || "")
+          } else {
+            setActiveValidations(null)
+            setActiveBotMessage("")
+          }
+
+          if (res?.is_complete) {
+            setStrandStep(stateMachineLength)
+            setIsStreamingComplete(true)
+          }
+        } catch (err) {
+          console.warn("postNonLlmChat after MCQ selection:", err)
+          const chat_history_after_send = getChatHistory()
+          const updated_chat_history_after_send = chat_history_after_send.map(chat => {
+            if (!chat.received && chat.msg === messageText) {
+              return { ...chat, received: true }
+            }
+            return chat
+          })
+          setChatHistory(updated_chat_history_after_send)
+        }
+      }
+
+      handleScrollToView()
+    },
+    [
+      strandStep,
+      sessionId,
+      profileToUse,
+      chatLanguage,
+      activeFlowRoute,
+      companyBotData,
+      stateMachineLength,
+      handleMessagesForUser,
+      getChatHistory,
+      setChatHistory,
+      handleMessagesForBot,
+    ]
+  )
 
   useEffect(() => {
     if (!isFlowInfoError) return
@@ -2425,6 +2551,20 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 {flowInfo?.isParentFlow && <CustomFormData layOut={2} selectID="selectedTypeID" selectName="selectedType" selectOptions={(flowInfo.children_flows || []).filter(f => f.active).map(f => ({ label: f.flow_name, value: f.flow_route }))} selectValue={selectedChildFlowRoute} selectClassName="div31" selectOnChange={handleChildFlowChange} showDefaultDropdownText={false} />}
 
                 <button
+                  type="button"
+                  onClick={() => {
+                    setActiveValidations(prev => (prev ? null : sampleMcqResponse.validations))
+                    setActiveBotMessage(prev =>
+                      prev ? "" : sampleMcqResponse.translated_bot_message || sampleMcqResponse.bot_message || ""
+                    )
+                  }}
+                  className="px-2.5 py-1 text-xs font-medium rounded-full bg-teal-50 text-teal-800 border border-teal-300 hover:bg-teal-100 transition shadow-sm"
+                  title="Toggle Mock MCQ Options"
+                >
+                  {activeValidations ? "Hide MCQ" : "Show MCQ"}
+                </button>
+
+                <button
                   onClick={async e => {
                     if (accessToken) {
                       await resetChat(e)
@@ -2811,83 +2951,114 @@ const DynamicVoiceChat = ({ type = "" }) => {
               </div>
             </>
           )}
-          <div id="last-chat-boundary" className="div38" />
+          <div id="last-chat-boundary" className="div38" style={{ paddingBottom: activeValidations ? "220px" : "80px" }} />
         </div>
         <Notification />
 
         {(!showFileInput || showFileInput === null) && !isLoading && !endStoryMutation.isPending && (llmError === "" || !llmError) && Array.isArray(chatHistory) && chatHistory.some(item => item && Object.keys(item).length > 0) && (
-          <form
-            className="form-1 chat-input-row"
-            onSubmit={event => {
-              if (!hasStartedListening && !isFetchingData) {
-                handleSendMessage(event)
-              }
-            }}
-            autoComplete="off"
-          >
-            {/* Mic button on the left */}
-            <button type="button" aria-label={hasStartedRecording ? "stopRecording" : "startRecording"} aria-pressed={hasStartedRecording} onClick={hasStartedRecording ? stopRecording : startRecording} disabled={isFetchingData} className={`mic-btn ${hasStartedRecording ? "mic-recording" : "mic-idle"}`}>
-              {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
-            </button>
-
-            {/* Text area in the middle */}
-            <div className="textarea-wrapper relative">
-              <textarea
-                id="textBoxID"
-                className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
-                style={{ alignContent: isFetchingData ? "normal" : "center" }}
-                onChange={handleOnInputText}
-                placeholder={hasStartedRecording ? t("placeholder1") : isFetchingData ? t("placeholder2") : t("placeholder3")}
-                name="message-box"
-                value={textMessage}
-                autoFocus={false}
-                disabled={hasStartedRecording || isFetchingData || strandStep >= stateMachineLength}
-                ref={textAreaRef}
-                onInput={e => {
-                  e.target.style.height = "auto"
-                  const maxHeight = 150
-                  if (e.target.scrollHeight > maxHeight) {
-                    e.target.style.height = `${maxHeight}px`
-                    e.target.style.overflowY = "scroll"
-                  } else {
-                    e.target.style.height = `${e.target.scrollHeight}px`
-                    e.target.style.overflowY = "hidden"
-                  }
-                }}
-                onFocus={() => {
-                  setTimeout(() => {
-                    handleScrollToView()
-                    if (textAreaRef.current) {
-                      textAreaRef.current.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      })
-                    }
-                  }, 300)
-                }}
-                onKeyDown={e => {
-                  if (e.key === "Enter") {
-                    if (e.shiftKey) {
-                      e.preventDefault()
-                      e.target.form.requestSubmit()
-                      setTimeout(() => {
-                        e.target.value = ""
-                      }, 0)
-                    }
-                  }
-                }}
+          <div className="chat-bottom-docked-container">
+            {activeValidations && activeValidations.type === "MULTIPLE_CHOICE" && (
+              <MultipleChoiceQuestions
+                validations={activeValidations}
+                question={activeBotMessage}
+                onSubmit={handleMcqSubmit}
+                disabled={isFetchingData}
+                language={chatLanguage}
               />
-              {hasStartedRecording && (
-                <div className="absolute bottom-3 right-3 flex items-center space-x-1 text-red-600 text-sm font-medium pointer-events-none">
-                  <FaCircle className="text-red-500 animate-pulse text-xs" />
-                  <span>{formatTime(seconds)}</span>
-                </div>
-              )}
-            </div>
-            <button type="submit" aria-label={"sendMessage"} disabled={!textMessage.trim() || hasStartedRecording || isFetchingData} className="send-btn">
-              <MdSend />
-            </button>
-          </form>
+            )}
+            <form
+              className="form-1 chat-input-row"
+              onSubmit={event => {
+                if (!hasStartedListening && !isFetchingData && !activeValidations) {
+                  handleSendMessage(event)
+                }
+              }}
+              autoComplete="off"
+            >
+              {/* Mic button on the left */}
+              <button
+                type="button"
+                aria-label={hasStartedRecording ? "stopRecording" : "startRecording"}
+                aria-pressed={hasStartedRecording}
+                onClick={hasStartedRecording ? stopRecording : startRecording}
+                disabled={isFetchingData || Boolean(activeValidations)}
+                className={`mic-btn ${hasStartedRecording ? "mic-recording" : "mic-idle"}`}
+              >
+                {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
+              </button>
+
+              {/* Text area in the middle */}
+              <div className="textarea-wrapper relative">
+                <textarea
+                  id="textBoxID"
+                  className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
+                  style={{ alignContent: isFetchingData ? "normal" : "center" }}
+                  onChange={handleOnInputText}
+                  placeholder={
+                    activeValidations
+                      ? "Please choose an option above"
+                      : hasStartedRecording
+                      ? t("placeholder1")
+                      : isFetchingData
+                      ? t("placeholder2")
+                      : t("placeholder3")
+                  }
+                  name="message-box"
+                  value={textMessage}
+                  autoFocus={false}
+                  disabled={hasStartedRecording || isFetchingData || strandStep >= stateMachineLength || Boolean(activeValidations)}
+                  ref={textAreaRef}
+                  onInput={e => {
+                    e.target.style.height = "auto"
+                    const maxHeight = 150
+                    if (e.target.scrollHeight > maxHeight) {
+                      e.target.style.height = `${maxHeight}px`
+                      e.target.style.overflowY = "scroll"
+                    } else {
+                      e.target.style.height = `${e.target.scrollHeight}px`
+                      e.target.style.overflowY = "hidden"
+                    }
+                  }}
+                  onFocus={() => {
+                    setTimeout(() => {
+                      handleScrollToView()
+                      if (textAreaRef.current) {
+                        textAreaRef.current.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        })
+                      }
+                    }, 300)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      if (e.shiftKey) {
+                        e.preventDefault()
+                        e.target.form.requestSubmit()
+                        setTimeout(() => {
+                          e.target.value = ""
+                        }, 0)
+                      }
+                    }
+                  }}
+                />
+                {hasStartedRecording && (
+                  <div className="absolute bottom-3 right-3 flex items-center space-x-1 text-red-600 text-sm font-medium pointer-events-none">
+                    <FaCircle className="text-red-500 animate-pulse text-xs" />
+                    <span>{formatTime(seconds)}</span>
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                aria-label={"sendMessage"}
+                disabled={!textMessage.trim() || hasStartedRecording || isFetchingData || Boolean(activeValidations)}
+                className="send-btn"
+              >
+                <MdSend />
+              </button>
+            </form>
+          </div>
         )}
       </div>
     </>

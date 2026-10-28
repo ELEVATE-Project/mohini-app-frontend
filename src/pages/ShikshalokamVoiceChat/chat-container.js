@@ -117,8 +117,11 @@ function ChatContainer() {
 
       setIsLoading(false)
     } catch (error) {
-      console.error("Error during initial setup:", error)
-      navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY)
+      console.warn("Error during initial setup, using fallback for mock/local:", error)
+      setCompanyName("shikshalokamstaging")
+      if (!sessionId) {
+        setSessionId("mock_session_" + Date.now())
+      }
       setIsLoading(false)
     }
   }
@@ -155,16 +158,14 @@ function ChatContainer() {
       }
     }
 
-    if (!flowInfo) return
-
     setIpFetched(false)
     runSetup()
   }, [accessToken, sessionId, flowInfo])
 
   return (
     <>
-      {companyName && !isLoading && <DynamicVoiceChat />}
-      {(isLoading || !ipFetched) && (
+      {(companyName || sessionId) && !isLoading && <DynamicVoiceChat />}
+      {(isLoading || (!ipFetched && !companyName && !sessionId)) && (
         <div className="loader-load-spinner">
           <div className="div67">
             <BiLoader className="loader-rotate-loader loader-icon" />

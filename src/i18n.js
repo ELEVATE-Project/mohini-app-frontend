@@ -18,7 +18,7 @@ i18n
       escapeValue: false,
     },
     backend: {
-      loadPath: `https://${env.LOCALES_BUCKET()}${env.LOCALES_DIR_PATH()}/{{lng}}/{{ns}}.json`,
+      loadPath: `https://${env.LOCALES_DOMAIN()}${env.LOCALES_DIR_PATH()}/{{lng}}/{{ns}}.json`,
     },
   })
 

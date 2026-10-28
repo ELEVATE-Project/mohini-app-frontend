@@ -374,7 +374,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
     return "storyGuestLoaderHeading"
   }, [activeFlowRoute])
-  
+
   const storyLoaderLabel = useMemo(() => {
     if ([sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)) {
       return "reportLoader"
@@ -2456,7 +2456,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
         && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} />
       }
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t(tncText)} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
       <div className={`div27`}>
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
@@ -2613,8 +2613,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
                       <ul className="div11">
                         <li>{t([`config.${activeFlowRoute}.homepageList`, `config.default.homepageList`, `${prefix}homepageList`])}</li>
-                        <li>{t([[`config.${activeFlowRoute}.homepageList1`, `config.default.homepageList1`, `${prefix}homepageList1`]])}</li>
-                        <li>{t([[`config.${activeFlowRoute}.homepageList2`, `config.default.homepageList2`, `${prefix}homepageList2`]])}</li>
+                        <li>{t([`config.${activeFlowRoute}.homepageList1`, `config.default.homepageList1`, `${prefix}homepageList1`])}</li>
+                        <li>{t([`config.${activeFlowRoute}.homepageList2`, `config.default.homepageList2`, `${prefix}homepageList2`])}</li>
                       </ul>
                     </>
                   )

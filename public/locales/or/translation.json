@@ -26,7 +26,8 @@
     "reportLoader": "ଆପଣଙ୍କ ରିପୋର୍ଟ ତିଆରି କରାଯାଉଛି, ଏଥିରେ କିଛି ସମୟ ଲାଗିପାରେ। ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ...",
     "downloadLoader": "ଡାଉନଲୋଡ୍ ହେଉଛି, ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ...",
     "homepageHeading": "ଉନ୍ନତି ରିପୋର୍ଟ",
-    "homepageHeading1": "ମିତ୍ରା ସହିତ!",
+    "homepageHeadingDiscussion": "ଆଲୋଚନା ରିପୋର୍ଟ",
+    "homepageHeading1": "ମିତ୍ରଙ୍କ ସହିତ!",
     "homepageList": "ତଳେ ମିତ୍ରା ସହିତ ଚାଟିଂ ଆରମ୍ଭ କରନ୍ତୁ",
     "homepageList1": "ଆପଣଙ୍କ ରିପୋର୍ଟରେ ଫଟୋଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ",
     "homepageList2": "ଆପଣଙ୍କର ରିପୋର୍ଟ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |",
@@ -137,5 +138,8 @@
     "shiksha_samvad_homepageHeading1": "ମିତ୍ରା ସହିତ!",
     "shiksha_samvad_homepageList": "ମିତ୍ରା ସହିତ ଚ୍ୟାଟ୍ କରିବା ଆରମ୍ଭ କରନ୍ତୁ",
     "shiksha_samvad_homepageList1": "ମିତ୍ରା ସହିତ ଆପଣଙ୍କ ଅନୁଭବ ଏବଂ ଚିନ୍ତାଭାବଗୁଡ଼ିକ ସେୟାର କରନ୍ତୁ",
-    "shiksha_samvad_homepageList2": "ଆପଣଙ୍କର ପ୍ରତିକ୍ରିୟା ଦାଖଲ କରନ୍ତୁ |"
+    "shiksha_samvad_homepageList2": "ଆପଣଙ୍କର ପ୍ରତିକ୍ରିୟା ଦାଖଲ କରନ୍ତୁ |",
+    "pppi_PPsCompletionMessage": "<div class='text-class'>ଆପଣଙ୍କ ସମୟ ଏବଂ ଆମ ସହିତ ଆପଣଙ୍କ ମତାମତ ବାଣ୍ଟିଥିବାରୁ ଆପଣଙ୍କୁ ଧନ୍ୟବାଦ। ଆପଣଙ୍କ ମତାମତ ଅତ୍ୟନ୍ତ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଏବଂ ଏହା ଆପଣଙ୍କ ସନ୍ତାନ ତଥା ଅନ୍ୟମାନଙ୍କ ପାଇଁ ବିଦ୍ୟାଳୟକୁ ଆହୁରି ଉନ୍ନତ କରିବାରେ ସାହାଯ୍ୟ କରିବ।</div>",
+    "general_public_voice_PPsCompletionMessage": "<div class='text-class'>ଏହି ପ୍ରଶ୍ନଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ପାଇଁ ସମୟ ନେଇଥିବାରୁ ଧନ୍ୟବାଦ। ଯୁବକଙ୍କ ଭବିଷ୍ୟତ ପ୍ରସ୍ତୁତି ବୁଝିବା ଦିଗରେ ଆପଣ ଦଶ ଲକ୍ଷ କଣ୍ଠସ୍ୱରର ଅବଦାନ ରଖିଛନ୍ତି।</div>",
+    "one_million_youth_PPsCompletionMessage": "<div class='text-class'>ଏହି ପ୍ରଶ୍ନଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ପାଇଁ ସମୟ ନେଇଥିବାରୁ ଧନ୍ୟବାଦ।</div>"
 }

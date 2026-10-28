@@ -81,6 +81,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const { flow: storageFlow } = useUrlFlow()
   const selectedChildFlowRoute = useChatStorage()(state => state.selectedChildFlowRoute)
   const activeFlowRoute = selectedChildFlowRoute || storageFlow
+  const isYouthFlow = [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute)
+  const isEducationHouseConversationFlow = [sessionFlowName.Education_House_Conversation].includes(activeFlowRoute)
 
   // ========== useState Hooks ==========
   const [asrAudio, setAsrAudio] = useState([])
@@ -193,7 +195,6 @@ const DynamicVoiceChat = ({ type = "" }) => {
     queryKey: [API_ENDPOINTS.FLOW_CONNECTION_INFO, selectedChildFlowRoute],
     queryFn: () => getFlowInfoApi(selectedChildFlowRoute),
     enabled: !!selectedChildFlowRoute,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   })
@@ -1545,6 +1546,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
       [sessionFlowName.PPPI_BOT_1]: "pppi_",
       [sessionFlowName.PPPI_Set_2]: "pppi_",
       [sessionFlowName.Bihar_PTM]: "bihar_ptm_",
+      [sessionFlowName.Parent_Voice]: "pppi_",
+      [sessionFlowName.General_Public_Voice]: "general_public_voice_",
+      [sessionFlowName.One_Million_Youth]: "one_million_youth_",
     }
 
     if (paramsMap[activeFlowRoute]) {
@@ -2054,8 +2058,6 @@ const DynamicVoiceChat = ({ type = "" }) => {
           setFiles([])
           setShowFileInput(true)
           setLlmError("")
-          // Reset the audio mute preference once the chat is completed.
-          setDidUserMute(false)
           window.location.reload()
         } else {
           setLlmError(endStoryResponse?.error_message)
@@ -2139,14 +2141,23 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const handleChildFlowChange = e => {
     const newRoute = e.target.value
-    if (chatHistory.length > 0) {
-      showGuestPopup(() => {
-        setSelectedChildFlowRoute(newRoute)
-        resetChat()
-      }, stayOnPage)
-    } else {
+
+    // `introMessage` is persisted, and resetChat's reload does not clear it the
+    // way removeChatHistory clears the transcript. Left in place, the reloaded
+    // page seeds the outgoing sub-flow's welcome message into the new chat
+    // before the incoming one is fetched, leaving the greeting one switch
+    // behind. Clearing it here reproduces the first-load state, which is where
+    // the greeting already resolves correctly.
+    const switchToChildFlow = () => {
+      setIntroMessage(null)
       setSelectedChildFlowRoute(newRoute)
       resetChat()
+    }
+
+    if (chatHistory.length > 0) {
+      showGuestPopup(switchToChildFlow, stayOnPage)
+    } else {
+      switchToChildFlow()
     }
   }
 
@@ -2598,13 +2609,17 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
                   {activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute)
                     ? t("feedbackLoaderHeading")
-                    : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute)
+                    : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)
                       ? t("reportLoaderHeading")
-                      : activeFlowRoute && [sessionFlowName.GuestMiStory].includes(activeFlowRoute)
-                        ? t("storyGuestLoaderHeading")
-                        : t("storyLoaderHeading")}
+                      : isYouthFlow
+                        ? t("youth_storyGuestLoaderHeading")
+                        : isEducationHouseConversationFlow
+                          ? t("education_house_conversation_storyGuestLoaderHeading")
+                          : activeFlowRoute && [sessionFlowName.LoginMiStory].includes(activeFlowRoute)
+                            ? t("storyLoaderHeading")
+                            : t("storyGuestLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2679,6 +2694,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   const prefixMap = {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
+                    [sessionFlowName.General_Public_Voice]: "shiksha_samvad_",
+                    [sessionFlowName.One_Million_Youth]: "shiksha_samvad_",
+                    [sessionFlowName.Parent_Voice]: "shiksha_samvad_",
                     [sessionFlowName.ShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.DelhiShikshaSamvad]: "shiksha_samvad_",
                     [sessionFlowName.StudyTeacherInterview]: "shiksha_samvad_",
@@ -2692,11 +2710,14 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     [sessionFlowName.PPPI_BOT_1]: "shiksha_samvad_",
                     [sessionFlowName.PPPI_Set_2]: "shiksha_samvad_",
                     [sessionFlowName.Bihar_PTM]: "shiksha_samvad_",
+                    [sessionFlowName.Youth_21_25]: "youth_",
+                    [sessionFlowName.Youth_12_20]: "youth_",
+                    [sessionFlowName.Education_House_Conversation]: "education_house_conversation_",
                   }
 
                   const prefix = prefixMap[activeFlowRoute] || ""
 
-                  const homePageHeading = activeFlowRoute === sessionFlowName.GuestDiscussion ? "homepageHeadingDiscussion" : "homepageHeading"
+                  const homePageHeading = [sessionFlowName.GuestDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? "homepageHeadingDiscussion" : "homepageHeading"
 
                   return (
                     <>
@@ -2744,7 +2765,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               )}
             </>
           )}
-          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(activeFlowRoute) && accessToken) && (
+          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(activeFlowRoute) && accessToken) && (
             <>
               {activeFlowInfo && activeFlowInfo.image_config && (
                 <div className="div13">
@@ -2753,13 +2774,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     userType="bot"
                     message={(() => {
                       const flow = activeFlowRoute
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot, sessionFlowName.ListeningActivity].includes(flow) ? t("evidence") : t("evidenceStory")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = activeFlowRoute
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot, sessionFlowName.ListeningActivity].includes(flow) ? t("evidence") : t("evidenceStory")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -2853,11 +2874,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")}
+                    message={activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
-                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportText") : activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -2882,7 +2903,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("downloadReportText") : t("downloadStoryText")}
+                            {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("downloadReportText") : isYouthFlow ? t("youth_downloadStoryText") : isEducationHouseConversationFlow ? t("education_house_conversation_downloadReportText") : t("downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -2895,7 +2916,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(activeFlowRoute) ? t("editReportText") : t("editStoryText")}
+                          {activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("editReportText") : isYouthFlow ? t("youth_editReportText") : isEducationHouseConversationFlow ? t("education_house_conversation_editReportText") : t("editStoryText")}
                         </span>
                       </div>
                     </button>

@@ -175,6 +175,8 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
   const ssoRerouteURL = useSiteStorage()(state => state.ssoRerouteURL)
   const stateMachineLength = useChatStorage()(state => state.stateMachineLength)
   const storageFlow = useChatStorage()(state => state.flow)
+  const isYouthFlow = [sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(storageFlow)
+  const isEducationHouseConversationFlow = [sessionFlowName.Education_House_Conversation].includes(storageFlow)
   const strandStep = useChatDataSessionStore(state => state.strandStep)
   const didUserMute = useChatDataSessionStore(state => state.didUserMute)
   const setDidUserMute = useChatDataSessionStore(state => state.setDidUserMute)
@@ -372,7 +374,7 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
 
   const isSpecialFlow = useMemo(() => {
     if (!storageFlow) return false
-    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey].includes(storageFlow)
+    return [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.GuestMiStory, sessionFlowName.ParentPerceptionSurvey, sessionFlowName.SanjhiSikhiyaStoryBot, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow)
   }, [storageFlow])
 
   const shouldFetchChatSession = useMemo(() => {
@@ -2921,9 +2923,9 @@ function handleLlmError(errorMessage, errorType) {
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
+                  {storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("feedbackLoaderHeading") : storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("reportLoaderHeading") : isYouthFlow ? t("youth_storyGuestLoaderHeading") : isEducationHouseConversationFlow ? t("education_house_conversation_storyGuestLoaderHeading") : storageFlow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(storageFlow) ? t("storyGuestLoaderHeading") : t("storyLoaderHeading")}
                 </h2>
-                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
               </div>
             )}
           </div>
@@ -2994,11 +2996,14 @@ function handleLlmError(errorMessage, errorType) {
                   const prefixMap = {
                     [sessionFlowName.ListeningActivity]: "la_",
                     [sessionFlowName.ParentPerceptionSurvey]: "pppi_",
+                    [sessionFlowName.Youth_21_25]: "youth_",
+                    [sessionFlowName.Youth_12_20]: "youth_",
+                    [sessionFlowName.Education_House_Conversation]: "education_house_conversation_",
                   }
 
                   const prefix = prefixMap[storageFlow] || ""
 
-                  const homePageHeading = storageFlow === sessionFlowName.GuestDiscussion ? "homepageHeadingDiscussion" : "homepageHeading"
+                  const homePageHeading = [sessionFlowName.GuestDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? "homepageHeadingDiscussion" : "homepageHeading"
                   return (
                     <>
                       <div className="div10">
@@ -3044,7 +3049,7 @@ function handleLlmError(errorMessage, errorType) {
               )}
             </>
           )}
-          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory].includes(storageFlow) && accessToken) && (
+          {isStreamingComplete && showFileInput && !showHomepage && !endStoryMutation.isPending && !isLoading && !isPdfDownloading && storyData?.id !== "" && !([sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(storageFlow) && accessToken) && (
             <>
               {![sessionFlowName.ListeningActivity, sessionFlowName.ParentPerceptionSurvey].includes(storageFlow) && (
                 <div className="div13">
@@ -3053,13 +3058,13 @@ function handleLlmError(errorMessage, errorType) {
                     userType="bot"
                     message={(() => {
                       const flow = storageFlow
-                      return flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      return flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
                     })()}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={() => {
                       const flow = storageFlow
-                      const message_to_use = flow && [sessionFlowName.GuestMiStory].includes(flow) ? t("evidenceStory") : t("evidence")
+                      const message_to_use = flow && [sessionFlowName.GuestMiStory, sessionFlowName.SanjhiSikhiyaStoryBot].includes(flow) ? t("evidenceStory") : t("evidence")
                       handleOnSpeaking(message_to_use, "upload-img-id", { msg: message_to_use, updated_at: "upload-img-id", source: "bot" })
                     }}
                     isAnyPlaying={!!hasOverRideId || isTalking}
@@ -3140,11 +3145,11 @@ function handleLlmError(errorMessage, errorType) {
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
-                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")}
+                    message={storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")}
                     isTalking={false}
                     handleOnStopSpeaking={() => handleOnStopSpeaking()}
                     handleOnSpeaking={(message, updatedAt, staticMessage) => {
-                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : t("storyText")
+                      const message_to_use = storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("reportText") : storageFlow && [sessionFlowName.ListeningActivity].includes(storageFlow) ? t("reportFeedbackText") : isYouthFlow ? t("youth_storyText") : isEducationHouseConversationFlow ? t("education_house_conversation_storyText") : t("storyText")
                       console.log("message_to_use", message_to_use)
                       handleOnSpeaking(message_to_use, "download-story-id", { msg: message_to_use, updated_at: "download-story-id", source: "bot" })
                     }}
@@ -3169,7 +3174,7 @@ function handleLlmError(errorMessage, errorType) {
                         <div className="download-story-div">
                           <FiDownload className="icon-1" />
                           <span className="div16" ref={endPageToScrollRef}>
-                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("downloadReportText") : t("downloadStoryText")}
+                            {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("downloadReportText") : isYouthFlow ? t("youth_downloadStoryText") : isEducationHouseConversationFlow ? t("education_house_conversation_downloadReportText") : t("downloadStoryText")}
                           </span>
                         </div>
                       </button>
@@ -3182,7 +3187,7 @@ function handleLlmError(errorMessage, errorType) {
                       <div className="download-story-div">
                         <MdEdit className="icon-1" />
                         <span className="div16" ref={endPageToScrollRef}>
-                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("editReportText") : t("editStoryText")}
+                          {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("editReportText") : isYouthFlow ? t("youth_editReportText") : isEducationHouseConversationFlow ? t("education_house_conversation_editReportText") : t("editStoryText")}
                         </span>
                       </div>
                     </button>
@@ -3230,7 +3235,7 @@ function handleLlmError(errorMessage, errorType) {
                   <div className="download-story-div">
                     <TbReload className="icon-1" />
                     <span className="div16" ref={endPageToScrollRef}>
-                      {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion].includes(storageFlow) ? t("reDownloadReportText") : t("reDownloadStoryText")}
+                      {storageFlow && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(storageFlow) ? t("reDownloadReportText") : t("reDownloadStoryText")}
                     </span>
                   </div>
                 </button>

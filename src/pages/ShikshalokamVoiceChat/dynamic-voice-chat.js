@@ -379,10 +379,10 @@ const DynamicVoiceChat = ({ type = "" }) => {
     if ([sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)) {
       return "reportLoader"
     }
-    else if([sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].has(activeFlowRoute)) {
+    else if([sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute)) {
       return "youth_storyLoader"
     }
-    else if([sessionFlowName.Education_House_Conversation].has(activeFlowRoute)) {
+    else if([sessionFlowName.Education_House_Conversation].includes(activeFlowRoute)) {
       return "education_house_conversation_storyLoader"
     }
     return "storyLoader"

@@ -174,6 +174,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
   // ========== react query hooks ==========
   const endStoryMutation = useMutation({ mutationFn: data => endStoryV2Api(data) })
 
+  // ========= success callbacks ==========
+
+  const redirectedRef = useRef(false)
+
+
   const {
     data: flowInfo,
     isError: isFlowInfoError,
@@ -197,12 +202,15 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const activeFlowInfo = childFlowInfo || flowInfo
 
-  const { data: companyBotData } = useQuery({
-    queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, activeFlowInfo?.bot_route, languageToUse, accessToken],
-    queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: activeFlowInfo.bot_route, target_language: languageToUse }),
-    enabled: !!(languageToUse && profileToUse && activeFlowInfo?.bot_route),
-    refetchOnWindowFocus: false,
-  })
+  const {
+  data: companyBotData,
+  isError: isCompanyBotError,
+} = useQuery({
+  queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, activeFlowInfo?.bot_route, languageToUse, accessToken],
+  queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: activeFlowInfo.bot_route, target_language: languageToUse }),
+  enabled: !!(languageToUse && profileToUse && activeFlowInfo?.bot_route),
+  refetchOnWindowFocus: false,
+})
 
   const { data: introMessageData, isLoading: isIntroMessageLoading } = useQuery({
     queryKey: [API_ENDPOINTS.BOT_VERNACULAR, activeFlowInfo?.bot_route, languageToUse],
@@ -1404,59 +1412,89 @@ const DynamicVoiceChat = ({ type = "" }) => {
   /**
    * * Display Popup for the flows where end story api is not being called
    */
-  useEffect(() => {
-    let survey_title = "PPsCompletionMessage"
+   useEffect(() => {
+  let survey_title = "PPsCompletionMessage"
 
-    const paramsMap = {
-      [sessionFlowName.ShikshaSamvad]: "shiksha_samvad_",
-      [sessionFlowName.DelhiShikshaSamvad]: "delhi_shiksha_",
-      [sessionFlowName.OdishaYouth]: "odisha_youth_",
-      [sessionFlowName.OdishaYouthAI]: "odisha_youth_",
-      [sessionFlowName.StudyTeacherInterview]: "fgd_teacher_",
-      [sessionFlowName.StakeholderFGD]: "stakeholder_fgd_",
-      [sessionFlowName.BiharStudentFGD]: "bihar_student_fgd_",
-      [sessionFlowName.CommunityFGD]: "bihar_student_fgd_",
-      [sessionFlowName.XylemX_entrepreneurship_development]: "xylemx_entrepreneurship_development_",
-      [sessionFlowName.PPPI_BOT_1]: "pppi_",
-      [sessionFlowName.PPPI_Set_2]: "pppi_",
-      [sessionFlowName.Bihar_PTM]: "bihar_ptm_",
-      [sessionFlowName.Parent_Voice]: "pppi_",
-      [sessionFlowName.General_Public_Voice]: "general_public_voice_",
-      [sessionFlowName.One_Million_Youth]: "one_million_youth_",
+  const paramsMap = {
+    [sessionFlowName.ShikshaSamvad]: "shiksha_samvad_",
+    [sessionFlowName.DelhiShikshaSamvad]: "delhi_shiksha_",
+    [sessionFlowName.OdishaYouth]: "odisha_youth_",
+    [sessionFlowName.OdishaYouthAI]: "odisha_youth_",
+    [sessionFlowName.StudyTeacherInterview]: "fgd_teacher_",
+    [sessionFlowName.StakeholderFGD]: "stakeholder_fgd_",
+    [sessionFlowName.BiharStudentFGD]: "bihar_student_fgd_",
+    [sessionFlowName.CommunityFGD]: "bihar_student_fgd_",
+    [sessionFlowName.XylemX_entrepreneurship_development]: "xylemx_entrepreneurship_development_",
+    [sessionFlowName.PPPI_BOT_1]: "pppi_",
+    [sessionFlowName.PPPI_Set_2]: "pppi_",
+    [sessionFlowName.Bihar_PTM]: "bihar_ptm_",
+    [sessionFlowName.Parent_Voice]: "pppi_",
+    [sessionFlowName.General_Public_Voice]: "general_public_voice_",
+    [sessionFlowName.One_Million_Youth]: "one_million_youth_",
+  }
+
+  if (paramsMap[activeFlowRoute]) {
+    survey_title = paramsMap[activeFlowRoute] + survey_title
+  }
+
+  const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot"
+  const isFlowComplete =
+    activeFlowRoute &&
+    activeFlowInfo?.create_story === "none" &&
+    isStreamingComplete &&
+    stateMachineLength &&
+    strandStep >= stateMachineLength &&
+    isLastMessageFromBot
+  
+  if (!isFlowComplete) return
+
+  // Success page: redirect when the bot config provides a safe path
+  if (!redirectedRef.current) {
+    // Wait for the bot config. If the request failed, fall through to the popup.
+    if (!companyBotData && !isCompanyBotError) return
+    
+    const bot =
+      companyBotData?.results?.find(b => b.route === activeFlowInfo?.bot_route) ||
+      companyBotData?.results?.[0]
+    const redirectPath = bot?.other_params?.on_success_redirect_uri
+    
+    if (isSafeRelativePath(redirectPath)) {
+      redirectedRef.current = true
+      stopAllAudio()
+      const url = new URL(redirectPath, window.location.origin)
+      url.searchParams.set("language", (chatLanguage || "en").toLowerCase())
+      url.searchParams.set("flow", activeFlowRoute)
+      navigate(url.pathname + url.search, { replace: true })
+      return
     }
+  }
 
-    if (paramsMap[activeFlowRoute]) {
-      survey_title = paramsMap[activeFlowRoute] + survey_title
-    }
-
-    const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot"
-    if (activeFlowRoute && activeFlowInfo?.create_story === "none" && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && isLastMessageFromBot) {
-      Swal.fire({
-        title: t(survey_title),
-        showCancelButton: false,
-        confirmButtonText: t("PPsCompletionCTA"),
-        showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad, sessionFlowName.OdishaYouth, sessionFlowName.OdishaYouthAI, sessionFlowName.TelanganaPTMPilot, sessionFlowName.Bihar_PTM].includes(activeFlowRoute),
-        showCloseButton: false,
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
-        imageHeight: "100",
-      }).then(result => {
-        if (result.isConfirmed) {
-          clearFromStorage()
-          setLanguage(LANGUAGE_ENUMS.ENGLISH)
-          setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
-          setHasSelectedLanguage(false)
-          stopAllAudio()
-          navigate({
-            pathname: ROUTES.SHIKSHAGRAHA_REPOSITORY,
-            search: activeFlowRoute ? new URLSearchParams({ flow: activeFlowRoute }).toString() : "",
-          })
-          window.location.reload()
-        }
+  // Fallback: existing popup, unchanged
+  Swal.fire({
+    title: t(survey_title),
+    showCancelButton: false,
+    confirmButtonText: t("PPsCompletionCTA"),
+    showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad, sessionFlowName.OdishaYouth, sessionFlowName.OdishaYouthAI, sessionFlowName.TelanganaPTMPilot, sessionFlowName.Bihar_PTM].includes(activeFlowRoute),
+    showCloseButton: false,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+    imageHeight: "100",
+  }).then(result => {
+    if (result.isConfirmed) {
+      clearFromStorage()
+      setLanguage(LANGUAGE_ENUMS.ENGLISH)
+      setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
+      setHasSelectedLanguage(false)
+      stopAllAudio()
+      navigate({
+        pathname: ROUTES.SHIKSHAGRAHA_REPOSITORY,
+        search: activeFlowRoute ? new URLSearchParams({ flow: activeFlowRoute }).toString() : "",
       })
+      window.location.reload()
     }
-  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow])
+  })
+}, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage])
 
   // ========================================================================
   // SECTION: UI State Management (Execution Order: 7 - Throughout Lifecycle)
@@ -2065,6 +2103,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
       console.error({ error })
     }
   }
+
+  // safe check for relative path to avoid SSRF attacks
+
+  function isSafeRelativePath(p) {
+  return typeof p === "string" && p.startsWith("/") && !p.startsWith("//")
+}
 
   const pdfDownloadSidebar = async sessionid => {
     try {

@@ -8,6 +8,7 @@ import ROUTES from "./url"
 import LoadingSpinner from "./components/LoadingSpinner"
 import RouteErrorBoundary from "./components/RouteErrorBoundary"
 import LanguageGuard from "./hooks/useLanguageGuard"
+import ThankYouLoader from "./pages/thankYou/ThankYouLoader"
 
 // Route-level code splitting: these are only pulled into a chunk when their
 // route is actually visited, instead of all landing in one bundle. See
@@ -22,6 +23,7 @@ const UnifiedChat = React.lazy(() => import("./pages/UnifiedChat/UnifiedChat"))
 const ChatContainer = React.lazy(() => import("./pages/ShikshalokamVoiceChat/chat-container"))
 const MainPage = React.lazy(() => import("pages/ai-creation/pages/shikshalokam-mitra/MainPage"))
 const ImprovementPlan = React.lazy(() => import("pages/ai-creation/pages/improvement-plan"))
+const ThankYouPage = React.lazy(() => import("./pages/thankYou/ThankYouPage"))
 
 const queryClient = new QueryClient()
 
@@ -86,6 +88,15 @@ const unprotected_old_routes = [
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY, element: <CommonHomePage /> },
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY_DETAIL, element: <ShikshagrahaRepositoryDetail /> },
   { path: ROUTES.NOT_FOUND, element: <NotFound /> },
+  { path: ROUTES.SHARE_TEMPLATE, element: <ThankYouPage /> },
+  {
+  path: ROUTES.SHARE_TEMPLATE,
+  element: (
+    <Suspense fallback={<ThankYouLoader />}>
+      <ThankYouPage />
+    </Suspense>
+  ),
+},
 ]
 
 const unprotected_routes_config = []

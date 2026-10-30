@@ -1449,7 +1449,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
   if (!isFlowComplete) return
 
   // Success page: redirect when the bot config provides a safe path
-  if (!redirectedRef.current) {
+  if (redirectedRef.current)  return
     // Wait for the bot config. If the request failed, fall through to the popup.
     if (!companyBotData && !isCompanyBotError) return
     
@@ -1467,7 +1467,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       navigate(url.pathname + url.search, { replace: true })
       return
     }
-  }
+  
 
   // Fallback: existing popup, unchanged
   Swal.fire({

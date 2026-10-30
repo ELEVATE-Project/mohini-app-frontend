@@ -88,7 +88,6 @@ const unprotected_old_routes = [
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY, element: <CommonHomePage /> },
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY_DETAIL, element: <ShikshagrahaRepositoryDetail /> },
   { path: ROUTES.NOT_FOUND, element: <NotFound /> },
-  { path: ROUTES.SHARE_TEMPLATE, element: <ThankYouPage /> },
   {
   path: ROUTES.SHARE_TEMPLATE,
   element: (

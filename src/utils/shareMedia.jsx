@@ -10,7 +10,7 @@ export const getRootPath = () => {
 
 // Fetches the rendered thank-you template for a mediaTemplate row.
 export const getTemplateDetails = async (templateId, language = "en") => {
-  const res = await axiosInstance.get(`api/template-details/${templateId}`, {
+  const res = await axiosInstance.get(`api/template-details/${encodeURIComponent(templateId)}`, {
     params: { language },
   })
   return res.data

@@ -4,6 +4,8 @@ import { useChatDataLocalStore, useChatDataSessionStore } from "store"
 import { getTemplateDetails } from "../../utils/shareMedia"
 import TemplateFrame from "./TemplateFrame"
 import ThankYouLoader from "./ThankYouLoader"
+import { LOADER_KEYS } from "../ai-creation/constants/common"
+import { useTranslation } from "react-i18next"
 
 export default function ThankYouPage() {
   const { templateId } = useParams()
@@ -11,7 +13,7 @@ export default function ThankYouPage() {
   const language = (params.get("language") || "en").toLowerCase()
   const flow = params.get("flow") || ""
   const [state, setState] = useState({ status: "loading", html: "" })
-
+  const { t } = useTranslation()
   useEffect(() => {
     useChatDataLocalStore.setState(useChatDataLocalStore.getInitialState(), true)
     useChatDataSessionStore.setState(useChatDataSessionStore.getInitialState(), true)
@@ -34,8 +36,8 @@ export default function ThankYouPage() {
     }
   }, [templateId, language])
 
-  if (state.status === "loading") return <ThankYouLoader />
-  if (state.status === "fallback") return <p>Thank you, your response is submitted.</p>
+  if (state.status === LOADER_KEYS.LOADING) return <ThankYouLoader />
+  if (state.status === LOADER_KEYS.FALLBACK) return <p>{t("SuccessfullySubmittedMessage")}</p>
 
   return <TemplateFrame html={state.html} flow={flow} />
 }

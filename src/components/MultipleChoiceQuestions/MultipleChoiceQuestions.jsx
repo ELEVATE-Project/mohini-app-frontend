@@ -24,7 +24,6 @@ const MultipleChoiceQuestions = ({
   const choices = config.choices || []
   const minChoices = config.min_choices ?? 1
   const maxChoices = config.max_choices ?? 1
-  const errorMessages = validations?.error_message || {}
   const isSingleChoice = maxChoices === 1
   const questionText = question || validations?.bot_message || ""
 
@@ -34,16 +33,39 @@ const MultipleChoiceQuestions = ({
     setErrorMessage("")
   }, [validations])
 
+  const getErrorMessage = (key, fallback = "") => {
+    const raw = validations?.error_message
+    if (Array.isArray(raw)) {
+      const match = raw.find(item => item && item.key === key)
+      if (match?.text) return match.text
+    } else if (raw && typeof raw === "object") {
+      if (typeof raw[key] === "string" && raw[key]) return raw[key]
+      if (raw[key]?.text) return raw[key].text
+    }
+    return fallback
+  }
+
   const getChoiceLabel = choice => {
+    if (!choice) return ""
     if (language && language !== "en") {
       if (choice.translations && choice.translations[language]?.text) {
         return choice.translations[language].text
+      }
+      if (choice.translations && choice.translations[language]?.label) {
+        return choice.translations[language].label
+      }
+      if (choice.translated_text) {
+        return choice.translated_text
       }
       if (choice.translated_label) {
         return choice.translated_label
       }
     }
-    return choice.label || choice.key
+    return choice.text || choice.label || choice.key || ""
+  }
+
+  const getChoiceAudioUrl = choice => {
+    return choice?.audio_s3_url || choice?.audio_url || null
   }
 
   const handleToggleChoice = (choice) => {
@@ -65,7 +87,8 @@ const MultipleChoiceQuestions = ({
     } else {
       if (selectedKeys.length >= maxChoices) {
         const msg =
-          errorMessages.max ||
+          getErrorMessage("max") ||
+          getErrorMessage("default") ||
           `You can select up to ${maxChoices} options.`
         setErrorMessage(msg)
         return
@@ -104,10 +127,19 @@ const MultipleChoiceQuestions = ({
 
     if (selectedKeys.length < minChoices) {
       const msg =
-        errorMessages.required ||
-        errorMessages.min ||
-        errorMessages.default ||
+        getErrorMessage("required") ||
+        getErrorMessage("min") ||
+        getErrorMessage("default") ||
         `Please select at least ${minChoices} option${minChoices > 1 ? "s" : ""}.`
+      setErrorMessage(msg)
+      return
+    }
+
+    if (selectedKeys.length > maxChoices) {
+      const msg =
+        getErrorMessage("max") ||
+        getErrorMessage("default") ||
+        `You can select up to ${maxChoices} options.`
       setErrorMessage(msg)
       return
     }
@@ -158,6 +190,7 @@ const MultipleChoiceQuestions = ({
         {choices.map(choice => {
           const isSelected = selectedKeys.includes(choice.key)
           const label = getChoiceLabel(choice)
+          const audioUrl = getChoiceAudioUrl(choice)
 
           return (
             <button
@@ -174,16 +207,22 @@ const MultipleChoiceQuestions = ({
 
               <span className="mcq-choice-label">{label}</span>
 
-              {choice.audio_url && (
-                <button
-                  type="button"
-                  className={`mcq-audio-btn ${playingAudioUrl === choice.audio_url ? "playing" : ""}`}
-                  onClick={e => handleAudioPlay(e, choice.audio_url)}
+              {audioUrl && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className={`mcq-audio-btn ${playingAudioUrl === audioUrl ? "playing" : ""}`}
+                  onClick={e => handleAudioPlay(e, audioUrl)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleAudioPlay(e, audioUrl)
+                    }
+                  }}
                   aria-label={`Play pronunciation for ${label}`}
                   title="Listen"
                 >
                   <FaVolumeUp />
-                </button>
+                </span>
               )}
             </button>
           )
@@ -194,7 +233,7 @@ const MultipleChoiceQuestions = ({
       <div className="mcq-actions-bar">
         <button
           type="button"
-          disabled={disabled || selectedKeys.length < minChoices}
+          disabled={disabled || selectedKeys.length < minChoices || selectedKeys.length > maxChoices}
           className="mcq-submit-btn"
           onClick={handleSubmit}
         >
@@ -210,15 +249,17 @@ MultipleChoiceQuestions.propTypes = {
   validations: PropTypes.shape({
     type: PropTypes.string,
     render_as: PropTypes.string,
-    error_message: PropTypes.object,
-    error_audio_url: PropTypes.object,
+    error_message: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    error_audio_url: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     config: PropTypes.shape({
       choices: PropTypes.arrayOf(
         PropTypes.shape({
           key: PropTypes.string.isRequired,
+          text: PropTypes.string,
           label: PropTypes.string,
           translated_label: PropTypes.string,
           audio_url: PropTypes.string,
+          audio_s3_url: PropTypes.string,
           translations: PropTypes.object,
         })
       ),

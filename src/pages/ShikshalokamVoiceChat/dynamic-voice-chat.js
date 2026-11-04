@@ -1464,7 +1464,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       Swal.fire({
         title: t([`config.${activeFlowRoute}.${survey_title}`, `config.default.${survey_title}`, survey_title]),
         showCancelButton: false,
-        confirmButtonText: t("PPsCompletionCTA"),
+        confirmButtonText: t([`config.${activeFlowRoute}.PPsCompletionCTA`, "PPsCompletionCTA"]),
         showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad, sessionFlowName.OdishaYouth, sessionFlowName.OdishaYouthAI, sessionFlowName.TelanganaPTMPilot, sessionFlowName.Bihar_PTM].includes(activeFlowRoute),
         showCloseButton: false,
         allowEscapeKey: false,

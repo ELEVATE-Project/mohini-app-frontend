@@ -9,7 +9,7 @@ export default function TemplateFrame({ html, flow }) {
   const doc = html.replaceAll("__START_URL__", startUrl)
   return (
     <iframe
-      title={t("thankYouFrameTitle")}
+      title={t("SuccessfullySubmittedMessage")}
       srcDoc={doc}
       sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads allow-top-navigation-by-user-activation"
       allow="web-share; clipboard-write"

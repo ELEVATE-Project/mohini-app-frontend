@@ -32,3 +32,13 @@ public/env-config.js
 downloads/
 test-results/
 playwright-report/
+
+# local session/memory tooling (not part of the app; see .claude/brain/README.md)
+memory.sh
+primer.md
+project-memory.md
+graphify-out/
+CLAUDE.md
+
+# Jenkins pipeline reference copy - not meant to live in the repo long-term (see its own header)
+Jenkinsfile

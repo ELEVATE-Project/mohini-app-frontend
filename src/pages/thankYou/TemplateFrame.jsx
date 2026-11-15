@@ -11,7 +11,7 @@ export default function TemplateFrame({ html, flow }) {
     <iframe
       title={t("SuccessfullySubmittedMessage")}
       srcDoc={doc}
-      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads allow-top-navigation-by-user-activation"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads allow-top-navigation-by-user-activation"
       allow="web-share; clipboard-write"
       style={{ border: 0, width: "100%", height: "100dvh" }}
     />

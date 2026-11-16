@@ -101,3 +101,13 @@ export function buildWebSocketUrl({ searchParams, storageFlow, selectedType, wss
 
   return null
 }
+
+// Detects iPhone, iPad and iPod, including iPadOS, which reports itself as a Mac.
+export const isIOS = () => {
+  if (typeof navigator === "undefined") return false
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  )
+}

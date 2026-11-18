@@ -1461,8 +1461,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
     if (isSafeRelativePath(redirectPath)) {
       redirectedRef.current = true
       stopAllAudio()
+      setHasSelectedLanguage(false)
       const url = new URL(redirectPath, window.location.origin)
-      // url.searchParams.set("language", (chatLanguage || "en").toLowerCase())
       url.searchParams.set("flow", activeFlowRoute)
       navigate(url.pathname + url.search, { replace: true })
       return

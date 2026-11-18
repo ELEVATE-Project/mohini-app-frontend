@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, useSearchParams } from "react-router-dom"
-import { useChatDataLocalStore, useChatDataSessionStore } from "store"
+import { useChatDataLocalStore, useChatDataSessionStore ,useSiteDataSessionStore} from "store"
 import { getTemplateDetails } from "../../utils/shareMedia"
 import TemplateFrame from "./TemplateFrame"
 import ThankYouLoader from "./ThankYouLoader"
@@ -17,6 +17,7 @@ export default function ThankYouPage() {
   useEffect(() => {
     useChatDataLocalStore.setState(useChatDataLocalStore.getInitialState(), true)
     useChatDataSessionStore.setState(useChatDataSessionStore.getInitialState(), true)
+    useSiteDataSessionStore.getState().setHasSelectedLanguage(false)
   }, [])
 
   useEffect(() => {

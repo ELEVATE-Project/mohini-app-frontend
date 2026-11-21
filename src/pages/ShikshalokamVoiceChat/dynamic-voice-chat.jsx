@@ -105,6 +105,10 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const [isRecognizing, setIsRecognizing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isStreamingComplete, setIsStreamingComplete] = useState(true)
+  // True when the flow ended without a closing bot message. Happens when the backend auto-fills the
+  // last question(s) from the logged-in user's profile: it then sends the usual end signal with an
+  // empty message, so no bot message ever reaches chatHistory. Used by the completion popup below.
+  const [completedWithoutBotMessage, setCompletedWithoutBotMessage] = useState(false)
   const [isTalking, setTalking] = useState(0)
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [noStoryFound, setNoStoryFound] = useState(false)
@@ -325,7 +329,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
           if (message.finish_reason === FINISH_REASON_SOCKET && message?.audio_s3_url) {
             lastSentence.audio_s3_url = message.audio_s3_url
           }
-        } else {
+        } else if (message?.msg) {
+          // Only start a new bot bubble when there is text. The end-of-flow signal sent after the
+          // backend auto-fills the final question(s) from the user's profile has an empty msg; pushing
+          // it would show an empty bubble and send an empty string to TTS. The append branch above is
+          // deliberately left unguarded: normal streams end with an empty chunk that still carries
+          // finish_reason / audio_s3_url for the current bubble.
           updatedSentences.push({
             message: message?.msg || "",
             source: "bot",
@@ -334,6 +343,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
             audio_s3_url: message.finish_reason === FINISH_REASON_SOCKET ? message?.audio_s3_url : undefined,
           })
           lastBotMessageIndex.current = updatedSentences.length - 1
+        } else if (message.finish_reason === FINISH_REASON_SOCKET) {
+          // Empty final message with no bot bubble in progress: the flow ended without a closing
+          // message (see completedWithoutBotMessage). Setting the same value twice is harmless if
+          // React re-runs this updater.
+          setCompletedWithoutBotMessage(true)
         }
         return updatedSentences
       })
@@ -703,6 +717,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
         if (res?.is_complete) {
           setStrandStep(stateMachineLength)
           setIsStreamingComplete(true)
+          // Completed with no closing question: the backend auto-filled the last step(s) from the
+          // user's profile, so the popup can't wait for a bot message in chatHistory.
+          if (!botMsg) {
+            setCompletedWithoutBotMessage(true)
+          }
         }
         if (res?.operation_type === "llm") {
           // Next step is LLM — open WebSocket to continue
@@ -1474,7 +1493,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
       isStreamingComplete &&
       stateMachineLength &&
       strandStep >= stateMachineLength &&
-      isLastMessageFromBot
+      // Normally the flow ends on the bot's closing message; when the last step(s) were auto-filled
+      // from the profile there is none, and completedWithoutBotMessage stands in for it.
+      (isLastMessageFromBot || completedWithoutBotMessage)
 
     if (!isFlowComplete) return
 
@@ -1524,7 +1545,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
         window.location.reload()
       }
     })
-  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage])
+  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage, completedWithoutBotMessage])
 
   // ========================================================================
   // SECTION: UI State Management (Execution Order: 7 - Throughout Lifecycle)
@@ -2069,6 +2090,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     setLlmError("")
     setSessionId(null)
     setStrandStep(null)
+    setCompletedWithoutBotMessage(false)
     const session = await getSessionDetails()
     setSessionId(session.sessionid)
     setIsChatVisible(false)

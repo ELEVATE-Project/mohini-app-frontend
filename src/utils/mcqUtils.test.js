@@ -127,6 +127,13 @@ describe("MCQ Question Text Extraction Priority", () => {
     expect(extractMCQQuestionText(response)).toBe("What is your qualification?")
   })
 
+  test("Falls back to bot_question when bot_message and translated fields are not present", () => {
+    const response = {
+      bot_question: "Which grade do you teach?",
+    }
+    expect(extractMCQQuestionText(response)).toBe("Which grade do you teach?")
+  })
+
   test("Falls back to introductory_message when no specific question field exists", () => {
     const response = {
       introductory_message: "Did you had food ?",

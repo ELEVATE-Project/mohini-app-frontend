@@ -14,6 +14,7 @@ const MultipleChoiceQuestions = ({
   onSubmit,
   disabled = false,
   language = "en",
+  submissionError = "",
 }) => {
   const [selectedKeys, setSelectedKeys] = useState([])
   const [errorMessage, setErrorMessage] = useState("")
@@ -32,6 +33,12 @@ const MultipleChoiceQuestions = ({
     setSelectedKeys([])
     setErrorMessage("")
   }, [validations])
+
+  useEffect(() => {
+    if (submissionError) {
+      setErrorMessage(submissionError)
+    }
+  }, [submissionError])
 
   const getErrorMessage = (key, fallback = "") => {
     const raw = validations?.error_message
@@ -271,6 +278,7 @@ MultipleChoiceQuestions.propTypes = {
   question: PropTypes.string,
   disabled: PropTypes.bool,
   language: PropTypes.string,
+  submissionError: PropTypes.string,
 }
 
 export default MultipleChoiceQuestions

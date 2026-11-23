@@ -43,6 +43,9 @@ export const extractMCQQuestionText = response => {
   if (typeof response.bot_message === "string" && response.bot_message.trim()) {
     return response.bot_message.trim()
   }
+  if (typeof response.bot_question === "string" && response.bot_question.trim()) {
+    return response.bot_question.trim()
+  }
   if (typeof response.introductory_message === "string" && response.introductory_message.trim()) {
     return response.introductory_message.trim()
   }

@@ -289,4 +289,19 @@ describe("MultipleChoiceQuestions Component", () => {
     expect(choiceB).toHaveClass("selected")
     expect(choiceA).not.toHaveClass("selected")
   })
+
+  test("renders submissionError in error banner when provided", () => {
+    const onSubmit = jest.fn()
+    render(
+      <MultipleChoiceQuestions
+        validations={sampleMock.validations}
+        question={sampleMock.bot_message}
+        onSubmit={onSubmit}
+        submissionError="Failed to submit response. Please try again."
+        language="en"
+      />
+    )
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Failed to submit response. Please try again.")
+  })
 })

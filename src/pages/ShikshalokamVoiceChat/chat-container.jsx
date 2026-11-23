@@ -5,7 +5,7 @@ import { getIpLocation, getProfileDetails, getSessionDetails } from "../../servi
 import { languageList } from "./enum"
 import { setLanguage } from "../../i18n"
 import { useChatStorage, useUserStorage } from "../../hooks/useStorage"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useSiteDataSessionStore } from "store"
@@ -20,28 +20,31 @@ function ChatContainer() {
   const { flow: urlFlow } = useUrlFlow()
 
   const [isLoading, setIsLoading] = useState(false)
-  const { setFirstName } = useUserStorage().getState()
+  const isSetupInProgressRef = useRef(false)
+  const userStore = useUserStorage()
+  const chatStore = useChatStorage()
+  const { setFirstName } = userStore.getState()
 
   const chatLanguage = useSiteDataSessionStore(state => state.chatLanguage)
-  const companyName = useUserStorage()(state => state.companyName)
-  const deviceId = useUserStorage()(state => state.device_id)
-  const getDeviceId = useUserStorage()(state => state.getDeviceId)
-  const ipCity = useUserStorage()(state => state.ipCity)
-  const ipCountry = useUserStorage()(state => state.ipCountry)
-  const ipFetched = useUserStorage()(state => state.ipFetched)
-  const ipState = useUserStorage()(state => state.ipState)
-  const sessionId = useChatStorage()(state => state.sessionId)
-  const setCompanyName = useUserStorage()(state => state.setCompanyName)
-  const setDeviceId = useUserStorage()(state => state.setDeviceId)
-  const setIpCity = useUserStorage()(state => state.setIpCity)
-  const setIpCountry = useUserStorage()(state => state.setIpCountry)
-  const setIpFetched = useUserStorage()(state => state.setIpFetched)
-  const setIpState = useUserStorage()(state => state.setIpState)
-  const setIpZipCode = useUserStorage()(state => state.setIpZipCode)
-  const setIsNewChatOpen = useChatStorage()(state => state.setIsNewChatOpen)
-  const setProfileId = useUserStorage()(state => state.setProfileId)
-  const setSessionId = useChatStorage()(state => state.setSessionId)
-  const setUserId = useUserStorage()(state => state.setUserId)
+  const companyName = userStore(state => state.companyName)
+  const deviceId = userStore(state => state.device_id)
+  const getDeviceId = userStore(state => state.getDeviceId)
+  const ipCity = userStore(state => state.ipCity)
+  const ipCountry = userStore(state => state.ipCountry)
+  const ipFetched = userStore(state => state.ipFetched)
+  const ipState = userStore(state => state.ipState)
+  const sessionId = chatStore(state => state.sessionId)
+  const setCompanyName = userStore(state => state.setCompanyName)
+  const setDeviceId = userStore(state => state.setDeviceId)
+  const setIpCity = userStore(state => state.setIpCity)
+  const setIpCountry = userStore(state => state.setIpCountry)
+  const setIpFetched = userStore(state => state.setIpFetched)
+  const setIpState = userStore(state => state.setIpState)
+  const setIpZipCode = userStore(state => state.setIpZipCode)
+  const setIsNewChatOpen = chatStore(state => state.setIsNewChatOpen)
+  const setProfileId = userStore(state => state.setProfileId)
+  const setSessionId = chatStore(state => state.setSessionId)
+  const setUserId = userStore(state => state.setUserId)
 
   const [chatHistory, setChatHistory, removeChatHistory, getChatHistory] = useSmartChatStorage()
 
@@ -119,9 +122,18 @@ function ChatContainer() {
       setIsLoading(false)
     } catch (error) {
       console.warn("Error during initial setup, using fallback for mock/local:", error)
-      setCompanyName("shikshalokamstaging")
-      if (!sessionId) {
-        setSessionId("mock_session_" + Date.now())
+      if (import.meta.env.DEV) {
+        setCompanyName("shikshalokamstaging")
+        const currentProfileId = userStore.getState().profileId
+        if (!currentProfileId) {
+          setProfileId("mock_profile_" + Date.now())
+        }
+        const currentSessionId = chatStore.getState().sessionId
+        if (!currentSessionId) {
+          setSessionId("mock_session_" + Date.now())
+        }
+      } else {
+        navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY)
       }
       setIsLoading(false)
     }
@@ -136,26 +148,30 @@ function ChatContainer() {
   }
 
   useEffect(() => {
+    if (!flowInfo) return
+
     const runSetup = async () => {
+      const currentSession = chatStore.getState().sessionId
+      if (currentSession || isSetupInProgressRef.current) return
+
       try {
-        if (!sessionId) {
-          setIsLoading(true)
-          setIsNewChatOpen(true)
+        isSetupInProgressRef.current = true
+        setIsLoading(true)
+        setIsNewChatOpen(true)
 
-          const locationData = await getIpLocation()
-          if (locationData && locationData?.location) {
-            setIpState(locationData?.location?.regionName)
-            setIpCity(locationData?.location?.city)
-            setIpCountry(locationData?.location?.country)
-            setIpZipCode(locationData?.location?.zip)
-          }
-          getUserFingerPrint()
-          await setFinalLanguage()
-
-          setIsLoading(false)
+        const locationData = await getIpLocation()
+        if (locationData && locationData?.location) {
+          setIpState(locationData?.location?.regionName)
+          setIpCity(locationData?.location?.city)
+          setIpCountry(locationData?.location?.country)
+          setIpZipCode(locationData?.location?.zip)
         }
+        getUserFingerPrint()
+        await setFinalLanguage()
       } finally {
+        isSetupInProgressRef.current = false
         setIpFetched(true)
+        setIsLoading(false)
       }
     }
 
@@ -165,8 +181,8 @@ function ChatContainer() {
 
   return (
     <>
-      {(companyName || sessionId) && !isLoading && <DynamicVoiceChat />}
-      {(isLoading || (!ipFetched && !companyName && !sessionId)) && (
+      {companyName && !isLoading && <DynamicVoiceChat />}
+      {(isLoading || (!ipFetched && !companyName)) && (
         <div className="loader-load-spinner">
           <div className="div67">
             <BiLoader className="loader-rotate-loader loader-icon" />

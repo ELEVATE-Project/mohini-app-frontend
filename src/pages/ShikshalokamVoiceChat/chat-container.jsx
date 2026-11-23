@@ -100,12 +100,17 @@ function ChatContainer() {
       }
 
       setIsLoading(true)
-      const res = await getProfileDetails(body)
+      const currentProfileId = userStore.getState().profileId
+      if (!currentProfileId) {
+        const res = await getProfileDetails(body)
+        setProfileId(res.id)
+      }
 
-      setProfileId(res.id)
-
-      let session = await getSessionDetails()
-      setSessionId(session.sessionid)
+      const currentSessionId = chatStore.getState().sessionId
+      if (!currentSessionId) {
+        let session = await getSessionDetails()
+        setSessionId(session.sessionid)
+      }
 
       const response = await loginApi({
         email: customEmail,
@@ -150,10 +155,18 @@ function ChatContainer() {
   useEffect(() => {
     if (!flowInfo) return
 
-    const runSetup = async () => {
-      const currentSession = chatStore.getState().sessionId
-      if (currentSession || isSetupInProgressRef.current) return
+    const currentSession = chatStore.getState().sessionId
+    const currentCompany = userStore.getState().companyName
+    const isSetupComplete = Boolean(currentCompany && (accessToken || currentSession))
 
+    if (isSetupComplete || isSetupInProgressRef.current) {
+      if (!ipFetched) {
+        setIpFetched(true)
+      }
+      return
+    }
+
+    const runSetup = async () => {
       try {
         isSetupInProgressRef.current = true
         setIsLoading(true)
@@ -177,7 +190,7 @@ function ChatContainer() {
 
     setIpFetched(false)
     runSetup()
-  }, [accessToken, sessionId, flowInfo])
+  }, [accessToken, sessionId, companyName, flowInfo])
 
   return (
     <>

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
+import env from "../../../../utils/env";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "https://shikshagraha.org";
+const BASE_URL = env.BASE_URL();
 
 function Footer() {
   const { t } = useTranslation();
@@ -76,7 +77,7 @@ function Footer() {
                 <br />
               </a>
               <a
-                href={process.env.REACT_APP_RECORD_STORY_URL}
+                href={env.RECORD_STORY_URL()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="d"

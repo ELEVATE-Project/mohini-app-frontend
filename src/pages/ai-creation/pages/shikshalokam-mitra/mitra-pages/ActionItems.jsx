@@ -28,7 +28,6 @@ import "../stylesheet/chatStyle.css";
 import { useAICreationSessionStore } from "store";
 import ChatWindow from "./components/ChatWindow";
 import { useSearchParams } from "react-router-dom";
-import { sessionFlowName } from "../../../../ShikshalokamVoiceChat/enum";
 import { bot_routes } from "../../../../../configure";
 import { useChatWebhook } from "../../../../../hooks/useChatWebhook";
 import { buildWebSocketUrl } from "../../../../../utils/helpers";

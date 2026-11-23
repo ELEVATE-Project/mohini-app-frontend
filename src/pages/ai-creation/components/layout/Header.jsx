@@ -5,8 +5,9 @@ import { FiArrowLeft } from "react-icons/fi";
 import { HiMenu, HiX } from "react-icons/hi";
 import ROUTES from "../../../../url";
 import { clearMitraSessionStorage } from "../../pages/shikshalokam-mitra/MainPage";
+import env from "../../../../utils/env";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "https://shikshagraha.org";
+const BASE_URL = env.BASE_URL();
 
 function HeroSection() {
   const { t } = useTranslation();

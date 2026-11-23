@@ -180,6 +180,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
   // ========== react query hooks ==========
   const endStoryMutation = useMutation({ mutationFn: data => endStoryV2Api(data) })
 
+  // ========= success callbacks ==========
+
+  const redirectedRef = useRef(false)
+
+
   const {
     data: flowInfo,
     isError: isFlowInfoError,
@@ -203,7 +208,10 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const activeFlowInfo = childFlowInfo || flowInfo
 
-  const { data: companyBotData } = useQuery({
+  const {
+    data: companyBotData,
+    isError: isCompanyBotError,
+  } = useQuery({
     queryKey: [API_ENDPOINTS.GET_COMPANY_BOT, companySlug, activeFlowInfo?.bot_route, languageToUse, accessToken],
     queryFn: () => getCompanyBotApi({ company_slug: companySlug, route: activeFlowInfo.bot_route, target_language: languageToUse }),
     enabled: !!(languageToUse && profileToUse && activeFlowInfo?.bot_route),
@@ -375,6 +383,36 @@ const DynamicVoiceChat = ({ type = "" }) => {
   })
 
   // ========== useMemo Hooks ==========
+
+  const storyLoaderHeading = useMemo(() => {
+    const heading_map = {
+      [sessionFlowName.ListeningActivity]: "feedbackLoaderHeading",
+      [sessionFlowName.GuestDiscussion]: "reportLoaderHeading",
+      [sessionFlowName.LoginDiscussion]: "reportLoaderHeading",
+      [sessionFlowName.SanjhiSikhiyaDiscussionBot]: "reportLoaderHeading",
+      [sessionFlowName.Youth_21_25]: "youth_storyGuestLoaderHeading",
+      [sessionFlowName.Youth_12_20]: "youth_storyGuestLoaderHeading",
+      [sessionFlowName.Education_House_Conversation]: "education_house_conversation_storyGuestLoaderHeading",
+      [sessionFlowName.LoginMiStory]: "storyLoaderHeading"
+    }
+
+    if (heading_map[activeFlowRoute]) return heading_map[activeFlowRoute]
+
+    return "storyGuestLoaderHeading"
+  }, [activeFlowRoute])
+
+  const storyLoaderLabel = useMemo(() => {
+    if ([sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)) {
+      return "reportLoader"
+    }
+    else if([sessionFlowName.Youth_21_25, sessionFlowName.Youth_12_20].includes(activeFlowRoute)) {
+      return "youth_storyLoader"
+    }
+    else if([sessionFlowName.Education_House_Conversation].includes(activeFlowRoute)) {
+      return "education_house_conversation_storyLoader"
+    }
+    return "storyLoader"
+  }, [activeFlowRoute])
 
   const projectId = useMemo(() => projectIdStore || searchParams.get("projectId"), [projectIdStore, searchParams])
 
@@ -1571,7 +1609,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
     fetchMedia()
 
-    return () => {}
+    return () => { }
   }, [accessToken, storyData])
 
   /**
@@ -1619,34 +1657,64 @@ const DynamicVoiceChat = ({ type = "" }) => {
       survey_title = paramsMap[activeFlowRoute] + survey_title
     }
 
-    const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === "bot"
-    if (activeFlowRoute && activeFlowInfo?.create_story === "none" && isStreamingComplete && stateMachineLength && strandStep >= stateMachineLength && isLastMessageFromBot) {
-      Swal.fire({
-        title: t(survey_title),
-        showCancelButton: false,
-        confirmButtonText: t("PPsCompletionCTA"),
-        showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad, sessionFlowName.OdishaYouth, sessionFlowName.OdishaYouthAI, sessionFlowName.TelanganaPTMPilot, sessionFlowName.Bihar_PTM].includes(activeFlowRoute),
-        showCloseButton: false,
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
-        imageHeight: "100",
-      }).then(result => {
-        if (result.isConfirmed) {
-          clearFromStorage()
-          setLanguage(LANGUAGE_ENUMS.ENGLISH)
-          setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
-          setHasSelectedLanguage(false)
-          stopAllAudio()
-          navigate({
-            pathname: ROUTES.SHIKSHAGRAHA_REPOSITORY,
-            search: activeFlowRoute ? new URLSearchParams({ flow: activeFlowRoute }).toString() : "",
-          })
-          window.location.reload()
-        }
-      })
+    const isLastMessageFromBot = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.source === CONVERSATION_USER_TYPES.BOT
+    const isFlowComplete =
+      activeFlowRoute &&
+      activeFlowInfo?.create_story === "none" &&
+      isStreamingComplete &&
+      stateMachineLength &&
+      strandStep >= stateMachineLength &&
+      isLastMessageFromBot
+
+    if (!isFlowComplete) return
+
+    // Success page: redirect when the bot config provides a safe path
+    if (redirectedRef.current) return
+    // Wait for the bot config. If the request failed, fall through to the popup.
+    if (!companyBotData && !isCompanyBotError) return
+
+    const bot =
+      companyBotData?.results?.find(b => b.route === activeFlowInfo?.bot_route) ||
+      companyBotData?.results?.[0]
+    const redirectPath = bot?.other_params?.on_success_redirect_uri
+
+    if (isSafeRelativePath(redirectPath)) {
+      redirectedRef.current = true
+      stopAllAudio()
+      const url = new URL(redirectPath, window.location.origin)
+      url.searchParams.set("language", (chatLanguage || "en").toLowerCase())
+      url.searchParams.set("flow", activeFlowRoute)
+      navigate(url.pathname + url.search, { replace: true })
+      return
     }
-  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow])
+
+
+    // Fallback: existing popup, unchanged
+    Swal.fire({
+      title: t(survey_title),
+      showCancelButton: false,
+      confirmButtonText: t("PPsCompletionCTA"),
+      showConfirmButton: ![sessionFlowName.ShikshaSamvad, sessionFlowName.DelhiShikshaSamvad, sessionFlowName.OdishaYouth, sessionFlowName.OdishaYouthAI, sessionFlowName.TelanganaPTMPilot, sessionFlowName.Bihar_PTM].includes(activeFlowRoute),
+      showCloseButton: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+      imageUrl: "https://static-media.gritworks.ai/fe-images/PNG/Shikshalokam/check-mark.png",
+      imageHeight: "100",
+    }).then(result => {
+      if (result.isConfirmed) {
+        clearFromStorage()
+        setLanguage(LANGUAGE_ENUMS.ENGLISH)
+        setChatLanguage(LANGUAGE_ENUMS.ENGLISH)
+        setHasSelectedLanguage(false)
+        stopAllAudio()
+        navigate({
+          pathname: ROUTES.SHIKSHAGRAHA_REPOSITORY,
+          search: activeFlowRoute ? new URLSearchParams({ flow: activeFlowRoute }).toString() : "",
+        })
+        window.location.reload()
+      }
+    })
+  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage])
 
   // ========================================================================
   // SECTION: UI State Management (Execution Order: 7 - Throughout Lifecycle)
@@ -1751,7 +1819,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
       }
       setChatHistory(updatedChatHistory)
     }
-    return () => {}
+    return () => { }
   }, [recordings, setChatHistory, getChatHistory])
 
   /**
@@ -1836,7 +1904,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     let hasUnnarratedMessages = !!unnarratedMessages?.length
     let sourceLanguage = languageToUse
     if (acceptedTnc === "ONGOING") {
-      return () => {}
+      return () => { }
     }
 
     if (isNextAllowed && hasUnnarratedMessages && !isLoading && !endStoryMutation.isPending && activeFlowInfo) {
@@ -2256,6 +2324,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
     }
   }
 
+  // safe check for relative path to avoid SSRF attacks
+
+  function isSafeRelativePath(p) {
+    return typeof p === "string" && p.startsWith("/") && !p.startsWith("//")
+  }
+
   const pdfDownloadSidebar = async sessionid => {
     try {
       setIsLoading(true)
@@ -2612,9 +2686,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   return (
     <>
-      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession && <PrivacyPolicyPopup tncText={t(tncText)} onAccept={handleAcceptTnC} />}
+      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession
+        && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} />
+      }
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t(tncText)} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
       <div className={`div27`}>
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
@@ -2659,19 +2735,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
             {endStoryMutation.isPending && (
               <div className="div69 text-center">
                 <h2 className="form-label label1 font-bold text-lg sm:text-2xl text-center">
-                  {activeFlowRoute && [sessionFlowName.ListeningActivity].includes(activeFlowRoute)
-                    ? t("feedbackLoaderHeading")
-                    : activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute)
-                      ? t("reportLoaderHeading")
-                      : isYouthFlow
-                        ? t("youth_storyGuestLoaderHeading")
-                        : isEducationHouseConversationFlow
-                          ? t("education_house_conversation_storyGuestLoaderHeading")
-                          : activeFlowRoute && [sessionFlowName.LoginMiStory].includes(activeFlowRoute)
-                            ? t("storyLoaderHeading")
-                            : t("storyGuestLoaderHeading")}
+                  {activeFlowRoute && t([`config.${activeFlowRoute}.storyLoaderHeading`, `config.default.storyLoaderHeading`, storyLoaderHeading])}
                 </h2>
-                <label className="form-label label1 text-center">{activeFlowRoute && [sessionFlowName.GuestDiscussion, sessionFlowName.ListeningActivity, sessionFlowName.LoginDiscussion, sessionFlowName.SanjhiSikhiyaDiscussionBot].includes(activeFlowRoute) ? t("reportLoader") : isYouthFlow ? t("youth_storyLoader") : isEducationHouseConversationFlow ? t("education_house_conversation_storyLoader") : t("storyLoader")}</label>
+                <label className="form-label label1 text-center">{t([`config.${activeFlowRoute}.storyLoaderLabel`, `config.default.storyLoaderLabel`, storyLoaderLabel])}</label>
               </div>
             )}
           </div>
@@ -2775,16 +2841,16 @@ const DynamicVoiceChat = ({ type = "" }) => {
                     <>
                       <div className="div10">
                         <h3 className="h3-1">
-                          {t(`${prefix}${homePageHeading}`)}
+                          {t([`config.${activeFlowRoute}.${homePageHeading}` ,`config.default.${homePageHeading}`, `${prefix}${homePageHeading}`])}
                           <br />
-                          {t(`${prefix}homepageHeading1`)}
+                          {t([`config.${activeFlowRoute}.homepageHeading1`, `config.default.homepageHeading1`, `${prefix}homepageHeading1`])}
                         </h3>
                       </div>
 
                       <ul className="div11">
-                        <li>{t(`${prefix}homepageList`)}</li>
-                        <li>{t(`${prefix}homepageList1`)}</li>
-                        <li>{t(`${prefix}homepageList2`)}</li>
+                        <li>{t([`config.${activeFlowRoute}.homepageList`, `config.default.homepageList`, `${prefix}homepageList`])}</li>
+                        <li>{t([`config.${activeFlowRoute}.homepageList1`, `config.default.homepageList1`, `${prefix}homepageList1`])}</li>
+                        <li>{t([`config.${activeFlowRoute}.homepageList2`, `config.default.homepageList2`, `${prefix}homepageList2`])}</li>
                       </ul>
                     </>
                   )

@@ -6,7 +6,6 @@ const ROUTES = {
   
   SHIKSHAGRAHA_REPOSITORY_DETAIL: "/:id",
   SHIKSHAGRAHA_REPOSITORY: "/",
-  
   SHIKSHALOKAM_GUEST_LISTENING_CHAT: "/guest-listen",
   SHIKSHALOKAM_GUEST_MI_STORY: "/guest-mi",
   SHIKSHALOKAM_GUEST_PAGE: "/flow",
@@ -25,7 +24,8 @@ const ROUTES = {
   MITRA_CHAT: "/mitra-chat",
   IMPROVEMENT_PLAN: "/improvement-plan",
   LOGIN: "/login",
-  EXPLORE: "/explore"
+  EXPLORE: "/explore",
+  SHARE_TEMPLATE: "/share_template/:templateId",
 }
 
 export default ROUTES

@@ -167,5 +167,7 @@
     "education_house_conversation_homepageHeading1": "with MItra!",
     "education_house_conversation_homepageList": "Reflect on the big picture",
     "education_house_conversation_homepageList1": "Share your expert insights",
-    "education_house_conversation_homepageList2": "Help shape the future"
+    "education_house_conversation_homepageList2": "Help shape the future",
+    "thankYouLoaderMessage":"Thank you for taking the time to answer these questions. Please wait...",
+    "SuccessfullySubmittedMessage":"Thank you for taking the time to answer these questions. Your responses have been successfully submitted."
     }

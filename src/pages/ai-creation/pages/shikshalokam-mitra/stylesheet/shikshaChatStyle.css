@@ -1091,3 +1091,22 @@
 .div72{
     background-color: hsl(0deg 0% 95.42%);
 }
+.sidebar-lang-wrapper > *,
+.sidebar-lang-wrapper select {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-lang-wrapper,
+.sidebar-lang-wrapper * {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-lang-wrapper > div,
+.sidebar-lang-wrapper select {
+  width: 100% !important;
+}

@@ -15,9 +15,9 @@ export async function createAuthRequest({ loader = () => {}, setter = () => {}, 
       method,
       data,
       params,
-      headers: {
-        Authorization: token,
-      },
+      // headers: {
+      //   Authorization: token,
+      // },
     })
     setter(response?.data || {})
     loader(false)

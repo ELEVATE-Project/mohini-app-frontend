@@ -1,0 +1,267 @@
+/* MultipleChoiceQuestions.css */
+
+.mcq-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid gray;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.25s ease-in-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mcq-question-text {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.45;
+  padding: 2px 4px 6px 4px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mcq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.mcq-instruction {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.01em;
+}
+
+.mcq-count-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #e0f2f1;
+  color: #00796b;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.mcq-error-banner {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.mcq-choices-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+/* Custom scrollbar for choices */
+.mcq-choices-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mcq-choices-grid::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.mcq-choice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.18s ease-in-out;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.mcq-choice-btn:hover:not(:disabled) {
+  border-color: #00796b;
+  background-color: #f0fdfa;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 121, 107, 0.1);
+}
+
+.mcq-choice-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.mcq-choice-btn.selected {
+  background-color: #e0f2f1;
+  border-color: #00796b;
+  color: #004d40;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 121, 107, 0.15);
+}
+
+.mcq-choice-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mcq-checkbox-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  background: #ffffff;
+}
+
+.mcq-choice-btn.selected .mcq-checkbox-circle {
+  background-color: #00796b;
+  border-color: #00796b;
+}
+
+.mcq-check-icon {
+  font-size: 0.65rem;
+  color: #ffffff;
+}
+
+.mcq-choice-label {
+  line-height: 1.3;
+}
+
+.mcq-audio-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.mcq-audio-btn:hover {
+  color: #00796b;
+}
+
+.mcq-audio-btn.playing {
+  color: #00796b;
+  animation: pulse 1s infinite;
+}
+
+.mcq-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+
+.mcq-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 10px;
+  background-color: #00796b;
+  color: #ffffff;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 121, 107, 0.25);
+}
+
+.mcq-submit-btn:hover:not(:disabled) {
+  background-color: #00695c;
+  box-shadow: 0 4px 10px rgba(0, 121, 107, 0.35);
+  transform: translateY(-1px);
+}
+
+.mcq-submit-btn:disabled {
+  background-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.mcq-submit-icon {
+  font-size: 0.95rem;
+}
+
+/* Disabled input state styling */
+.input-2:disabled {
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+  border-color: #e2e8f0 !important;
+}
+
+@media (max-width: 639px) {
+  .mcq-container {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .mcq-choice-btn {
+    font-size: 0.84rem;
+    padding: 7px 12px;
+    border-radius: 10px;
+  }
+
+  .mcq-submit-btn {
+    padding: 7px 16px;
+    font-size: 0.82rem;
+  }
+}

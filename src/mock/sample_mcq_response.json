@@ -1,0 +1,56 @@
+{
+  "is_complete": false,
+  "step": 3,
+  "bot_message": "How often are Parent-Teacher Meetings (PTMs) conducted in your child's school?",
+  "translated_bot_message": null,
+  "audio_s3_url": null,
+  "operation_type": "non_llm",
+  "is_new_session": false,
+  "validations": {
+    "method": "FE",
+    "type": "MULTIPLE_CHOICE",
+    "render_as": "BUTTONS",
+    "error_message": {
+      "default": "Please select one option.",
+      "required": "Please select one option.",
+      "min": "Please select at least one option.",
+      "max": "You can select up to 3 options."
+    },
+    "error_audio_url": {
+      "default": null,
+      "required": null,
+      "min": null,
+      "max": null
+    },
+    "config": {
+      "choices": [
+        {
+          "key": "monthly",
+          "label": "Monthly",
+          "translated_label": "மாதந்தோறும்",
+          "audio_url": null
+        },
+        {
+          "key": "quarterly",
+          "label": "Quarterly",
+          "translated_label": "காலாண்டுதோறும்",
+          "audio_url": null
+        },
+        {
+          "key": "half_yearly",
+          "label": "Half-Yearly",
+          "translated_label": "அரை ஆண்டுதோறும்",
+          "audio_url": null
+        },
+        {
+          "key": "annually",
+          "label": "Annually",
+          "translated_label": "ஆண்டுதோறும்",
+          "audio_url": null
+        }
+      ],
+      "min_choices": 1,
+      "max_choices": 1
+    }
+  }
+}

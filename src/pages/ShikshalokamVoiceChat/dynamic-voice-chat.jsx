@@ -61,6 +61,8 @@ import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-vo
 import WaveSurferPlayer from "../interview-text-voice/voice-player"
 import { apiClient } from "../../api/client"
 import CustomFormData from "../../components/Form/FormData"
+import MultipleChoiceQuestions from "../../components/MultipleChoiceQuestions/MultipleChoiceQuestions"
+import { isMCQEligible, extractMCQQuestionText } from "../../utils/mcqUtils"
 
 const cookies = new Cookies()
 
@@ -120,6 +122,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
   const [trigger, setTrigger] = useState(false)
   const [triggerDownload, setTriggerDownload] = useState(false)
   const [stepMetadata, setStepMetadata] = useState([])
+  const [activeOperationType, setActiveOperationType] = useState(null)
+  const [activeValidations, setActiveValidations] = useState(null)
+  const [activeBotMessage, setActiveBotMessage] = useState("")
+  const [mcqSubmissionError, setMcqSubmissionError] = useState("")
+  const isSubmittingMcqRef = useRef(false)
 
   // ========== useSelector Hooks ==========
   const [chatHistory, setChatHistory, removeChatHistory, getChatHistory] = useSmartChatStorage()
@@ -310,6 +317,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
   }, [sessionId, profileToUse, projectIdStore, searchParams, taskId, accessToken, chatLanguage, activeFlowRoute, ipFetched, activeFlowInfo])
 
   const onWebSocketMessage = useCallback(event => {
+    // LLM websocket path active: ensure MCQ is not visible
+    if (activeOperationType !== STATE_MACHINE_OPERATION_TYPE.LLM) {
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.LLM)
+      setActiveValidations(null)
+      setActiveBotMessage("")
+    }
+
     const data = JSON.parse(event.data)
     const message = data["text"]
     if (message.source === "bot") {
@@ -363,6 +377,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const isShikshalokamPublicType = true
   const shouldShowChatHistoryFeature = true
+
+  const shouldShowMCQ = isMCQEligible({
+    operation_type: activeOperationType,
+    validations: activeValidations,
+  })
 
   // ========== useMemo Hooks ==========
 
@@ -651,6 +670,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
       event.stopPropagation()
     }
 
+    if (isSubmittingMcqRef.current || isFetchingData) return
+
     setLlmError("")
     handleOnStopSpeaking()
     setIsChatVisible(true)
@@ -667,6 +688,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
     // NON_LLM HTTP path: skip WebSocket for data-collection steps
     if (isNonLlmStep(strandStep || 1)) {
+      setIsFetchingData(true)
       try {
         const res = await postNonLlmChat({
           session: sessionId,
@@ -674,7 +696,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           message: textMessage,
           language: chatLanguage,
           flow_name: activeFlowRoute,
-          company_bot: companyBotData.results[0].id,
+          company_bot: companyBotData?.results?.[0]?.id || 71,
           asr_audio: asrAudio && asrAudio.length > 0 ? asrAudio.join(',') : null
         })
 
@@ -700,11 +722,21 @@ const DynamicVoiceChat = ({ type = "" }) => {
           setStrandStep(res.step)
         }
 
+        if (isMCQEligible(res)) {
+          setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
+          setActiveValidations(res.validations)
+          setActiveBotMessage(extractMCQQuestionText(res))
+        } else {
+          setActiveOperationType(res?.operation_type || null)
+          setActiveValidations(null)
+          setActiveBotMessage("")
+        }
+
         if (res?.is_complete) {
           setStrandStep(stateMachineLength)
           setIsStreamingComplete(true)
         }
-        if (res?.operation_type === "llm") {
+        if (res?.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
           // Next step is LLM — open WebSocket to continue
           connectToWebSocket()
           sendSocketMessage({
@@ -725,6 +757,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
       } catch (err) {
         console.error("NON_LLM HTTP send failed:", err)
         setLlmError("Failed to send message. Please try again.")
+      } finally {
+        setIsFetchingData(false)
       }
 
       setAsrAudio([])
@@ -897,6 +931,153 @@ const DynamicVoiceChat = ({ type = "" }) => {
     }
   }, [])
 
+  // Clear MCQ state when switching flows or child flows
+  useEffect(() => {
+    setActiveOperationType(null)
+    setActiveValidations(null)
+    setActiveBotMessage("")
+    setMcqSubmissionError("")
+  }, [activeFlowRoute, selectedChildFlowRoute])
+
+  const handleMcqSubmit = useCallback(
+    async (selectedChoices, messageText) => {
+      if (!messageText || isSubmittingMcqRef.current || isFetchingData) return
+
+      // Validate selection constraints against activeValidations config
+      const minChoices = activeValidations?.config?.min_choices ?? 1
+      const maxChoices = activeValidations?.config?.max_choices ?? 1
+      const count = Array.isArray(selectedChoices) ? selectedChoices.length : 1
+      if (count < minChoices || count > maxChoices) {
+        return
+      }
+
+      isSubmittingMcqRef.current = true
+      setIsFetchingData(true)
+      setMcqSubmissionError("")
+      handleOnStopSpeaking()
+      setIsChatVisible(true)
+      setShowHomepage(false)
+      setIsMute(true)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+
+      // Display the selected answer label in chat history (unreceived until success)
+      handleMessagesForUser(messageText)
+
+      // Extract the choice key(s) to submit to backend API contract
+      const submissionValue = Array.isArray(selectedChoices)
+        ? selectedChoices.map(c => c.key || c).join(", ")
+        : (selectedChoices?.key || messageText)
+
+      try {
+        const res = await postNonLlmChat({
+          session: sessionId,
+          profile_id: profileToUse,
+          message: submissionValue,
+          language: chatLanguage,
+          flow_name: activeFlowRoute,
+          company_bot: companyBotData?.results?.[0]?.id || 71,
+          asr_audio: null,
+        })
+
+        // On success: mark user message as received
+        const chat_history_after_send = getChatHistory()
+        const updated_chat_history_after_send = chat_history_after_send.map(chat => {
+          if (!chat.received && chat.msg === messageText) {
+            return { ...chat, received: true }
+          }
+          return chat
+        })
+        setChatHistory(updated_chat_history_after_send)
+
+        const botMsg = res?.translated_bot_message || res?.bot_message
+        if (botMsg) {
+          setSentences(prev => [...prev, { message: botMsg, source: "bot", isNarrated: false, id: Date.now(), audio_s3_url: res?.audio_s3_url }])
+          handleMessagesForBot(botMsg, res?.audio_s3_url)
+        }
+
+        if (res?.step !== undefined) {
+          setStrandStep(res.step)
+        }
+
+        // Apply exact visibility condition to subsequent response
+        if (isMCQEligible(res)) {
+          setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
+          setActiveValidations(res.validations)
+          setActiveBotMessage(extractMCQQuestionText(res))
+        } else {
+          setActiveOperationType(res?.operation_type || null)
+          setActiveValidations(null)
+          setActiveBotMessage("")
+        }
+
+        setMcqSubmissionError("")
+
+        if (res?.is_complete) {
+          setStrandStep(stateMachineLength)
+          setIsStreamingComplete(true)
+        }
+
+        if (res?.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
+          // Next step is LLM — open WebSocket to continue
+          connectToWebSocket()
+          sendSocketMessage({
+            type: "authenticate",
+            sessionid: sessionId,
+            profileid: profileToUse,
+            projectid: projectIdStore || searchParams.get("projectId") || "",
+            taskid: searchParams.get("taskId") || taskId,
+            access_token: accessToken,
+            route: chatLanguage,
+            bot_route: activeFlowInfo.bot_route,
+            flow_name: activeFlowRoute,
+            address: { ipCity, ipState, ipZipCode },
+          })
+        }
+      } catch (err) {
+        console.warn("postNonLlmChat after MCQ selection:", err)
+        // Retain question and validations so user can retry
+        setMcqSubmissionError("Failed to submit response. Please try again.")
+        // Do not mark rejected answer as received; remove the unreceived message from chat history
+        const chat_history_after_send = getChatHistory()
+        const cleanedHistory = chat_history_after_send.filter(chat => !(chat.msg === messageText && !chat.received))
+        setChatHistory(cleanedHistory)
+      } finally {
+        isSubmittingMcqRef.current = false
+        setIsFetchingData(false)
+      }
+
+      handleScrollToView()
+    },
+    [
+      activeValidations,
+      isFetchingData,
+      strandStep,
+      sessionId,
+      profileToUse,
+      chatLanguage,
+      activeFlowRoute,
+      companyBotData,
+      stateMachineLength,
+      connectToWebSocket,
+      sendSocketMessage,
+      projectIdStore,
+      searchParams,
+      taskId,
+      accessToken,
+      activeFlowInfo,
+      ipCity,
+      ipState,
+      ipZipCode,
+      handleMessagesForUser,
+      getChatHistory,
+      setChatHistory,
+      handleMessagesForBot,
+    ]
+  )
+
   useEffect(() => {
     if (!isFlowInfoError) return
 
@@ -1003,9 +1184,48 @@ const DynamicVoiceChat = ({ type = "" }) => {
       setIntroMessage(message)
     }
 
+    if (introMessageData?.state_machine_steps?.length > 0 && stepMetadata.length === 0) {
+      setStepMetadata(introMessageData.state_machine_steps)
+    }
+
+    // Initialize or clear MCQ state based on actual API response
+    if (isMCQEligible(introMessageData)) {
+      const hasUserMessages = Array.isArray(chatHistory) && chatHistory.some(msg => msg?.source === "user")
+      if (!hasUserMessages) {
+        setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
+        setActiveValidations(introMessageData.validations)
+        setActiveBotMessage(extractMCQQuestionText(introMessageData))
+      }
+    } else {
+      setActiveOperationType(introMessageData?.operation_type || null)
+      setActiveValidations(null)
+      setActiveBotMessage("")
+    }
+
     setShouldFetchIntro(false)
     setIsLoading(false)
   }, [introMessageData])
+
+  // Restore current MCQ when reopening an ongoing conversation
+  useEffect(() => {
+    const hasUserMessages = Array.isArray(chatHistory) && chatHistory.some(msg => msg?.source === "user")
+    if (!hasUserMessages) return
+    if (!stepMetadata || stepMetadata.length === 0) return
+    if (stateMachineLength > 0 && strandStep >= stateMachineLength) return
+
+    // Find the step metadata for the current session step
+    const currentStepMeta = stepMetadata.find(s => s.step === strandStep)
+    if (currentStepMeta && isMCQEligible(currentStepMeta)) {
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
+      setActiveValidations(currentStepMeta.validations)
+      const qText = extractMCQQuestionText(currentStepMeta) || currentStepMeta.bot_question || ""
+      setActiveBotMessage(qText)
+    } else if (currentStepMeta && currentStepMeta.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.LLM)
+      setActiveValidations(null)
+      setActiveBotMessage("")
+    }
+  }, [chatHistory, stepMetadata, strandStep, stateMachineLength])
 
   useEffect(() => {
     if (!companyBotData) return
@@ -1024,8 +1244,10 @@ const DynamicVoiceChat = ({ type = "" }) => {
       setStateMachineLength(selectedBot.statemachine_length)
     }
 
-    const steps = selectedBot?.state_machine_steps ?? []
-    setStepMetadata(steps)
+    const steps = selectedBot?.state_machine_steps || introMessageData?.state_machine_steps || []
+    if (steps.length > 0) {
+      setStepMetadata(steps)
+    }
 
     // Find the latest bot based on flow type
     const latestBot = bots.find(bot => bot.route === storedRoute)
@@ -2511,6 +2733,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
               <>
                 {flowInfo?.isParentFlow && <CustomFormData layOut={2} selectID="selectedTypeID" selectName="selectedType" selectOptions={(flowInfo.children_flows || []).filter(f => f.active).map(f => ({ label: f.flow_name, value: f.flow_route }))} selectValue={selectedChildFlowRoute} selectClassName="div31" selectOnChange={handleChildFlowChange} showDefaultDropdownText={false} />}
 
+
+
                 <button
                   onClick={async e => {
                     if (accessToken) {
@@ -2898,83 +3122,115 @@ const DynamicVoiceChat = ({ type = "" }) => {
               </div>
             </>
           )}
-          <div id="last-chat-boundary" className="div38" />
+          <div id="last-chat-boundary" className="div38" style={{ paddingBottom: shouldShowMCQ ? "220px" : "80px" }} />
         </div>
         <Notification />
 
         {(!showFileInput || showFileInput === null) && !isLoading && !endStoryMutation.isPending && (llmError === "" || !llmError) && Array.isArray(chatHistory) && chatHistory.some(item => item && Object.keys(item).length > 0) && (
-          <form
-            className="form-1 chat-input-row"
-            onSubmit={event => {
-              if (!hasStartedListening && !isFetchingData) {
-                handleSendMessage(event)
-              }
-            }}
-            autoComplete="off"
-          >
-            {/* Mic button on the left */}
-            <button type="button" aria-label={hasStartedRecording ? "stopRecording" : "startRecording"} aria-pressed={hasStartedRecording} onClick={hasStartedRecording ? stopRecording : startRecording} disabled={isFetchingData} className={`mic-btn ${hasStartedRecording ? "mic-recording" : "mic-idle"}`}>
-              {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
-            </button>
-
-            {/* Text area in the middle */}
-            <div className="textarea-wrapper relative">
-              <textarea
-                id="textBoxID"
-                className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
-                style={{ alignContent: isFetchingData ? "normal" : "center" }}
-                onChange={handleOnInputText}
-                placeholder={hasStartedRecording ? t("placeholder1") : isFetchingData ? t("placeholder2") : t("placeholder3")}
-                name="message-box"
-                value={textMessage}
-                autoFocus={false}
-                disabled={hasStartedRecording || isFetchingData || strandStep >= stateMachineLength}
-                ref={textAreaRef}
-                onInput={e => {
-                  e.target.style.height = "auto"
-                  const maxHeight = 150
-                  if (e.target.scrollHeight > maxHeight) {
-                    e.target.style.height = `${maxHeight}px`
-                    e.target.style.overflowY = "scroll"
-                  } else {
-                    e.target.style.height = `${e.target.scrollHeight}px`
-                    e.target.style.overflowY = "hidden"
-                  }
-                }}
-                onFocus={() => {
-                  setTimeout(() => {
-                    handleScrollToView()
-                    if (textAreaRef.current) {
-                      textAreaRef.current.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      })
-                    }
-                  }, 300)
-                }}
-                onKeyDown={e => {
-                  if (e.key === "Enter") {
-                    if (e.shiftKey) {
-                      e.preventDefault()
-                      e.target.form.requestSubmit()
-                      setTimeout(() => {
-                        e.target.value = ""
-                      }, 0)
-                    }
-                  }
-                }}
+          <div className="chat-bottom-docked-container">
+            {shouldShowMCQ && (
+              <MultipleChoiceQuestions
+                validations={activeValidations}
+                question={activeBotMessage}
+                onSubmit={handleMcqSubmit}
+                disabled={isFetchingData || isSubmittingMcqRef.current}
+                language={chatLanguage}
+                submissionError={mcqSubmissionError}
               />
-              {hasStartedRecording && (
-                <div className="absolute bottom-3 right-3 flex items-center space-x-1 text-red-600 text-sm font-medium pointer-events-none">
-                  <FaCircle className="text-red-500 animate-pulse text-xs" />
-                  <span>{formatTime(seconds)}</span>
-                </div>
-              )}
-            </div>
-            <button type="submit" aria-label={"sendMessage"} disabled={!textMessage.trim() || hasStartedRecording || isFetchingData} className="send-btn">
-              <MdSend />
-            </button>
-          </form>
+            )}
+            <form
+              className="form-1 chat-input-row"
+              onSubmit={event => {
+                if (!hasStartedListening && !isFetchingData && !shouldShowMCQ && !isSubmittingMcqRef.current) {
+                  handleSendMessage(event)
+                }
+              }}
+              autoComplete="off"
+            >
+              {/* Mic button on the left */}
+              <button
+                type="button"
+                aria-label={hasStartedRecording ? "stopRecording" : "startRecording"}
+                aria-pressed={hasStartedRecording}
+                onClick={hasStartedRecording ? stopRecording : startRecording}
+                disabled={isFetchingData || shouldShowMCQ || isSubmittingMcqRef.current}
+                className={`mic-btn ${hasStartedRecording ? "mic-recording" : "mic-idle"}`}
+              >
+                {hasStartedRecording ? <FaRegStopCircle /> : <FaMicrophone />}
+              </button>
+
+              {/* Text area in the middle */}
+              <div className="textarea-wrapper relative">
+                <textarea
+                  id="textBoxID"
+                  className={`input-2 input-1 ${isFetchingData ? "min-h-[68px] sm:min-h-0 py-0" : ""}`}
+                  style={{ alignContent: isFetchingData ? "normal" : "center" }}
+                  onChange={handleOnInputText}
+                  placeholder={
+                    shouldShowMCQ
+                      ? "Please choose an option above"
+                      : hasStartedRecording
+                      ? t("placeholder1")
+                      : isFetchingData
+                      ? t("placeholder2")
+                      : t("placeholder3")
+                  }
+                  name="message-box"
+                  value={textMessage}
+                  autoFocus={false}
+                  disabled={hasStartedRecording || isFetchingData || strandStep >= stateMachineLength || shouldShowMCQ || isSubmittingMcqRef.current}
+                  ref={textAreaRef}
+                  onInput={e => {
+                    e.target.style.height = "auto"
+                    const maxHeight = 150
+                    if (e.target.scrollHeight > maxHeight) {
+                      e.target.style.height = `${maxHeight}px`
+                      e.target.style.overflowY = "scroll"
+                    } else {
+                      e.target.style.height = `${e.target.scrollHeight}px`
+                      e.target.style.overflowY = "hidden"
+                    }
+                  }}
+                  onFocus={() => {
+                    setTimeout(() => {
+                      handleScrollToView()
+                      if (textAreaRef.current) {
+                        textAreaRef.current.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        })
+                      }
+                    }, 300)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      if (e.shiftKey) {
+                        e.preventDefault()
+                        e.target.form.requestSubmit()
+                        setTimeout(() => {
+                          e.target.value = ""
+                        }, 0)
+                      }
+                    }
+                  }}
+                />
+                {hasStartedRecording && (
+                  <div className="absolute bottom-3 right-3 flex items-center space-x-1 text-red-600 text-sm font-medium pointer-events-none">
+                    <FaCircle className="text-red-500 animate-pulse text-xs" />
+                    <span>{formatTime(seconds)}</span>
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                aria-label={"sendMessage"}
+                disabled={!textMessage.trim() || hasStartedRecording || isFetchingData || shouldShowMCQ || isSubmittingMcqRef.current}
+                className="send-btn"
+              >
+                <MdSend />
+              </button>
+            </form>
+          </div>
         )}
       </div>
     </>

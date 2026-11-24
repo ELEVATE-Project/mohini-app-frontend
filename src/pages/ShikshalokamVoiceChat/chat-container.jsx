@@ -126,20 +126,8 @@ function ChatContainer() {
 
       setIsLoading(false)
     } catch (error) {
-      console.warn("Error during initial setup, using fallback for mock/local:", error)
-      if (import.meta.env.DEV) {
-        setCompanyName("shikshalokamstaging")
-        const currentProfileId = userStore.getState().profileId
-        if (!currentProfileId) {
-          setProfileId("mock_profile_" + Date.now())
-        }
-        const currentSessionId = chatStore.getState().sessionId
-        if (!currentSessionId) {
-          setSessionId("mock_session_" + Date.now())
-        }
-      } else {
-        navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY)
-      }
+      console.error("Error during initial setup:", error)
+      navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY)
       setIsLoading(false)
     }
   }

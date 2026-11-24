@@ -1,3 +1,5 @@
+import { STATE_MACHINE_OPERATION_TYPE } from "../constants/session"
+
 /**
  * Evaluates whether a backend API response is eligible for Multiple Choice Questions (MCQ) rendering.
  * Mandatory Conditions:
@@ -12,7 +14,7 @@
 export const isMCQEligible = response => {
   if (!response || typeof response !== "object") return false
   return (
-    response.operation_type === "non_llm" &&
+    response.operation_type === STATE_MACHINE_OPERATION_TYPE.NON_LLM &&
     response.validations?.type === "MULTIPLE_CHOICE"
   )
 }

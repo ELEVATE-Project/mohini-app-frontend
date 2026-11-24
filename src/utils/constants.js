@@ -1,7 +1,9 @@
 // utils/constants.js
 import { sessionFlowName } from "../constants/session"
-import { SESSION_USECASE_TYPE } from "constants/session"
+import { SESSION_USECASE_TYPE, STATE_MACHINE_OPERATION_TYPE } from "constants/session"
 import env from "./env"
+
+export { STATE_MACHINE_OPERATION_TYPE }
 
 export const rootPath = env.ROOT_PATH() ? `/${env.ROOT_PATH().replace(/^\/|\/$/g, "")}` : ""
 

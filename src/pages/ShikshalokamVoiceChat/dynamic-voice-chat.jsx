@@ -318,8 +318,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
   const onWebSocketMessage = useCallback(event => {
     // LLM websocket path active: ensure MCQ is not visible
-    if (activeOperationType !== "llm") {
-      setActiveOperationType("llm")
+    if (activeOperationType !== STATE_MACHINE_OPERATION_TYPE.LLM) {
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.LLM)
       setActiveValidations(null)
       setActiveBotMessage("")
     }
@@ -723,7 +723,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
         }
 
         if (isMCQEligible(res)) {
-          setActiveOperationType("non_llm")
+          setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
           setActiveValidations(res.validations)
           setActiveBotMessage(extractMCQQuestionText(res))
         } else {
@@ -736,7 +736,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           setStrandStep(stateMachineLength)
           setIsStreamingComplete(true)
         }
-        if (res?.operation_type === "llm") {
+        if (res?.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
           // Next step is LLM — open WebSocket to continue
           connectToWebSocket()
           sendSocketMessage({
@@ -1004,7 +1004,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
         // Apply exact visibility condition to subsequent response
         if (isMCQEligible(res)) {
-          setActiveOperationType("non_llm")
+          setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
           setActiveValidations(res.validations)
           setActiveBotMessage(extractMCQQuestionText(res))
         } else {
@@ -1020,7 +1020,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           setIsStreamingComplete(true)
         }
 
-        if (res?.operation_type === "llm") {
+        if (res?.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
           // Next step is LLM — open WebSocket to continue
           connectToWebSocket()
           sendSocketMessage({
@@ -1192,7 +1192,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     if (isMCQEligible(introMessageData)) {
       const hasUserMessages = Array.isArray(chatHistory) && chatHistory.some(msg => msg?.source === "user")
       if (!hasUserMessages) {
-        setActiveOperationType("non_llm")
+        setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
         setActiveValidations(introMessageData.validations)
         setActiveBotMessage(extractMCQQuestionText(introMessageData))
       }
@@ -1216,12 +1216,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
     // Find the step metadata for the current session step
     const currentStepMeta = stepMetadata.find(s => s.step === strandStep)
     if (currentStepMeta && isMCQEligible(currentStepMeta)) {
-      setActiveOperationType("non_llm")
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.NON_LLM)
       setActiveValidations(currentStepMeta.validations)
       const qText = extractMCQQuestionText(currentStepMeta) || currentStepMeta.bot_question || ""
       setActiveBotMessage(qText)
-    } else if (currentStepMeta && currentStepMeta.operation_type === "llm") {
-      setActiveOperationType("llm")
+    } else if (currentStepMeta && currentStepMeta.operation_type === STATE_MACHINE_OPERATION_TYPE.LLM) {
+      setActiveOperationType(STATE_MACHINE_OPERATION_TYPE.LLM)
       setActiveValidations(null)
       setActiveBotMessage("")
     }

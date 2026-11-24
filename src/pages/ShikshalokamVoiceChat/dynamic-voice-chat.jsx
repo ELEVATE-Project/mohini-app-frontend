@@ -61,6 +61,9 @@ import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-vo
 import WaveSurferPlayer from "../interview-text-voice/voice-player"
 import { apiClient } from "../../api/client"
 import CustomFormData from "../../components/Form/FormData"
+import LoggedInChatSidebar from "../../components/LoggedInChatSidebar"
+import { clearAllFlowTokens } from "../../auth/flowTokenStore"
+import { buildWrapperProfileUrl } from "../../auth/wrapperUrl"
 
 const cookies = new Cookies()
 
@@ -177,6 +180,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
   // ========= success callbacks ==========
 
   const redirectedRef = useRef(false)
+
+
+  // True when the flow ended without a closing bot message. Happens when the backend auto-fills the
+  // last question(s) from the logged-in user's profile: it then sends the usual end signal with an
+  // empty message, so no bot message ever reaches chatHistory. Used by the completion popup below.
+  const [completedWithoutBotMessage, setCompletedWithoutBotMessage] = useState(false)
 
 
   const {
@@ -325,7 +334,12 @@ const DynamicVoiceChat = ({ type = "" }) => {
           if (message.finish_reason === FINISH_REASON_SOCKET && message?.audio_s3_url) {
             lastSentence.audio_s3_url = message.audio_s3_url
           }
-        } else {
+        } else if(message?.msg) {
+           // Only start a new bot bubble when there is text. The end-of-flow signal sent after the
+          // backend auto-fills the final question(s) from the user's profile has an empty msg; pushing
+          // it would show an empty bubble and send an empty string to TTS. The append branch above is
+          // deliberately left unguarded: normal streams end with an empty chunk that still carries
+          // finish_reason / audio_s3_url for the current bubble.
           updatedSentences.push({
             message: message?.msg || "",
             source: "bot",
@@ -334,6 +348,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
             audio_s3_url: message.finish_reason === FINISH_REASON_SOCKET ? message?.audio_s3_url : undefined,
           })
           lastBotMessageIndex.current = updatedSentences.length - 1
+        } else if (message.finish_reason === FINISH_REASON_SOCKET) {
+          // Empty final message with no bot bubble in progress: the flow ended without a closing
+          // message (see completedWithoutBotMessage). Setting the same value twice is harmless if
+          // React re-runs this updater.
+          setCompletedWithoutBotMessage(true)
         }
         return updatedSentences
       })
@@ -535,8 +554,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
         console.log("navigating from the condtion to -3")
         navigate(-3, { replace: true })
       }
-      setEditorCopyChanges(extractTextBlocks(result.formatted_content))
-      setIsModalOpen(false)
+      // setEditorCopyChanges(extractTextBlocks(result.formatted_content))
+      // setIsModalOpen(false)
     } catch (error) {
       console.error("Saving failed: ", error)
       if (accessToken) {
@@ -703,6 +722,11 @@ const DynamicVoiceChat = ({ type = "" }) => {
         if (res?.is_complete) {
           setStrandStep(stateMachineLength)
           setIsStreamingComplete(true)
+           // Completed with no closing question: the backend auto-filled the last step(s) from the
+          // user's profile, so the popup can't wait for a bot message in chatHistory.
+          if (!botMsg) {
+            setCompletedWithoutBotMessage(true)
+          }
         }
         if (res?.operation_type === "llm") {
           // Next step is LLM — open WebSocket to continue
@@ -1474,7 +1498,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
       isStreamingComplete &&
       stateMachineLength &&
       strandStep >= stateMachineLength &&
-      isLastMessageFromBot
+      // Normally the flow ends on the bot's closing message; when the last step(s) were auto-filled
+      // from the profile there is none, and completedWithoutBotMessage stands in for it.
+      (isLastMessageFromBot || completedWithoutBotMessage)
 
     if (!isFlowComplete) return
 
@@ -1524,7 +1550,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
         window.location.reload()
       }
     })
-  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage])
+  }, [isStreamingComplete, strandStep, stateMachineLength, activeFlowRoute, chatHistory, activeFlowInfo, storageFlow, companyBotData, isCompanyBotError, chatLanguage,completedWithoutBotMessage])
 
   // ========================================================================
   // SECTION: UI State Management (Execution Order: 7 - Throughout Lifecycle)
@@ -2069,6 +2095,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
     setLlmError("")
     setSessionId(null)
     setStrandStep(null)
+    setCompletedWithoutBotMessage(false)
     const session = await getSessionDetails()
     setSessionId(session.sessionid)
     setIsChatVisible(false)
@@ -2494,13 +2521,29 @@ const DynamicVoiceChat = ({ type = "" }) => {
     setShouldFetchIntro(true)
   }
 
-  return (
+  const handleLoggedInLogout = () => {
+    clearAllFlowTokens()
+    clearFromStorage()
+    navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY, { replace: true })
+    window.location.reload()
+  }
+
+  const handleLoggedInProfile = () => {
+    window.location.href = buildWrapperProfileUrl({
+      flow: activeFlowRoute,
+      preferredLanguage: chatLanguage,
+      accessToken,
+    })
+  }
+
+  const mainContent = (
     <>
-      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession
+      {!accessToken && acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession
         && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} />
       }
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {!accessToken && chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {(!accessToken || flowInfo?.isParentFlow) && (
       <div className={`div27`}>
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
@@ -2511,6 +2554,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               <>
                 {flowInfo?.isParentFlow && <CustomFormData layOut={2} selectID="selectedTypeID" selectName="selectedType" selectOptions={(flowInfo.children_flows || []).filter(f => f.active).map(f => ({ label: f.flow_name, value: f.flow_route }))} selectValue={selectedChildFlowRoute} selectClassName="div31" selectOnChange={handleChildFlowChange} showDefaultDropdownText={false} />}
 
+                {!accessToken && (
                 <button
                   onClick={async e => {
                     if (accessToken) {
@@ -2526,11 +2570,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 >
                   <div className="div8">+</div>
                 </button>
+                )}
               </>
             }
           />
         </div>
       </div>
+      )}
       {(isInitialising || isLoading || (!introMessageData && !introMessage) || endStoryMutation.isPending) && (
         <div className="loader-load-spinner">
           <div className="div67">
@@ -2551,14 +2597,21 @@ const DynamicVoiceChat = ({ type = "" }) => {
           </div>
         </div>
       )}
-      {storyData &&
+      {/* {storyData &&
         isModalOpen &&
         (accessToken ? (
           <ReportEditorAuth title={storyData?.title} name={firstName} location={storyData?.location} onSave={onEditorSave} stopAllAudio={stopAllAudio} storyData={storyData} isLoading={isLoading} setIsLoading={setIsLoading} fileErrorText={fileErrorText} setFileErrorText={setFileErrorText} isSaving={isSaving} />
         ) : (
           <ReportEditor onClose={closeModal} onSave={onEditorSave} disabled={isLoading || isSaving} />
-        ))}
-      <div className={`${accessToken ? "div72" : ""}`}>
+        ))} */}
+
+       {storyData &&
+        isModalOpen &&
+       (
+          <ReportEditor onClose={closeModal} onSave={onEditorSave} disabled={isLoading || isSaving} />
+        )}
+        
+      <div className={`${accessToken ? "div72" : ""} flex-1 flex flex-col`}>
         {shouldFetchChatSession && (
           <button
             onClick={() => {
@@ -2573,7 +2626,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           </button>
         )}
         <HiddenRecorder />
-        <div className={`${accessToken ? "div33-a" : "div33"} div9`}>
+        <div className={`${accessToken ? "div33-a" : "div33"} div9 flex-1`}>
           {!showHomepage && (
             <ul className="div34">
               {chatHistory &&
@@ -2796,7 +2849,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               )}
 
               {![sessionFlowName.ParentPerceptionSurvey].includes(activeFlowRoute) && (
-                <div className="div19">
+                <div className="div13">
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
@@ -2978,6 +3031,20 @@ const DynamicVoiceChat = ({ type = "" }) => {
         )}
       </div>
     </>
+  )
+
+  if (!accessToken) return mainContent
+
+  return (
+    <div className="flex min-h-screen">
+      <LoggedInChatSidebar
+        userName={firstName}
+        onNewChat={() => resetChat()}
+        onProfile={handleLoggedInProfile}
+        onLogout={handleLoggedInLogout}
+      />
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">{mainContent}</div>
+    </div>
   )
 }
 

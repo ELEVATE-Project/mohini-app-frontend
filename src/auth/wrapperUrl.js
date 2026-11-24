@@ -25,7 +25,6 @@ export function buildWrapperProfileUrl({ flow, preferredLanguage, accessToken })
 
   const params = new URLSearchParams({
     redirecturl: appReturnUrl(flow),
-    flow,
   })
   if (preferredLanguage) params.set("preferred_language", preferredLanguage)
   if (accessToken) params.set("accToken", accessToken)

@@ -540,23 +540,23 @@ const DynamicVoiceChat = ({ type = "" }) => {
       /**
        * * Navigation handled differently if authenticated user
        */
-      if (accessToken) {
-        await updateReflectionStatusApi(projectId, "completed", sessionFlowName.SsoFlow, accessToken)
-        console.log("clearing storage")
-        clearFromStorage()
-        console.log("History length:", window.history.length)
-        console.log("Can go back 1?", window.history.length > 1)
-        console.log("Can go back 3?", window.history.length > 3)
-        setSsoNavigationTriggered(true)
-        const message = { type: "MItra", name: "MItra" }
-        setTimeout(() => {
-          window.postMessage(message, "*")
-          console.log("Postmessage called")
-        }, 500)
+      // if (accessToken) {
+      //   await updateReflectionStatusApi(projectId, "completed", sessionFlowName.SsoFlow, accessToken)
+      //   console.log("clearing storage")
+      //   clearFromStorage()
+      //   console.log("History length:", window.history.length)
+      //   console.log("Can go back 1?", window.history.length > 1)
+      //   console.log("Can go back 3?", window.history.length > 3)
+      //   setSsoNavigationTriggered(true)
+      //   const message = { type: "MItra", name: "MItra" }
+      //   setTimeout(() => {
+      //     window.postMessage(message, "*")
+      //     console.log("Postmessage called")
+      //   }, 500)
 
-        console.log("navigating from the condtion to -3")
-        navigate(-3, { replace: true })
-      }
+      //   console.log("navigating from the condtion to -3")
+      //   navigate(-3, { replace: true })
+      // }
       // setEditorCopyChanges(extractTextBlocks(result.formatted_content))
       // setIsModalOpen(false)
     } catch (error) {
@@ -1614,9 +1614,9 @@ const DynamicVoiceChat = ({ type = "" }) => {
   useEffect(() => {
     const fetchMedia = async () => {
       if (storyData && storyData?.id !== "") {
-        if (accessToken) {
-          openModal()
-        }
+        // if (accessToken) {
+        //   openModal()
+        // }
         const story_id = storyData?.id
         const tempMediaArr = []
         setIsImageUploading(true)

@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   VALIDATE_TITLE: "api/shikshalokam/validate-title/",
   PARAPHRASE: "api/shikshalokam/paraphrase/",
   NON_LLM_CHAT: "api/non-llm-chat/",
+  GET_PROFILE_DETAILS_V2: "/api/get-profile-details/",
 }
 
 export const URL_PARAMS = {

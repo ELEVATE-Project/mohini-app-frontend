@@ -1,20 +1,28 @@
 import { API_ENDPOINTS, URL_PARAMS } from "../constants/urls"
 import { useChatStorage, useSiteStorage } from "hooks/useStorage"
 import { clearFromStorage } from "../services/storage_service"
-import { getFlowLanguagesApi } from "../api/endpoints/flow"
+import { getFlowInfoApi, getFlowLanguagesApi } from "../api/endpoints/flow"
+import { getFlowToken, markGuestChoice } from "../auth/flowTokenStore"
+import { buildWrapperLoginUrl } from "../auth/wrapperUrl"
 import { languageList, languageValueMap } from "../pages/ShikshalokamVoiceChat/enum"
 import { sessionFlowName } from "../constants/session"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useSiteDataSessionStore } from "store"
 import { useTranslation } from "react-i18next"
+import LoginOptions from "./auth/LoginOptions"
 import ROUTES from "../url"
 import useUrlFlow from "../hooks/useUrlFlow"
+
+// Flows that open their own routes instead of common-chat. The login gate does not
+// cover these, so they keep their original behaviour.
+const NON_GATED_FLOWS = [sessionFlowName.ParentPerceptionSurvey, sessionFlowName.ListeningActivity]
 
 const LanguageSelectionGrid = ({ usecaseType }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [pendingLanguage, setPendingLanguage] = useState(null)
 
   const setChatLanguage = useSiteDataSessionStore(state => state.setChatLanguage)
   const setHasSelectedLanguage = useSiteDataSessionStore(state => state.setHasSelectedLanguage)
@@ -35,6 +43,13 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
     enabled: !!urlFlow && ![sessionFlowName.ParentPerceptionSurvey, sessionFlowName.ListeningActivity].includes(urlFlow),
   })
 
+  const { data: flowInfo } = useQuery({
+    queryKey: [API_ENDPOINTS.FLOW_CONNECTION_INFO, urlFlow],
+    queryFn: () => getFlowInfoApi(urlFlow),
+    enabled: !!urlFlow,
+    retry: false,
+  })
+
   useEffect(() => {
     if (!isFlowLanguagesError) return
 
@@ -45,14 +60,13 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
     }
   }, [flowLanguagesError, isFlowLanguagesError])
 
-  const handleLanguageClick = langValue => {
-    setChatLanguage(langValue)
-    setHasSelectedLanguage(true)
-
+  // Opens the chosen flow. Used after language selection, and after Continue as Guest.
+  const openFlow = () => {
     if (!urlFlow) return
+
     const route_mapping = {
-      [sessionFlowName.ParentPerceptionSurvey]: ROUTES.SHIKSHALOKAM_PPPI_VOICE_CHAT,
-      [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT,
+      [sessionFlowName.ParentPerceptionSurvey]: ROUTES.SHIKSHAGRAHA_PPPI_VOICE_CHAT,
+      [sessionFlowName.ListeningActivity]: ROUTES.SHIKSHAGRAHA_GUEST_LISTENING_CHAT,
     }
 
     if (route_mapping[urlFlow]) {
@@ -66,6 +80,48 @@ const LanguageSelectionGrid = ({ usecaseType }) => {
       pathname: ROUTES.COMMON_CHAT,
       search: new URLSearchParams({ [URL_PARAMS.FLOW]: urlFlow }).toString(),
     })
+  }
+
+  const handleLanguageClick = langValue => {
+    setChatLanguage(langValue)
+
+    // Only flows that open common-chat are gated. Other flows behave as before.
+    const opensGatedChat = !!urlFlow && !NON_GATED_FLOWS.includes(urlFlow)
+    const loginConfig = flowInfo?.login_config
+    const needsLogin = opensGatedChat && (loginConfig === "mandatory" || loginConfig === "optional") && !getFlowToken(urlFlow)
+
+    if (needsLogin) {
+      if (loginConfig === "mandatory") {
+        window.location.href = buildWrapperLoginUrl({ flow: urlFlow, preferredLanguage: langValue })
+        return
+      }
+      // Optional: show Login / Continue as Guest on this screen.
+      // Do not set hasSelectedLanguage yet, or this screen would unmount.
+      setPendingLanguage(langValue)
+      return
+    }
+
+    setHasSelectedLanguage(true)
+    openFlow()
+  }
+
+  const handleContinueAsGuest = () => {
+    markGuestChoice(urlFlow)
+    setHasSelectedLanguage(true)
+    openFlow()
+  }
+
+  if (pendingLanguage) {
+    return (
+      <>
+        <div className="text-center text-lg md:text-2xl sm:text-md mt-0 sm:mt-[100px] text-slate-700">
+          <b>{t("welcome_text")}</b>
+        </div>
+        <div className="mt-4 mb-10 px-6 flex justify-center">
+          <LoginOptions flow={urlFlow} language={pendingLanguage} onContinueAsGuest={handleContinueAsGuest} />
+        </div>
+      </>
+    )
   }
 
   return (

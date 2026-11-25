@@ -1140,17 +1140,17 @@
 }
 
 .chat-input-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  padding: 10px 25px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 50;
-  background-color: #ffffff;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 10px 25px;
+    position: sticky; /* Changed from fixed */
+    bottom: 0;
+    /* Removed left: 0; */
+    z-index: 20;
+    background-color: #ffffff;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05); /* Optional: shifted shadow to top */
 }
 
 @media (min-width: 640px) {

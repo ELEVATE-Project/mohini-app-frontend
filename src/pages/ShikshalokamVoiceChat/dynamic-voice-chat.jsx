@@ -61,6 +61,9 @@ import useVoiceRecord, { default_wave_surfer_config } from "../interview-text-vo
 import WaveSurferPlayer from "../interview-text-voice/voice-player"
 import { apiClient } from "../../api/client"
 import CustomFormData from "../../components/Form/FormData"
+import LoggedInChatSidebar from "../../components/LoggedInChatSidebar"
+import { clearAllFlowTokens } from "../../auth/flowTokenStore"
+import { buildWrapperProfileUrl } from "../../auth/wrapperUrl"
 import MultipleChoiceQuestions from "../../components/MultipleChoiceQuestions/MultipleChoiceQuestions"
 import { isMCQEligible, extractMCQQuestionText } from "../../utils/mcqUtils"
 
@@ -554,8 +557,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
         console.log("navigating from the condtion to -3")
         navigate(-3, { replace: true })
       }
-      setEditorCopyChanges(extractTextBlocks(result.formatted_content))
-      setIsModalOpen(false)
+      // setEditorCopyChanges(extractTextBlocks(result.formatted_content))
+      // setIsModalOpen(false)
     } catch (error) {
       console.error("Saving failed: ", error)
       if (accessToken) {
@@ -2716,13 +2719,29 @@ const DynamicVoiceChat = ({ type = "" }) => {
     setShouldFetchIntro(true)
   }
 
-  return (
+  const handleLoggedInLogout = () => {
+    clearAllFlowTokens()
+    clearFromStorage()
+    navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY, { replace: true })
+    window.location.reload()
+  }
+
+  const handleLoggedInProfile = () => {
+    window.location.href = buildWrapperProfileUrl({
+      flow: activeFlowRoute,
+      preferredLanguage: chatLanguage,
+      accessToken,
+    })
+  }
+
+  const mainContent = (
     <>
-      {acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession
+      {!accessToken && acceptedTnc === "ONGOING" && !isLoading && shouldFetchChatSession
         && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} />
       }
 
-      {chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {!accessToken && chatLanguage && acceptedTnc === "ONGOING" && !isLoading && activeFlowRoute && !shouldFetchChatSession && <PrivacyPolicyPopup tncText={t([`config.${activeFlowRoute}.tncText`, `config.default.tncText`, tncText])} onAccept={handleAcceptTnC} useStaticText={false} />}
+      {(!accessToken || flowInfo?.isParentFlow) && (
       <div className={`div27`}>
         <div className={isMobile ? "div30_a" : "div30"}>
           <MainHeader
@@ -2735,6 +2754,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
 
 
 
+                {!accessToken && (
                 <button
                   onClick={async e => {
                     if (accessToken) {
@@ -2750,11 +2770,13 @@ const DynamicVoiceChat = ({ type = "" }) => {
                 >
                   <div className="div8">+</div>
                 </button>
+                )}
               </>
             }
           />
         </div>
       </div>
+      )}
       {(isInitialising || isLoading || (!introMessageData && !introMessage) || endStoryMutation.isPending) && (
         <div className="loader-load-spinner">
           <div className="div67">
@@ -2775,14 +2797,21 @@ const DynamicVoiceChat = ({ type = "" }) => {
           </div>
         </div>
       )}
-      {storyData &&
+      {/* {storyData &&
         isModalOpen &&
         (accessToken ? (
           <ReportEditorAuth title={storyData?.title} name={firstName} location={storyData?.location} onSave={onEditorSave} stopAllAudio={stopAllAudio} storyData={storyData} isLoading={isLoading} setIsLoading={setIsLoading} fileErrorText={fileErrorText} setFileErrorText={setFileErrorText} isSaving={isSaving} />
         ) : (
           <ReportEditor onClose={closeModal} onSave={onEditorSave} disabled={isLoading || isSaving} />
-        ))}
-      <div className={`${accessToken ? "div72" : ""}`}>
+        ))} */}
+
+       {storyData &&
+        isModalOpen &&
+       (
+          <ReportEditor onClose={closeModal} onSave={onEditorSave} disabled={isLoading || isSaving} />
+        )}
+        
+      <div className={`${accessToken ? "div72" : ""} flex-1 flex flex-col`}>
         {shouldFetchChatSession && (
           <button
             onClick={() => {
@@ -2797,7 +2826,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
           </button>
         )}
         <HiddenRecorder />
-        <div className={`${accessToken ? "div33-a" : "div33"} div9`}>
+        <div className={`${accessToken ? "div33-a" : "div33"} div9 flex-1`}>
           {!showHomepage && (
             <ul className="div34">
               {chatHistory &&
@@ -3020,7 +3049,7 @@ const DynamicVoiceChat = ({ type = "" }) => {
               )}
 
               {![sessionFlowName.ParentPerceptionSurvey].includes(activeFlowRoute) && (
-                <div className="div19">
+                <div className="div13">
                   <ChatMessage
                     botNameToDisplay={botNameToDisplay}
                     userType="bot"
@@ -3234,6 +3263,20 @@ const DynamicVoiceChat = ({ type = "" }) => {
         )}
       </div>
     </>
+  )
+
+  if (!accessToken) return mainContent
+
+  return (
+    <div className="flex min-h-screen">
+      <LoggedInChatSidebar
+        userName={firstName}
+        onNewChat={() => resetChat()}
+        onProfile={handleLoggedInProfile}
+        onLogout={handleLoggedInLogout}
+      />
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">{mainContent}</div>
+    </div>
   )
 }
 

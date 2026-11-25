@@ -26,6 +26,7 @@ const ROUTES = {
   LOGIN: "/login",
   EXPLORE: "/explore",
   SHARE_TEMPLATE: "/share_template/:templateId",
+  SSO_MITRA: "/sso-mitra",
 }
 
 export default ROUTES

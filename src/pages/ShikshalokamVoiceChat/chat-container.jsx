@@ -33,6 +33,7 @@ function ChatContainer() {
   const ipCountry = userStore(state => state.ipCountry)
   const ipFetched = userStore(state => state.ipFetched)
   const ipState = userStore(state => state.ipState)
+  const profileToUse = useUserStorage()(state => state.profileId)
   const sessionId = chatStore(state => state.sessionId)
   const setCompanyName = userStore(state => state.setCompanyName)
   const setDeviceId = userStore(state => state.setDeviceId)
@@ -65,27 +66,39 @@ function ChatContainer() {
     setChatHistory(updated_chat_history)
   }, [])
 
+  const DEVICE_ID_KEY = "mitra_unique_device_id"
+
+  // Random ID per browser. Uses randomUUID where available, and falls back for
+  // non-secure origins (e.g. http://LAN-IP) where randomUUID does not exist.
+  function createDeviceId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID()
+
+    const bytes = new Uint8Array(16)
+    window.crypto.getRandomValues(bytes)
+    bytes[6] = (bytes[6] & 0x0f) | 0x40
+    bytes[8] = (bytes[8] & 0x3f) | 0x80
+    const hex = [...bytes].map(b => b.toString(16).padStart(2, "0")).join("")
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+  }
+
+  // Runs for guest and logged-in users. The ID is only read or created here.
   function getUserFingerPrint() {
-    if (accessToken) return
-
     try {
-      const fingerprint = window.navigator.userAgent + window.navigator.language + window.screen.colorDepth + window.screen.pixelDepth + window.screen.width + window.screen.height
-
-      const newUserId = deviceId || btoa(fingerprint)
-
-      if (!deviceId) setDeviceId(newUserId)
-      setUserId(newUserId)
+      let deviceId = localStorage.getItem(DEVICE_ID_KEY)
+      if (!deviceId) {
+        deviceId = createDeviceId()
+        localStorage.setItem(DEVICE_ID_KEY, deviceId)
+      }
+      setDeviceId(deviceId)
+      setUserId(`${deviceId.replaceAll("-", "")}@shikshalokam.org`)
     } catch (error) {
-      console.error("Error handling user ID:", error)
-      setUserId("guest_" + Date.now())
+      console.error("Error generating device id:", error)
     }
   }
 
   async function initialSetup() {
-    if (accessToken) return
-
     try {
-      const customEmail = getDeviceId() + "@shikshalokam.org"
+      const customEmail = getDeviceId().replaceAll("-", "") + "@shikshalokam.org"
       const body = {
         email: customEmail,
         company: "shikshalokamstaging",
@@ -112,16 +125,19 @@ function ChatContainer() {
         setSessionId(session.sessionid)
       }
 
-      const response = await loginApi({
-        email: customEmail,
-        password: "grit@123",
-      })
+      // Guests only. Logged-in users already have company and name from activateSession.
+      if (!accessToken) {
+        const response = await loginApi({
+          email: customEmail,
+          password: "grit@123",
+        })
 
-      if (response?.access_token) {
-        setCompanyName(response?.company)
-        setFirstName(response?.first_name)
-      } else {
-        window.location.reload()
+        if (response?.access_token) {
+          setCompanyName(response?.company)
+          setFirstName(response?.first_name)
+        } else {
+          window.location.reload()
+        }
       }
 
       setIsLoading(false)
@@ -133,8 +149,6 @@ function ChatContainer() {
   }
 
   const setFinalLanguage = async () => {
-    if (accessToken) return
-
     await initialSetup()
     const storedLanguage = chatLanguage || languageList[0].value
     setLanguage(storedLanguage)
@@ -159,6 +173,10 @@ function ChatContainer() {
         isSetupInProgressRef.current = true
         setIsLoading(true)
         setIsNewChatOpen(true)
+        if (!sessionId || !profileToUse) {
+          setIsLoading(true)
+          setIsNewChatOpen(true)
+        }
 
         const locationData = await getIpLocation()
         if (locationData && locationData?.location) {
@@ -178,11 +196,11 @@ function ChatContainer() {
 
     setIpFetched(false)
     runSetup()
-  }, [accessToken, sessionId, companyName, flowInfo])
+  }, [accessToken, sessionId, companyName, profileToUse, flowInfo])
 
   return (
     <>
-      {companyName && !isLoading && <DynamicVoiceChat />}
+      {companyName && profileToUse && !isLoading && <DynamicVoiceChat />}
       {(isLoading || (!ipFetched && !companyName)) && (
         <div className="loader-load-spinner">
           <div className="div67">

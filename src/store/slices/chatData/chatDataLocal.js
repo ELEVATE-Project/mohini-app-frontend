@@ -6,8 +6,8 @@ import { INITIAL_STATE } from "./state"
 const initialState = INITIAL_STATE
 
 const useChatDataLocalStore = create(
-  createPersistentStore(STORE_NAME_CONSTANTS.CHAT_DATA, (set, get) => ({
-    ...initialState(set, get),
+  createPersistentStore(STORE_NAME_CONSTANTS.CHAT_DATA, (set, get,store) => ({
+    ...initialState(set, get,store),
   }))
 )
 

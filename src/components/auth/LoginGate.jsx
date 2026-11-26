@@ -38,7 +38,7 @@ export default function LoginGate({ flow, onContinueAsGuest }) {
           >
             <FaArrowLeftLong />
           </button>
-          <div className="w-full shrink-0">
+          <div className="w-[150px] shrink-0">
             <LanguageSelector fluid />
           </div>
         </div>

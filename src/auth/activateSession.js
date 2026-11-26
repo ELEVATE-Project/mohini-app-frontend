@@ -7,12 +7,17 @@ import { useSiteDataSessionStore, useUserDataLocalStore, useChatDataLocalStore }
 //
 // Language: wrapper preferred_language, else the language the user already selected, else English.
 // Profile: never taken from the wrapper profile. The Mitra profile id is set by
-// ChatContainer.initialSetup from /api/profile/, and is cleared here on a fresh login.
+// ChatContainer.initialSetup from /api/profile/. It is cleared here on a fresh login,
+// on a flow change, and when a different Elevate user logs in on this browser.
 // Session: not created here. ChatContainer creates it when profileId is missing.
 export function activateSession({ flow, token, profile, language, fresh = false }) {
-  // Read before clearFromStorage(), which resets the site store.
+  // Read before clearFromStorage(), which resets the user store.
   const selectedLanguage = useSiteDataSessionStore.getState().chatLanguage
   const chatLanguage = language || selectedLanguage || LANGUAGE_ENUMS.ENGLISH
+
+  const previousElevateId = useUserDataLocalStore.getState().elevateUserId
+  const newElevateId = profile?.id ? String(profile.id) : null
+  const isDifferentUser = Boolean(previousElevateId && newElevateId && previousElevateId !== newElevateId)
 
   const chatBefore = useChatDataLocalStore.getState()
   const needsNewSession = fresh || !chatBefore.sessionId || chatBefore.flow !== flow
@@ -20,7 +25,8 @@ export function activateSession({ flow, token, profile, language, fresh = false 
 
   const user = useUserDataLocalStore.getState()
   user.setAccessToken(token)
-  if (needsNewSession) user.setProfileId(null)
+  if (needsNewSession || isDifferentUser) user.setProfileId(null)
+  user.setElevateUserId(newElevateId)
   user.setFirstName(profile?.name || "")
   user.setCompanyName(profile?.organizations?.[0]?.code || "")
   user.setState(profile?.state?.label || "")

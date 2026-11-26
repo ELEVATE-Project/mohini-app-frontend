@@ -15,6 +15,21 @@ import useSmartChatStorage from "../../hooks/useSmartChatStorage"
 import useUrlFlow from "../../hooks/useUrlFlow"
 import useUserDataLocalStore from "../../store/slices/userData/userDataLocal"
 
+const DEVICE_ID_KEY = "mitra_unique_device_id"
+
+// Random ID per browser. Uses randomUUID where available, and falls back for
+// non-secure origins (e.g. http://LAN-IP) where randomUUID does not exist.
+function createDeviceId() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID()
+
+  const bytes = new Uint8Array(16)
+  window.crypto.getRandomValues(bytes)
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const hex = [...bytes].map(b => b.toString(16).padStart(2, "0")).join("")
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 function ChatContainer() {
   const navigate = useNavigate()
   const { flow: urlFlow } = useUrlFlow()
@@ -33,7 +48,7 @@ function ChatContainer() {
   const ipCountry = userStore(state => state.ipCountry)
   const ipFetched = userStore(state => state.ipFetched)
   const ipState = userStore(state => state.ipState)
-  const profileToUse = useUserStorage()(state => state.profileId)
+  const profileToUse = userStore(state => state.profileId)
   const sessionId = chatStore(state => state.sessionId)
   const setCompanyName = userStore(state => state.setCompanyName)
   const setDeviceId = userStore(state => state.setDeviceId)
@@ -66,31 +81,16 @@ function ChatContainer() {
     setChatHistory(updated_chat_history)
   }, [])
 
-  const DEVICE_ID_KEY = "mitra_unique_device_id"
-
-  // Random ID per browser. Uses randomUUID where available, and falls back for
-  // non-secure origins (e.g. http://LAN-IP) where randomUUID does not exist.
-  function createDeviceId() {
-    if (window.crypto?.randomUUID) return window.crypto.randomUUID()
-
-    const bytes = new Uint8Array(16)
-    window.crypto.getRandomValues(bytes)
-    bytes[6] = (bytes[6] & 0x0f) | 0x40
-    bytes[8] = (bytes[8] & 0x3f) | 0x80
-    const hex = [...bytes].map(b => b.toString(16).padStart(2, "0")).join("")
-    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-  }
-
   // Runs for guest and logged-in users. The ID is only read or created here.
   function getUserFingerPrint() {
     try {
-      let deviceId = localStorage.getItem(DEVICE_ID_KEY)
-      if (!deviceId) {
-        deviceId = createDeviceId()
-        localStorage.setItem(DEVICE_ID_KEY, deviceId)
+      let currentDeviceId = localStorage.getItem(DEVICE_ID_KEY)
+      if (!currentDeviceId) {
+        currentDeviceId = createDeviceId()
+        localStorage.setItem(DEVICE_ID_KEY, currentDeviceId)
       }
-      setDeviceId(deviceId)
-      setUserId(`${deviceId.replaceAll("-", "")}@shikshalokam.org`)
+      setDeviceId(currentDeviceId)
+      setUserId(`${currentDeviceId.replaceAll("-", "")}@shikshalokam.org`)
     } catch (error) {
       console.error("Error generating device id:", error)
     }
@@ -113,15 +113,22 @@ function ChatContainer() {
       }
 
       setIsLoading(true)
-      const currentProfileId = userStore.getState().profileId
-      if (!currentProfileId) {
+
+      // Logged-in users always call the profile API, with the token attached by the interceptor.
+      // Guests call it only when no profile id is stored yet.
+      const shouldFetchProfile = Boolean(accessToken) || !userStore.getState().profileId
+      if (shouldFetchProfile) {
         const res = await getProfileDetails(body)
+         if (res?.status === "error" && res?.message) {
+          // Backend returns status: "error" bodies with 200 on some paths, and 409 on conflicts
+          throw Object.assign(new Error(res.message), { status: res.status })
+        }
+        if (!res?.id) throw new Error("profile call returned no id")
         setProfileId(res.id)
       }
 
-      const currentSessionId = chatStore.getState().sessionId
-      if (!currentSessionId) {
-        let session = await getSessionDetails()
+      if (!chatStore.getState().sessionId) {
+        const session = await getSessionDetails()
         setSessionId(session.sessionid)
       }
 
@@ -142,7 +149,10 @@ function ChatContainer() {
 
       setIsLoading(false)
     } catch (error) {
-      console.error("Error during initial setup:", error)
+       console.error("Error during initial setup:", error)
+      if (error?.status === 409) {
+        console.log("This account is linked to another user. Please contact support.")
+      }
       navigate(ROUTES.SHIKSHAGRAHA_REPOSITORY)
       setIsLoading(false)
     }
@@ -157,14 +167,12 @@ function ChatContainer() {
   useEffect(() => {
     if (!flowInfo) return
 
-    const currentSession = chatStore.getState().sessionId
-    const currentCompany = userStore.getState().companyName
-    const isSetupComplete = Boolean(currentCompany && (accessToken || currentSession))
-
+    // Setup is complete only when the Mitra profile id and the chat session both exist.
+    // Company name is not enough: logged-in users get it from activateSession before
+    // the profile call has run, which previously skipped setup entirely.
+    const isSetupComplete = Boolean(profileToUse && sessionId)
     if (isSetupComplete || isSetupInProgressRef.current) {
-      if (!ipFetched) {
-        setIpFetched(true)
-      }
+      if (!ipFetched) setIpFetched(true)
       return
     }
 
@@ -173,10 +181,6 @@ function ChatContainer() {
         isSetupInProgressRef.current = true
         setIsLoading(true)
         setIsNewChatOpen(true)
-        if (!sessionId || !profileToUse) {
-          setIsLoading(true)
-          setIsNewChatOpen(true)
-        }
 
         const locationData = await getIpLocation()
         if (locationData && locationData?.location) {
@@ -196,7 +200,7 @@ function ChatContainer() {
 
     setIpFetched(false)
     runSetup()
-  }, [accessToken, sessionId, companyName, profileToUse, flowInfo])
+  }, [accessToken, sessionId, profileToUse, flowInfo])
 
   return (
     <>

@@ -112,9 +112,9 @@ export const partialUpdateStoryById = async ({ token, data, storyId, partialUpda
     }
 
     const config = {
-      headers: {
-        Authorization: token,
-      },
+      // headers: {
+      //   Authorization: token,
+      // },
     }
 
     const requestData = {

@@ -557,8 +557,8 @@ const DynamicVoiceChat = ({ type = "" }) => {
       //   console.log("navigating from the condtion to -3")
       //   navigate(-3, { replace: true })
       // }
-      // setEditorCopyChanges(extractTextBlocks(result.formatted_content))
-      // setIsModalOpen(false)
+      setEditorCopyChanges(extractTextBlocks(result.formatted_content))
+      setIsModalOpen(false)
     } catch (error) {
       console.error("Saving failed: ", error)
       if (accessToken) {
@@ -1446,56 +1446,56 @@ const DynamicVoiceChat = ({ type = "" }) => {
   /**
    * Create user profile for authenticated users
    * Fetches user details, creates session, and initializes user-specific data
-   */
-  useEffect(() => {
-    async function createUserProfile() {
-      try {
-        setIsLoading(true)
+   // commenting for now as we are not using this flow for now
+  // useEffect(() => {
+  //   async function createUserProfile() {
+  //     try {
+  //       setIsLoading(true)
 
-        const response = await createUserProfileApi({
-          access_token: accessToken,
-        })
+  //       const response = await createUserProfileApi({
+  //         access_token: accessToken,
+  //       })
 
-        if (response) {
-          const data = response.profile_details
-          const userPreferredLanguage = preferredLanguage || {}
-          let language = LANGUAGE_ENUMS.ENGLISH
-          if (userPreferredLanguage) {
-            language = userPreferredLanguage.value
-          } else if (languageToUse) {
-            language = languageToUse
-          }
-          // setStorageFlow(type)
-          setChatLanguage(language)
-          setLanguage(language)
-          setProfileToUse(data?.id)
-          if (!sessionId) {
-            let session = await getSessionDetails()
-            setSessionId(session.sessionid)
-          }
-          setFirstName(data?.first_name)
-          setCompanyName(data?.company?.slug)
-          setState(data?.profile_address[0]?.state)
-          setIsNewChatOpen(true)
-        } else {
-          clearFromStorage()
-          navigate(-1)
-        }
-      } catch (error) {
-        console.error(error)
-        clearFromStorage()
-        navigate(-1)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  //       if (response) {
+  //         const data = response.profile_details
+  //         const userPreferredLanguage = preferredLanguage || {}
+  //         let language = LANGUAGE_ENUMS.ENGLISH
+  //         if (userPreferredLanguage) {
+  //           language = userPreferredLanguage.value
+  //         } else if (languageToUse) {
+  //           language = languageToUse
+  //         }
+  //         // setStorageFlow(type)
+  //         setChatLanguage(language)
+  //         setLanguage(language)
+  //         setProfileToUse(data?.id)
+  //         if (!sessionId) {
+  //           let session = await getSessionDetails()
+  //           setSessionId(session.sessionid)
+  //         }
+  //         setFirstName(data?.first_name)
+  //         setCompanyName(data?.company?.slug)
+  //         setState(data?.profile_address[0]?.state)
+  //         setIsNewChatOpen(true)
+  //       } else {
+  //         clearFromStorage()
+  //         navigate(-1)
+  //       }
+  //     } catch (error) {
+  //       console.error(error)
+  //       clearFromStorage()
+  //       navigate(-1)
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
 
-    if (!profileToUse && accessToken) {
-      createUserProfile()
-      setShouldFetchIntro(true)
-      setIsStreamingComplete(true)
-    }
-  }, [accessToken, profileToUse])
+  //   if (!profileToUse && accessToken) {
+  //     createUserProfile()
+  //     setShouldFetchIntro(true)
+  //     setIsStreamingComplete(true)
+  //   }
+  // }, [accessToken, profileToUse])
 
   /**
    * Fetch chat session for Reflection flow based on projectId

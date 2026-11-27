@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from "axios"
 import env from "utils/env"
+// @ts-ignore authInterceptor is implemented in JavaScript and has no declaration file
+import { attachAuthInterceptors } from "../../../src/auth/authInterceptor"
 
 type TAPIConfig = {
   headers?: {
@@ -42,5 +44,7 @@ const axiosInstance = axios.create({
   baseURL: env.LOCAL_PROXY(),
   params: {},
 })
+
+attachAuthInterceptors(axiosInstance)
 
 export const apiClient = new ApiClient(axiosInstance)

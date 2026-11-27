@@ -9,7 +9,7 @@ import LoadingSpinner from "./components/LoadingSpinner"
 import RouteErrorBoundary from "./components/RouteErrorBoundary"
 import LanguageGuard from "./hooks/useLanguageGuard"
 import ThankYouLoader from "./pages/thankYou/ThankYouLoader"
-
+import AuthGate from "./components/auth/AuthGate"
 // Route-level code splitting: these are only pulled into a chunk when their
 // route is actually visited, instead of all landing in one bundle. See
 // .claude/brain/task/vite-migration-and-lazy-loading-plan.md Plan A.
@@ -19,6 +19,7 @@ const ShikshagrahaRepository = React.lazy(() => import("./pages/shikshagraha-rep
 const ShikshagrahaRepositoryDetail = React.lazy(() => import("./pages/shikshagraha-repository/details"))
 const ShikshalokamChat = React.lazy(() => import("./pages/shikshalokamChat"))
 const SsoFlow = React.lazy(() => import("./pages/ssoFlow"))
+const SsoMitra = React.lazy(() => import("./pages/sso/SsoHandoff"))
 const UnifiedChat = React.lazy(() => import("./pages/UnifiedChat/UnifiedChat"))
 const ChatContainer = React.lazy(() => import("./pages/ShikshalokamVoiceChat/chat-container"))
 const MainPage = React.lazy(() => import("pages/ai-creation/pages/shikshalokam-mitra/MainPage"))
@@ -67,7 +68,7 @@ const unprotected_old_routes = [
   // { path: ROUTES.SHIKSHALOKAM_VOICE_CHAT_LOGIN, element: <Shikshalokam type={"shikshalokam"} variant={"publicBot"} /> },
   // { path: ROUTES.SHIKSHALOKAM_VOICE_CHAT, element: <ShikshalokamVoiceBasedChat type={"shikshalokam"} variant={"publicBot"} /> },
 
-  { path: ROUTES.COMMON_CHAT, element: <LanguageGuard><ChatContainer /></LanguageGuard> },
+  { path: ROUTES.COMMON_CHAT, element: <LanguageGuard><AuthGate><ChatContainer /></AuthGate></LanguageGuard> },
 
   { path: ROUTES.SHIKSHALOKAM_GUEST_VOICE_CHAT, element: <LanguageGuard flow={sessionFlowName.GuestDiscussion}><ShikshalokamChat type={sessionFlowName.GuestDiscussion} /></LanguageGuard> },
   { path: ROUTES.SHIKSHALOKAM_GUEST_LISTENING_CHAT, element: <LanguageGuard flow={sessionFlowName.ListeningActivity}><ShikshalokamChat type={sessionFlowName.ListeningActivity} /></LanguageGuard> },
@@ -85,6 +86,7 @@ const unprotected_old_routes = [
   { path: ROUTES.TERMS_AND_CONDITIONS, element: <PrivacyPage /> },
   { path: ROUTES.SHIKSHALOKAM_HOME_PAGE, element: <HomeRedirect /> },
   { path: ROUTES.SSO_FLOW, element: <SsoFlow /> },
+  { path: ROUTES.SSO_MITRA, element: <SsoMitra/> },
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY, element: <CommonHomePage /> },
   { path: ROUTES.SHIKSHAGRAHA_REPOSITORY_DETAIL, element: <ShikshagrahaRepositoryDetail /> },
   { path: ROUTES.NOT_FOUND, element: <NotFound /> },

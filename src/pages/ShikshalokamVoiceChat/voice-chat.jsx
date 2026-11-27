@@ -485,10 +485,10 @@ const ShikshalokamVoiceBasedChat = ({ type = "", variant = "" }) => {
       setIsLoading(false)
       setIsSaving(false)
       console.error("Saving failed: ", error)
-      if (accessToken) {
-        clearFromStorage()
-        navigate(-1)
-      }
+      // if (accessToken) {
+      //   clearFromStorage()
+      //   navigate(-1)
+      // }
     } finally {
       window.location.reload()
     }

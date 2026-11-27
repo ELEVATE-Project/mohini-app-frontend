@@ -14,6 +14,8 @@ export const INITIAL_STATE = (set, get, store) => ({
   profileId: null,
   state: null,
   userId: null,
+  elevateUserId: null,
+
 
   setIpZipCode: ipZipCode => set({ ipZipCode }),
 
@@ -53,4 +55,5 @@ export const INITIAL_STATE = (set, get, store) => ({
     console.log(store.getInitialState(), "initial_state")
     set(store.getInitialState())
   },
+  setElevateUserId: elevateUserId => set({ elevateUserId }),
 })

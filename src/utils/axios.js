@@ -1,5 +1,6 @@
 import axios from "axios"
 import env from "./env"
+import { attachAuthInterceptors } from "../auth/authInterceptor"
 
 const axiosInstance = axios.create({
   withCredentials: false,
@@ -7,4 +8,5 @@ const axiosInstance = axios.create({
   params: {},
 });
 
+attachAuthInterceptors(axiosInstance)
 export default axiosInstance;

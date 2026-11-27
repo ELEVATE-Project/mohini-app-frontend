@@ -1,5 +1,7 @@
 import { bot_routes } from "../configure"
 import axiosInstance from "../utils/axios"
+import { getFlowToken } from "../auth/flowTokenStore"
+
 
 const postWithoutAuth = async (body, endpoint) => {
   const headers = {
@@ -37,6 +39,8 @@ export const getProfileDetails = async body => {
   const headers = {
     "Content-Type": "application/json",
   }
+  const token = getFlowToken(body?.latest_flow)
+  if (token) headers["x-auth-token"] = token
   return await axiosInstance
     .post(`/api/profile/`, body, { headers })
     .then(response => {
@@ -45,6 +49,10 @@ export const getProfileDetails = async body => {
       }
     })
     .catch(error => {
+       // Logged-in failures must surface as errors, with the HTTP status attached
+      if (token) {
+        throw Object.assign(error, { status: error?.response?.status })
+      }
       return error?.response?.data
     })
 }

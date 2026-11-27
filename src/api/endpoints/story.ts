@@ -77,10 +77,10 @@ export const createStoryMediaApi = async ({
   },
 }: TcreateStoryMediaParams) => {
   try {
-    const config = {
-      headers: {
-        Authorization: token,
-      },
+const config = {
+      // headers: {
+      //   Authorization: token,
+      // },    
     }
 
     const response = await apiClient.post(API_ENDPOINTS.STORY_MEDIA, data, config)
@@ -112,9 +112,9 @@ export const partialUpdateStoryById = async ({ token, data, storyId, partialUpda
     }
 
     const config = {
-      headers: {
-        Authorization: token,
-      },
+      // headers: {
+      //   Authorization: token,
+      // },
     }
 
     const requestData = {
@@ -165,9 +165,9 @@ export const updateStoryMediaApi = async ({ token, data, mediaId, partialUpdate 
     }
 
     const config = {
-      headers: {
-        Authorization: token,
-      },
+        // headers: {
+        //   Authorization: token,
+        // },
     }
 
     let response = null

@@ -124,8 +124,8 @@ function CommonHomePage({ usecaseType }) {
 
   // Updated render conditions
   return (
-    <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 px-0">
-      {/* Desktop Header */}
+    <div className="container max-w-full md mt-0 mx-auto grid md:grid-cols-2 px-0 overflow-x-hidden">      
+     {/* Desktop Header */}
       <Header languageButtonSelect={languageButtonSelect} isDesktop={true} />
 
       {/* Main Content */}

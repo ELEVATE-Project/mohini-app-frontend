@@ -73,6 +73,10 @@ window.addEventListener("vite:preloadError", event => {
   window.location.reload()
 })
 
+  window.addEventListener("pageshow", event => {
+  if (event.persisted) window.location.reload()
+})
+
 // Redirect legacy /mohini paths to base URL. Ported from src/index.js (release-2.3.0) - the app
 // moved off the /mohini subpath to root-path serving (see server.js/nginx.conf), so old bookmarked
 // /mohini/* links need a client-side redirect to the equivalent root-path URL.
